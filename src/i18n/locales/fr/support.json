@@ -1,0 +1,46 @@
+{
+  "title": "Assistance",
+  "subtitle": "Tickets et escalades",
+  "counts": {
+    "open": "Ouverts",
+    "inProgress": "En cours",
+    "resolved": "Résolus"
+  },
+  "createTicket": "Créer un ticket",
+  "myTickets": "Mes tickets",
+  "status": {
+    "open": "Ouvert",
+    "inProgress": "En cours",
+    "resolved": "Résolu",
+    "closed": "Clôturé"
+  },
+  "empty": {
+    "title": "Aucun ticket",
+    "message": "Créez-en un lorsqu'un client rencontre un problème que vous ne pouvez pas résoudre."
+  },
+  "create": {
+    "title": "Créer un ticket",
+    "category": "Catégorie",
+    "categoryPlaceholder": "Sélectionnez une catégorie",
+    "categories": {
+      "account": "Problème de compte",
+      "loan": "Problème de prêt",
+      "deposit": "Problème de dépôt",
+      "app": "Problème d'application",
+      "other": "Autre"
+    },
+    "subject": "Objet",
+    "subjectPlaceholder": "Bref résumé du problème",
+    "description": "Description",
+    "descriptionPlaceholder": "Expliquez ce qui s'est passé, avec les références client ou compte",
+    "priority": "Priorité",
+    "priorities": {
+      "low": "Faible",
+      "medium": "Moyenne",
+      "high": "Haute"
+    },
+    "attach": "Joindre une capture ou un document",
+    "submit": "Envoyer le ticket",
+    "submitted": "Ticket envoyé."
+  }
+}

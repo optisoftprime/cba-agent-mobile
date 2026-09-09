@@ -1,0 +1,20 @@
+{
+  "more": {
+    "title": "More",
+    "subtitle": "Manage your account and preferences.",
+    "profile": "Profile"
+  },
+  "title": "Profile",
+  "phone": "Phone",
+  "email": "Email",
+  "branch": "Branch",
+  "role": "Role",
+  "statusLabel": "Status",
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "suspended": "Suspended"
+  },
+  "changePassword": "Change Password",
+  "logout": "Logout"
+}

@@ -1,0 +1,75 @@
+{
+  "customer": {
+    "title": "Enregistrer un dépôt",
+    "subtitle": "Sélectionner le client",
+    "searchPlaceholder": "Nom, ID client, téléphone ou n° de compte.",
+    "results": "Résultats clients :",
+    "empty": {
+      "title": "Aucun client trouvé",
+      "message": "Essayez un autre nom ou ID client."
+    }
+  },
+  "account": {
+    "title": "Sélectionner le compte",
+    "subtitle": "Sélectionner le compte du client",
+    "currentBalance": "Solde actuel :",
+    "empty": {
+      "title": "Aucun compte",
+      "message": "Ce client n'a aucun compte pour un dépôt."
+    }
+  },
+  "amount": {
+    "title": "Saisir le dépôt",
+    "subtitle": "Détails du dépôt",
+    "amount": "Montant",
+    "amountPlaceholder": "₦0.00",
+    "narration": "Libellé",
+    "narrationPlaceholder": "Saisissez le motif du dépôt",
+    "paymentMethod": "Mode de paiement",
+    "paymentMethodPlaceholder": "Saisissez le mode de paiement",
+    "methods": {
+      "cash": "Espèces",
+      "transfer": "Virement",
+      "cheque": "Chèque",
+      "pos": "TPE"
+    },
+    "continue": "Continuer"
+  },
+  "review": {
+    "title": "Vérifier le dépôt",
+    "subtitle": "Vérifiez les informations du client avant de valider",
+    "customer": "Client",
+    "account": "Compte",
+    "amount": "Montant",
+    "narration": "Libellé",
+    "confirm": "Confirmer le dépôt",
+    "posted": "Dépôt enregistré."
+  },
+  "confirm": {
+    "title": "Confirmer le dépôt ?",
+    "message": "Vous êtes sur le point d'enregistrer un dépôt de {{amount}} sur le {{account}} de {{customer}}.",
+    "cancel": "Annuler",
+    "confirm": "Confirmer le dépôt"
+  },
+  "success": {
+    "title": "Dépôt réussi",
+    "message": "{{amount}} a été déposé avec succès.",
+    "amount": "Montant",
+    "account": "Compte",
+    "newBalance": "Nouveau solde",
+    "done": "Terminé",
+    "viewReceipt": "Voir le reçu"
+  },
+  "receipt": {
+    "title": "Reçu de dépôt",
+    "customer": "Client",
+    "account": "Compte",
+    "amount": "Montant",
+    "transactionId": "ID de transaction",
+    "dateTime": "Date et heure",
+    "statusLabel": "Statut",
+    "status": "Réussi",
+    "share": "Partager le reçu",
+    "shareMessage": "Reçu de dépôt {{appName}}\n{{amount}} vers {{account}}\nTransaction {{transactionId}} le {{dateTime}}"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "more": {
+    "title": "Plus",
+    "subtitle": "Gérez votre compte et vos préférences.",
+    "profile": "Profil"
+  },
+  "title": "Profil",
+  "phone": "Téléphone",
+  "email": "E-mail",
+  "branch": "Agence",
+  "role": "Rôle",
+  "statusLabel": "Statut",
+  "status": {
+    "active": "Actif",
+    "inactive": "Inactif",
+    "suspended": "Suspendu"
+  },
+  "changePassword": "Changer le mot de passe",
+  "logout": "Se déconnecter"
+}

@@ -1,0 +1,46 @@
+{
+  "title": "Support",
+  "subtitle": "Tickets and escalations",
+  "counts": {
+    "open": "Open",
+    "inProgress": "In Progress",
+    "resolved": "Resolved"
+  },
+  "createTicket": "Create Support Ticket",
+  "myTickets": "My Tickets",
+  "status": {
+    "open": "Open",
+    "inProgress": "In Progress",
+    "resolved": "Resolved",
+    "closed": "Closed"
+  },
+  "empty": {
+    "title": "No tickets yet",
+    "message": "Raise one when a customer hits a problem you can't resolve."
+  },
+  "create": {
+    "title": "Create ticket",
+    "category": "Category",
+    "categoryPlaceholder": "Select a category",
+    "categories": {
+      "account": "Account Issue",
+      "loan": "Loan Issue",
+      "deposit": "Deposit Issue",
+      "app": "App Issue",
+      "other": "Other"
+    },
+    "subject": "Subject",
+    "subjectPlaceholder": "Brief summary of issue",
+    "description": "Description",
+    "descriptionPlaceholder": "Explain what happened including customer or account references",
+    "priority": "Priority",
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "attach": "Attach screenshot or document",
+    "submit": "Submit Ticket",
+    "submitted": "Ticket submitted."
+  }
+}

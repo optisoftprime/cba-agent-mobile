@@ -1,0 +1,36 @@
+{
+  "greeting": {
+    "morning": "Good morning, {{name}} 👋",
+    "afternoon": "Good afternoon, {{name}} 👋",
+    "evening": "Good evening, {{name}} 👋"
+  },
+  "agentId": "Agent ID: {{code}}",
+  "stats": {
+    "customers": "My Customers",
+    "accounts": "My Accounts",
+    "activeLoans": "Active Loans",
+    "collections": "Collections"
+  },
+  "quickActions": {
+    "title": "Quick actions",
+    "all": "All Collections",
+    "customers": "Customers",
+    "deposit": "Deposit",
+    "ajo": "Ajo",
+    "loan": "Loan"
+  },
+  "tasks": {
+    "title": "Today's tasks",
+    "seeAll": "See All",
+    "view": "View",
+    "loanRepayment": "Loan repayment",
+    "status": {
+      "dueToday": "Due today",
+      "overdue": "Overdue",
+      "upcoming": "Upcoming"
+    }
+  },
+  "activity": {
+    "title": "Recent activity"
+  }
+}

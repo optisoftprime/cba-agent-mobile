@@ -1,0 +1,9 @@
+{
+  "title": "Notifications",
+  "subtitle": "View all customers notifications",
+  "unread": "Unread",
+  "empty": {
+    "title": "You're all caught up",
+    "message": "New alerts about your customers land here."
+  }
+}

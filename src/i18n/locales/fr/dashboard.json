@@ -1,0 +1,36 @@
+{
+  "greeting": {
+    "morning": "Bonjour, {{name}} 👋",
+    "afternoon": "Bon après-midi, {{name}} 👋",
+    "evening": "Bonsoir, {{name}} 👋"
+  },
+  "agentId": "ID agent : {{code}}",
+  "stats": {
+    "customers": "Mes clients",
+    "accounts": "Mes comptes",
+    "activeLoans": "Prêts actifs",
+    "collections": "Recouvrements"
+  },
+  "quickActions": {
+    "title": "Actions rapides",
+    "all": "Tous les recouvrements",
+    "customers": "Clients",
+    "deposit": "Dépôt",
+    "ajo": "Ajo",
+    "loan": "Prêt"
+  },
+  "tasks": {
+    "title": "Tâches du jour",
+    "seeAll": "Tout voir",
+    "view": "Voir",
+    "loanRepayment": "Remboursement de prêt",
+    "status": {
+      "dueToday": "À échéance",
+      "overdue": "En retard",
+      "upcoming": "À venir"
+    }
+  },
+  "activity": {
+    "title": "Activité récente"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "title": "Prêts",
+  "assigned": "{{count}} qui vous sont assignés",
+  "searchPlaceholder": "Client, ID de prêt ou produit",
+  "filters": {
+    "all": "Tous",
+    "active": "Actifs",
+    "due": "À échéance",
+    "overdue": "En retard"
+  },
+  "status": {
+    "active": "Actif",
+    "due": "À échéance",
+    "overdue": "En retard",
+    "closed": "Clôturé"
+  },
+  "outstanding": "Restant dû",
+  "nextPayment": "Prochain paiement",
+  "dueDate": "Échéance : {{date}}",
+  "empty": {
+    "title": "Aucun prêt trouvé",
+    "message": "Essayez une autre recherche ou un autre filtre."
+  },
+  "detail": {
+    "outstandingBalance": "Solde restant dû",
+    "next": "Prochain : {{amount}}",
+    "due": "Échéance {{date}}",
+    "tabs": {
+      "overview": "Aperçu",
+      "repayment": "Remboursement",
+      "activity": "Activité"
+    },
+    "loanId": "ID du prêt",
+    "customer": "Client",
+    "loanProduct": "Produit de prêt",
+    "principal": "Principal",
+    "outstanding": "Restant dû",
+    "interestRate": "Taux d'intérêt",
+    "tenure": "Durée",
+    "tenureValue": "{{count}} mois",
+    "monthlyRepayment": "Mensualité",
+    "nextDueDate": "Prochaine échéance",
+    "maturityDate": "Date d'échéance finale",
+    "statusLabel": "Statut",
+    "recordPayment": "Enregistrer un paiement",
+    "totalDue": "Total dû",
+    "repaymentRecorded": "Remboursement enregistré",
+    "received": "{{amount}} reçus",
+    "noRepayments": "Aucun échéancier",
+    "noActivity": "Aucune activité",
+    "notFound": "Prêt introuvable"
+  },
+  "scheduleStatus": {
+    "paid": "Payé",
+    "due": "À échéance",
+    "upcoming": "À venir",
+    "missed": "Manqué"
+  }
+}

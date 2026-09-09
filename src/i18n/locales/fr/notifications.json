@@ -1,0 +1,9 @@
+{
+  "title": "Notifications",
+  "subtitle": "Voir toutes les notifications clients",
+  "unread": "Non lu",
+  "empty": {
+    "title": "Tout est à jour",
+    "message": "Les nouvelles alertes sur vos clients apparaîtront ici."
+  }
+}

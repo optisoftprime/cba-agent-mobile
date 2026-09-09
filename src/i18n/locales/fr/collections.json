@@ -1,0 +1,55 @@
+{
+  "title": "Tous les encaissements",
+  "subtitle": "Consultez et suivez tout l'argent collecté auprès de vos clients.",
+  "summary": {
+    "today": "Aujourd'hui",
+    "week": "Cette semaine",
+    "month": "Ce mois",
+    "total": "Total collecté"
+  },
+  "history": "Historique des encaissements",
+  "periods": {
+    "today": "Aujourd'hui",
+    "week": "Cette semaine",
+    "month": "Ce mois",
+    "all": "Tout"
+  },
+  "filters": {
+    "all": "Tous",
+    "deposit": "Dépôt",
+    "ajo": "Ajo"
+  },
+  "types": {
+    "deposit": "Dépôt",
+    "ajo": "Cotisation Ajo"
+  },
+  "status": {
+    "successful": "Réussi",
+    "pending": "En attente",
+    "failed": "Échoué"
+  },
+  "empty": {
+    "title": "Aucun encaissement",
+    "message": "Rien de collecté sur cette période."
+  },
+  "detail": {
+    "title": "Détails de l'encaissement",
+    "subtitle": "Voir les détails de la transaction client",
+    "amount": "Montant",
+    "type": "Type",
+    "customer": "Client",
+    "account": "Compte",
+    "dateTime": "Date et heure",
+    "paymentMethod": "Mode de paiement",
+    "methods": {
+      "cash": "Espèces",
+      "transfer": "Virement",
+      "cheque": "Chèque",
+      "pos": "TPE"
+    },
+    "transactionId": "ID de transaction",
+    "statusLabel": "Statut",
+    "done": "Terminé",
+    "notFound": "Encaissement introuvable"
+  }
+}

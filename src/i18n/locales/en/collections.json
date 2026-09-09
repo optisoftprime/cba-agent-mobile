@@ -1,0 +1,55 @@
+{
+  "title": "All Collections",
+  "subtitle": "View and track all money collected from your assigned customers.",
+  "summary": {
+    "today": "Today",
+    "week": "This Week",
+    "month": "This Month",
+    "total": "Total Collected"
+  },
+  "history": "Collection History",
+  "periods": {
+    "today": "Today",
+    "week": "This Week",
+    "month": "This Month",
+    "all": "All Time"
+  },
+  "filters": {
+    "all": "All",
+    "deposit": "Deposit",
+    "ajo": "Ajo"
+  },
+  "types": {
+    "deposit": "Deposit",
+    "ajo": "Ajo Contribution"
+  },
+  "status": {
+    "successful": "Successful",
+    "pending": "Pending",
+    "failed": "Failed"
+  },
+  "empty": {
+    "title": "No collections",
+    "message": "Nothing collected in this period yet."
+  },
+  "detail": {
+    "title": "Collection Details",
+    "subtitle": "See customer transaction details",
+    "amount": "Amount",
+    "type": "Type",
+    "customer": "Customer",
+    "account": "Account",
+    "dateTime": "Date & Time",
+    "paymentMethod": "Payment Method",
+    "methods": {
+      "cash": "Cash",
+      "transfer": "Transfer",
+      "cheque": "Cheque",
+      "pos": "POS"
+    },
+    "transactionId": "Transaction ID",
+    "statusLabel": "Status",
+    "done": "Done",
+    "notFound": "Collection not found"
+  }
+}

@@ -1,0 +1,213 @@
+/**
+ * ─────────────────────────────────────────────────────────────────────────────
+ * THE SWAP FILE. Re-brand the whole app from here.
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * Change the values below and every screen follows — Tailwind classes, icon
+ * colours, the tab bar, the status bar, currency formatting, the app name.
+ * Nothing else in `src/` hardcodes a colour.
+ *
+ * How it reaches the UI:
+ *   • tailwind.config.js reads the token NAMES here and generates a class for
+ *     each one (`primary` → `bg-primary` / `text-primary` / `border-primary`).
+ *     Each class resolves a CSS variable, so the value is decided at runtime.
+ *   • ThemeProvider (src/theme/theme-provider.jsx) turns the active palette
+ *     into those variables and publishes the raw hex via `useTheme()` for the
+ *     places that need a real colour (icon `color` props, navigator options).
+ *
+ * Rules:
+ *   • Values MUST be hex (#rgb / #rrggbb). The alpha suffix in Tailwind
+ *     (`bg-primary/70`) is applied on top, so no rgba() strings here.
+ *   • Every token must exist in BOTH `light` and `dark`, or the class breaks in
+ *     one theme. `npm run check:theme` enforces this.
+ *   • Adding a token = add it to both palettes. No other file needs editing.
+ *
+ * This file is CommonJS on purpose: tailwind.config.js (plain Node) and the app
+ * bundle (Metro) both read it, so there is exactly one source of truth.
+ */
+
+const brand = {
+  // Shown on the splash screen, in the biometric prompt and anywhere the app
+  // refers to itself. Change it here and nowhere else.
+  appName: 'OASIS',
+  /**
+   * The logo mark on the splash screen. Drop the client's file into
+   * `assets/images/` and point at it:
+   *
+   *   logo: require('../../assets/images/oasis-logo.png'),
+   *
+   * Left null until the real asset arrives — BrandLogo falls back to a
+   * monogram built from `appName` so the splash is never broken.
+   */
+  logo: null,
+  // Drives formatNaira()/formatCurrencyCompact() in src/lib/format.js.
+  currency: { symbol: '\u20A6', code: 'NGN', locale: 'en-NG' },
+  // Fallback when no language is saved and the device locale isn't shipped.
+  defaultLanguage: 'en',
+  // 'light' | 'dark' | 'system'
+  defaultThemeMode: 'system',
+};
+
+const light = {
+  // Brand
+  primary: '#208AEF',
+  primaryDark: '#1B6FC4',
+  primaryLight: '#DCEBFB',
+  onPrimary: '#FFFFFF',
+
+  // Surfaces
+  background: '#F6F8FA',
+  card: '#FFFFFF',
+  cardMuted: '#F2F5F8',
+  line: '#E8EDF2',
+
+  // Text
+  ink: '#101828',
+  inkMuted: '#667085',
+  inkSoft: '#98A2B3',
+
+  // Status — `*Soft` is the pill background, `on*Soft` the text on it.
+  success: '#16A34A',
+  successSoft: '#E6F6EC',
+  onSuccessSoft: '#10783B',
+  warning: '#D9880C',
+  warningSoft: '#FCEFD9',
+  onWarningSoft: '#9A6A0B',
+  danger: '#DC2626',
+  onDanger: '#FFFFFF',
+  dangerSoft: '#FBDDDD',
+  onDangerSoft: '#C0392B',
+  info: '#2563EB',
+  infoSoft: '#DCEBFB',
+  onInfoSoft: '#1A56A8',
+
+  // Dark feature panel — the loan balance header. Deliberately near-black in
+  // BOTH themes: it is a designed emphasis surface, not a background.
+  panel: '#2B2B2B',
+  onPanel: '#FFFFFF',
+
+  // Dashboard summary tiles, in the order they appear.
+  tile1: '#CFF2F0',
+  tile2: '#FDF1E9',
+  tile3: '#EFF5D6',
+  tile4: '#D2E2E9',
+};
+
+const dark = {
+  primary: '#4FA3F5',
+  primaryDark: '#3B8AD9',
+  primaryLight: '#16324D',
+  onPrimary: '#06131F',
+
+  background: '#0B0F14',
+  card: '#151B23',
+  cardMuted: '#1B222B',
+  line: '#2A323C',
+
+  ink: '#F9FAFB',
+  inkMuted: '#9CA3AF',
+  inkSoft: '#6B7280',
+
+  success: '#34D399',
+  successSoft: '#10291F',
+  onSuccessSoft: '#6EE7B7',
+  warning: '#FBBF24',
+  warningSoft: '#2A2313',
+  onWarningSoft: '#FCD34D',
+  danger: '#E5484D',
+  onDanger: '#FFFFFF',
+  dangerSoft: '#2C1717',
+  onDangerSoft: '#FCA5A5',
+  info: '#60A5FA',
+  infoSoft: '#14263D',
+  onInfoSoft: '#93C5FD',
+
+  panel: '#20262E',
+  onPanel: '#F9FAFB',
+
+  tile1: '#16302F',
+  tile2: '#2E2419',
+  tile3: '#262B14',
+  tile4: '#1A2830',
+};
+
+const palette = { light, dark };
+
+/**
+ * Elevation. Expressed as layers, the way a designer specifies a shadow — a
+ * tight contact shadow plus a wider ambient one reads far better than a single
+ * blur. Heavier on dark, where a shadow barely registers otherwise.
+ *
+ * Consumed as ready-made RN styles: `const { shadows } = useTheme()` then
+ * `style={shadows.md}`.
+ *
+ * These compile to the `boxShadow` style prop (React Native 0.76+, New
+ * Architecture — which SDK 57 always runs). That matters on Android: the legacy
+ * shadowColor/shadowOpacity/shadowRadius props are IGNORED there, and plain
+ * `elevation` can't do a coloured or wide-blur shadow. Tailwind's shadow-*
+ * utilities are deliberately unused — they can't follow the active palette.
+ */
+const shadows = {
+  light: {
+    sm: [{ y: 1, blur: 2, color: '#101828', opacity: 0.06 }],
+    md: [
+      { y: 1, blur: 3, color: '#101828', opacity: 0.08 },
+      { y: 6, blur: 16, color: '#101828', opacity: 0.1 },
+    ],
+  },
+  dark: {
+    sm: [{ y: 1, blur: 2, color: '#000000', opacity: 0.4 }],
+    md: [
+      { y: 1, blur: 3, color: '#000000', opacity: 0.5 },
+      { y: 6, blur: 16, color: '#000000', opacity: 0.55 },
+    ],
+  },
+};
+
+/** Shadow layers → the `boxShadow` string React Native expects. */
+function toShadowStyle(layers) {
+  const boxShadow = layers
+    .map(({ x = 0, y, blur, spread = 0, color, opacity }) => {
+      const channels = hexToRgbChannels(color).split(' ').join(', ');
+      return `${x}px ${y}px ${blur}px ${spread}px rgba(${channels}, ${opacity})`;
+    })
+    .join(', ');
+
+  return { boxShadow };
+}
+
+/** `primaryDark` → `primary-dark`, `tile1` → `tile-1`. */
+function toKebab(token) {
+  return token.replace(/([a-z])([A-Z0-9])/g, '$1-$2').toLowerCase();
+}
+
+/** `#208AEF` → `32 138 239`, the form Tailwind's `<alpha-value>` needs. */
+function hexToRgbChannels(hex) {
+  let value = String(hex).replace('#', '');
+  if (value.length === 3) {
+    value = value
+      .split('')
+      .map((c) => c + c)
+      .join('');
+  }
+  const int = parseInt(value.slice(0, 6), 16);
+  if (Number.isNaN(int)) {
+    throw new Error(`[theme] "${hex}" is not a hex colour. Palette values must be hex.`);
+  }
+  return `${(int >> 16) & 255} ${(int >> 8) & 255} ${int & 255}`;
+}
+
+/** Every token name, kebab-cased. Drives the generated Tailwind colours. */
+const tokenNames = Object.keys(light).map(toKebab);
+
+module.exports = {
+  brand,
+  palette,
+  light,
+  dark,
+  shadows,
+  toShadowStyle,
+  tokenNames,
+  toKebab,
+  hexToRgbChannels,
+};

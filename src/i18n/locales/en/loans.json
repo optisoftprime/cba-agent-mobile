@@ -1,0 +1,59 @@
+{
+  "title": "Loans",
+  "assigned": "{{count}} assigned to you",
+  "searchPlaceholder": "Customer, loan ID or product",
+  "filters": {
+    "all": "All",
+    "active": "Active",
+    "due": "Due",
+    "overdue": "Overdue"
+  },
+  "status": {
+    "active": "Active",
+    "due": "Due",
+    "overdue": "Overdue",
+    "closed": "Closed"
+  },
+  "outstanding": "Outstanding",
+  "nextPayment": "Next Payment",
+  "dueDate": "Due: {{date}}",
+  "empty": {
+    "title": "No loans found",
+    "message": "Try a different search or filter."
+  },
+  "detail": {
+    "outstandingBalance": "Outstanding balance",
+    "next": "Next: {{amount}}",
+    "due": "Due {{date}}",
+    "tabs": {
+      "overview": "Overview",
+      "repayment": "Repayment",
+      "activity": "Activity"
+    },
+    "loanId": "Loan ID",
+    "customer": "Customer",
+    "loanProduct": "Loan product",
+    "principal": "Principal",
+    "outstanding": "Outstanding",
+    "interestRate": "Interest rate",
+    "tenure": "Tenure",
+    "tenureValue": "{{count}} months",
+    "monthlyRepayment": "Monthly repayment",
+    "nextDueDate": "Next due date",
+    "maturityDate": "Maturity date",
+    "statusLabel": "Status",
+    "recordPayment": "Record Payment",
+    "totalDue": "Total due",
+    "repaymentRecorded": "Repayment recorded",
+    "received": "{{amount}} received",
+    "noRepayments": "No repayment schedule yet",
+    "noActivity": "No activity yet",
+    "notFound": "Loan not found"
+  },
+  "scheduleStatus": {
+    "paid": "Paid",
+    "due": "Due",
+    "upcoming": "Upcoming",
+    "missed": "Missed"
+  }
+}

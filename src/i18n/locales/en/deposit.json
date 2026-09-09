@@ -1,0 +1,75 @@
+{
+  "customer": {
+    "title": "Post Deposit",
+    "subtitle": "Select Customer",
+    "searchPlaceholder": "Name, customer ID, phone or account no.",
+    "results": "Customer results:",
+    "empty": {
+      "title": "No customers found",
+      "message": "Try a different name or customer ID."
+    }
+  },
+  "account": {
+    "title": "Select Account",
+    "subtitle": "Select customer account",
+    "currentBalance": "Current Balance:",
+    "empty": {
+      "title": "No accounts",
+      "message": "This customer has no accounts to deposit into."
+    }
+  },
+  "amount": {
+    "title": "Enter Deposit",
+    "subtitle": "Deposit Details",
+    "amount": "Amount",
+    "amountPlaceholder": "₦0.00",
+    "narration": "Narration",
+    "narrationPlaceholder": "Enter reason for deposit",
+    "paymentMethod": "Payment Method",
+    "paymentMethodPlaceholder": "Enter payment method",
+    "methods": {
+      "cash": "Cash",
+      "transfer": "Transfer",
+      "cheque": "Cheque",
+      "pos": "POS"
+    },
+    "continue": "Continue"
+  },
+  "review": {
+    "title": "Review Deposit",
+    "subtitle": "Kindly review customer details before posting",
+    "customer": "Customer",
+    "account": "Account",
+    "amount": "Amount",
+    "narration": "Narration",
+    "confirm": "Confirm Deposit",
+    "posted": "Deposit posted."
+  },
+  "confirm": {
+    "title": "Confirm Deposit?",
+    "message": "You are about to post a deposit of {{amount}} to {{customer}}'s {{account}}.",
+    "cancel": "Cancel",
+    "confirm": "Confirm Deposit"
+  },
+  "success": {
+    "title": "Successful Deposit",
+    "message": "{{amount}} has been deposited successfully.",
+    "amount": "Amount",
+    "account": "Account",
+    "newBalance": "New Balance",
+    "done": "Done",
+    "viewReceipt": "View Receipt"
+  },
+  "receipt": {
+    "title": "Deposit Receipt",
+    "customer": "Customer",
+    "account": "Account",
+    "amount": "Amount",
+    "transactionId": "Transaction ID",
+    "dateTime": "Date & Time",
+    "statusLabel": "Status",
+    "status": "Successful",
+    "share": "Share Receipt",
+    "shareMessage": "{{appName}} deposit receipt\n{{amount}} to {{account}}\nTransaction {{transactionId}} on {{dateTime}}"
+  }
+}

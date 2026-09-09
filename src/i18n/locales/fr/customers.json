@@ -1,0 +1,46 @@
+{
+  "title": "Mes clients",
+  "assigned": "{{count}} assigné(s)",
+  "searchPlaceholder": "Nom, ID client, téléphone ou n° de compte.",
+  "filters": {
+    "all": "Tous",
+    "active": "Actifs",
+    "inactive": "Inactifs",
+    "sme": "PME"
+  },
+  "status": {
+    "active": "Actif",
+    "inactive": "Inactif"
+  },
+  "account": "compte",
+  "accounts": "comptes",
+  "loan": "prêt",
+  "loans": "prêts",
+  "empty": {
+    "title": "Aucun client trouvé",
+    "message": "Essayez une autre recherche ou un autre filtre."
+  },
+  "type": {
+    "individual": "Particulier",
+    "corporate": "Entreprise"
+  },
+  "detail": {
+    "tabs": {
+      "overview": "Aperçu",
+      "account": "Comptes",
+      "loans": "Prêts",
+      "activity": "Activité"
+    },
+    "customer": "Client",
+    "loanProduct": "Produit de prêt",
+    "principal": "Principal",
+    "outstanding": "Restant dû",
+    "accountsCount": "Comptes",
+    "activeLoansCount": "Prêts actifs",
+    "currentBalance": "Solde actuel :",
+    "noAccounts": "Aucun compte",
+    "noLoans": "Aucun prêt",
+    "noActivity": "Aucune activité",
+    "notFound": "Client introuvable"
+  }
+}

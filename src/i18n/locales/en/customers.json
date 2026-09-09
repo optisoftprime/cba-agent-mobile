@@ -1,0 +1,46 @@
+{
+  "title": "My Customers",
+  "assigned": "{{count}} assigned",
+  "searchPlaceholder": "Name, customer ID, phone or account no.",
+  "filters": {
+    "all": "All",
+    "active": "Active",
+    "inactive": "Inactive",
+    "sme": "SME"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "account": "Account",
+  "accounts": "Accounts",
+  "loan": "loan",
+  "loans": "loans",
+  "empty": {
+    "title": "No customers found",
+    "message": "Try a different search or filter."
+  },
+  "type": {
+    "individual": "Individual",
+    "corporate": "Corporate"
+  },
+  "detail": {
+    "tabs": {
+      "overview": "Overview",
+      "account": "Account",
+      "loans": "Loans",
+      "activity": "Activity"
+    },
+    "customer": "Customer",
+    "loanProduct": "Loan product",
+    "principal": "Principal",
+    "outstanding": "Outstanding",
+    "accountsCount": "Accounts",
+    "activeLoansCount": "Active loans",
+    "currentBalance": "Current Balance:",
+    "noAccounts": "No accounts yet",
+    "noLoans": "No loans yet",
+    "noActivity": "No activity yet",
+    "notFound": "Customer not found"
+  }
+}

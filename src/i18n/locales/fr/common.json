@@ -1,0 +1,11 @@
+{
+  "notifications": "Notifications",
+  "back": "Retour",
+  "search": "Rechercher",
+  "signOut": "Se déconnecter",
+  "continue": "Continuer",
+  "placeholder": "Écran provisoire — en attente du Figma.",
+  "notFound": "Cet écran n'existe pas.",
+  "goHome": "Aller à l'accueil",
+  "navigationError": "Erreur de navigation"
+}
