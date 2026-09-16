@@ -5,10 +5,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { getAccountById } from '@/api/mock';
+import { NoGoingBack } from '@/components/layout/no-going-back';
 import { Button } from '@/components/ui/button';
 import { DetailRows } from '@/components/ui/detail-rows';
 import { formatCurrencyPrecise } from '@/lib/format';
-import { navigateReplace, navigateTo } from '@/lib/navigate';
+import { navigateReset, navigateTo } from '@/lib/navigate';
 import { useTheme } from '@/theme/theme-provider';
 
 export default function DepositSuccessScreen() {
@@ -32,6 +33,10 @@ export default function DepositSuccessScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
+      {/* The deposit is posted. Going back to the review screen would offer to
+          post it again, so back does what Done does. */}
+      <NoGoingBack onBack={() => navigateReset('/(tabs)')} />
+
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 20, paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}>
@@ -51,7 +56,7 @@ export default function DepositSuccessScreen() {
           <Button
             label={t('deposit.success.done')}
             size="lg"
-            onPress={() => navigateReplace('/(tabs)')}
+            onPress={() => navigateReset('/(tabs)')}
           />
           <Button
             variant="outline"

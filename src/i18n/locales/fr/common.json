@@ -7,5 +7,30 @@
   "placeholder": "Écran provisoire — en attente du Figma.",
   "notFound": "Cet écran n'existe pas.",
   "goHome": "Aller à l'accueil",
-  "navigationError": "Erreur de navigation"
+  "navigationError": "Erreur de navigation",
+  "errors": {
+    "network": "Pas de connexion internet. Vérifiez votre réseau et réessayez.",
+    "timeout": "La requête a pris trop de temps. Veuillez réessayer.",
+    "generic": "Une erreur est survenue. Veuillez réessayer.",
+    "sessionExpiredTitle": "Session expirée",
+    "sessionExpired": "Veuillez vous reconnecter.",
+    "title": "Chargement impossible",
+    "offlineTitle": "Pas de connexion",
+    "timeoutTitle": "Délai dépassé"
+  },
+  "retry": "Réessayer",
+  "notificationsUnread": "Notifications, {{count}} non lues",
+  "showPassword": "Afficher le mot de passe",
+  "hidePassword": "Masquer le mot de passe",
+  "clearSearch": "Effacer la recherche",
+  "copyValue": "Copier {{value}}",
+  "cancel": "Annuler",
+  "toast": {
+    "successTitle": "Terminé",
+    "successDetail": "L'opération a abouti.",
+    "errorTitle": "Une erreur est survenue",
+    "infoTitle": "À noter",
+    "infoDetail": "Rien à signaler."
+  },
+  "done": "Terminé"
 }

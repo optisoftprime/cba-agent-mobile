@@ -1,40 +1,51 @@
-import { Ionicons } from '@expo/vector-icons';
+import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { getLoanById } from '@/api/mock';
-import { AppHeader, NotificationsAction } from '@/components/layout/app-header';
+import { loanActivityQuery, loanOverviewQuery, loanScheduleQuery } from '@/api/loans';
+import { AppHeader } from '@/components/layout/app-header';
 import { RepaymentCard } from '@/components/loans/repayment-card';
 import { ActivityList } from '@/components/ui/activity-list';
 import { BalancePanel } from '@/components/ui/balance-panel';
 import { Button } from '@/components/ui/button';
 import { DetailRows } from '@/components/ui/detail-rows';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { SegmentedTabs } from '@/components/ui/segmented-tabs';
+import { Skeleton, SkeletonCard } from '@/components/ui/skeleton';
 import { StatusPill } from '@/components/ui/status-pill';
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency, formatDate, formatDateTime } from '@/lib/format';
+import { navigateTo } from '@/lib/navigate';
 import { LOAN_STATUS_TONE } from '@/lib/status';
-import { useTheme } from '@/theme/theme-provider';
 
 const TABS = ['overview', 'repayment', 'activity'];
+
+/** Statuses arrive in core banking's casing ("OVERDUE", "Performing"). */
+const toneFor = (status) => LOAN_STATUS_TONE[String(status ?? '').toLowerCase()] ?? 'neutral';
+
+/**
+ * The term is two fields: `tenure` (6) and `tenureType` ("Weekly"). Joined raw
+ * that reads "6 Weekly", so the type becomes a unit. An unrecognised type is
+ * shown as the server sent it rather than dropped.
+ */
+const TENURE_UNITS = { daily: 'days', weekly: 'weeks', monthly: 'months', yearly: 'years' };
+
+function tenureLabel(t, tenure, tenureType) {
+  if (tenure == null) return null;
+  const unit = TENURE_UNITS[String(tenureType ?? '').toLowerCase()];
+  return unit ? `${tenure} ${t(`loans.detail.units.${unit}`)}` : `${tenure} ${tenureType ?? ''}`.trim();
+}
 
 export default function LoanDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams();
   const [tab, setTab] = useState('overview');
 
-  const loan = useMemo(() => getLoanById(id), [id]);
-
-  if (!loan) {
-    return (
-      <View className="flex-1 bg-background">
-        <AppHeader showBack title={t('loans.detail.notFound')} />
-        <EmptyState icon="cash-outline" title={t('loans.detail.notFound')} />
-      </View>
-    );
-  }
+  const loanCode = String(id ?? '');
+  const overview = useQuery(loanOverviewQuery(loanCode));
+  const loan = overview.data;
 
   const tabOptions = TABS.map((value) => ({
     value,
@@ -45,103 +56,171 @@ export default function LoanDetailScreen() {
     <View className="flex-1 bg-background">
       <AppHeader
         showBack
-        title={loan.product}
-        subtitle={`${loan.reference} \u00b7 ${loan.customerName}`}
-        right={<NotificationsAction />}
+        title={loan?.product ?? t('loans.detail.title')}
+        subtitle={[loan?.loanCode ?? loanCode, loan?.customerName].filter(Boolean).join(' · ')}
       />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
         <View className="px-4 pt-4">
-          <BalancePanel
-            label={t('loans.detail.outstandingBalance')}
-            value={formatCurrency(loan.outstanding)}
-            footerLeft={t('loans.detail.next', { amount: formatCurrency(loan.nextPayment) })}
-            footerRight={t('loans.detail.due', { date: loan.dueDate })}
-          />
-
-          <SegmentedTabs options={tabOptions} value={tab} onChange={setTab} className="my-4" />
-
-          {tab === 'overview' ? <OverviewTab loan={loan} /> : null}
-          {tab === 'repayment' ? <RepaymentTab loan={loan} /> : null}
-          {tab === 'activity' ? <ActivityTab loan={loan} /> : null}
+          {overview.isPending ? (
+            <View className="rounded-2xl bg-card-muted px-5 py-4">
+              <Skeleton width="35%" height={12} />
+              <Skeleton width="55%" height={26} style={{ marginTop: 10 }} />
+              <Skeleton width="80%" height={12} style={{ marginTop: 12 }} />
+            </View>
+          ) : overview.isError ? (
+            <ErrorState error={overview.error} onRetry={overview.refetch} compact />
+          ) : (
+            <BalancePanel
+              label={t('loans.detail.outstandingBalance')}
+              value={formatCurrency(loan.outstanding ?? 0)}
+              footerLeft={t('loans.detail.next', {
+                amount: formatCurrency(loan.nextPaymentAmount ?? 0),
+              })}
+              footerRight={
+                loan.nextDueDate ? t('loans.detail.due', { date: formatDate(loan.nextDueDate) }) : ''
+              }
+            />
+          )}
         </View>
+
+        {loan ? (
+          <>
+            <View className="px-4">
+              <SegmentedTabs options={tabOptions} value={tab} onChange={setTab} className="my-4" />
+            </View>
+
+            <View className="px-4">
+              {tab === 'overview' ? <OverviewTab loan={loan} tenureText={tenureLabel(t, loan.tenure, loan.tenureType)} /> : null}
+              {tab === 'repayment' ? <RepaymentTab loanCode={loanCode} /> : null}
+              {tab === 'activity' ? <ActivityTab loanCode={loanCode} /> : null}
+            </View>
+          </>
+        ) : null}
       </ScrollView>
 
-      <View className="border-t border-line bg-card px-4 pb-6 pt-3">
-        <Button label={t('loans.detail.recordPayment')} icon="send" size="lg" onPress={() => {}} />
-      </View>
+      {loan ? (
+        <View className="border-t border-line bg-card px-4 pb-6 pt-3">
+          <Button
+            label={t('loans.detail.recordPayment')}
+            icon="send"
+            size="lg"
+            onPress={() => navigateTo('/deposit/customer')}
+          />
+        </View>
+      ) : null}
     </View>
   );
 }
 
-function OverviewTab({ loan }) {
+function OverviewTab({ loan, tenureText }) {
   const { t } = useTranslation();
 
   const rows = [
-    { key: 'id', label: t('loans.detail.loanId'), value: loan.reference },
+    // The one value an agent reads out to support or types elsewhere.
+    { key: 'id', label: t('loans.detail.loanId'), value: loan.loanCode, copyable: true },
     { key: 'customer', label: t('loans.detail.customer'), value: loan.customerName, tone: 'link' },
     { key: 'product', label: t('loans.detail.loanProduct'), value: loan.product },
-    { key: 'principal', label: t('loans.detail.principal'), value: formatCurrency(loan.principal) },
+    { key: 'principal', label: t('loans.detail.principal'), value: formatCurrency(loan.principal ?? 0) },
     {
       key: 'outstanding',
       label: t('loans.detail.outstanding'),
-      value: formatCurrency(loan.outstanding),
+      value: formatCurrency(loan.outstanding ?? 0),
     },
-    { key: 'rate', label: t('loans.detail.interestRate'), value: loan.interestRate },
+    // A number from the server (10), not a formatted string.
     {
-      key: 'tenure',
-      label: t('loans.detail.tenure'),
-      value: t('loans.detail.tenureValue', { count: loan.tenureMonths }),
+      key: 'rate',
+      label: t('loans.detail.interestRate'),
+      value: loan.interestRate == null ? '' : `${loan.interestRate}%`,
     },
+    ...(tenureText ? [{ key: 'tenure', label: t('loans.detail.tenure'), value: tenureText }] : []),
     {
-      key: 'monthly',
+      key: 'repayment',
       label: t('loans.detail.monthlyRepayment'),
-      value: formatCurrency(loan.nextPayment),
+      value: formatCurrency(loan.monthlyRepayment ?? 0),
     },
-    { key: 'nextDue', label: t('loans.detail.nextDueDate'), value: loan.dueDate },
-    { key: 'maturity', label: t('loans.detail.maturityDate'), value: loan.maturityDate },
+    {
+      key: 'nextDue',
+      label: t('loans.detail.nextDueDate'),
+      value: loan.nextDueDate ? formatDate(loan.nextDueDate) : '',
+    },
+    {
+      key: 'maturity',
+      label: t('loans.detail.maturityDate'),
+      value: loan.maturityDate ? formatDate(loan.maturityDate) : '',
+    },
     {
       key: 'status',
       label: t('loans.detail.statusLabel'),
-      value: (
-        <StatusPill
-          label={t(`loans.status.${loan.status}`)}
-          tone={LOAN_STATUS_TONE[loan.status] ?? 'neutral'}
-        />
-      ),
+      value: <StatusPill label={loan.status} tone={toneFor(loan.status)} />,
     },
   ];
 
   return <DetailRows rows={rows} />;
 }
 
-function RepaymentTab({ loan }) {
-  const { t } = useTranslation();
-
-  if (loan.repayments.length === 0) {
-    return <EmptyState icon="calendar-outline" title={t('loans.detail.noRepayments')} />;
+/** Loading / failed / empty, shared by the tabs that fetch their own list. */
+function TabState({ query, emptyIcon, emptyTitle, emptyMessage, children }) {
+  if (query.isPending) {
+    return (
+      <View>
+        {[0, 1, 2].map((i) => (
+          <SkeletonCard key={i} lines={4} />
+        ))}
+      </View>
+    );
   }
 
-  return loan.repayments.map((repayment) => (
-    <RepaymentCard key={repayment.id} repayment={repayment} />
-  ));
+  if (query.isError) {
+    return <ErrorState error={query.error} onRetry={query.refetch} compact />;
+  }
+
+  if (!query.data?.length) {
+    return <EmptyState icon={emptyIcon} title={emptyTitle} message={emptyMessage} />;
+  }
+
+  return children;
 }
 
-function ActivityTab({ loan }) {
+function RepaymentTab({ loanCode }) {
   const { t } = useTranslation();
-  const { colors } = useTheme();
+  const query = useQuery(loanScheduleQuery(loanCode));
 
-  if (loan.activity.length === 0) {
-    return <EmptyState icon="time-outline" title={t('loans.detail.noActivity')} />;
-  }
+  return (
+    <TabState
+      query={query}
+      emptyIcon="calendar-outline"
+      emptyTitle={t('loans.detail.noRepayments')}
+      emptyMessage={t('loans.detail.noRepaymentsMessage')}>
+      <View>
+        {query.data?.map((row, index) => (
+          // The schedule has no id, and two instalments can share a due date.
+          <RepaymentCard key={`${row.dueDate}-${index}`} repayment={row} />
+        ))}
+      </View>
+    </TabState>
+  );
+}
 
-  const entries = loan.activity.map((entry) => ({
-    id: entry.id,
-    icon: <Ionicons name="checkmark-circle-outline" size={19} color={colors.ink} />,
-    title: t('loans.detail.repaymentRecorded'),
-    detail: t('loans.detail.received', { amount: formatCurrency(entry.amount) }),
-    timestamp: entry.date,
-  }));
+function ActivityTab({ loanCode }) {
+  const { t } = useTranslation();
+  const query = useQuery(loanActivityQuery(loanCode));
 
-  return <ActivityList entries={entries} />;
+  return (
+    <TabState
+      query={query}
+      emptyIcon="time-outline"
+      emptyTitle={t('loans.detail.noActivity')}
+      emptyMessage={t('loans.detail.noActivityMessage')}>
+      <ActivityList
+        entries={(query.data ?? []).map((entry, index) => ({
+          id: `${entry.occurredAt}-${index}`,
+          title: entry.title,
+          // Already formatted by the server; don't rebuild it.
+          detail: entry.detail,
+          timestamp: formatDateTime(entry.occurredAt),
+        }))}
+      />
+    </TabState>
+  );
 }

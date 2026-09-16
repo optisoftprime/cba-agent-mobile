@@ -13,6 +13,7 @@ export default function ActivateDeviceScreen() {
 
   return (
     <MessageScreen
+      showBack
       icon={
         <View className="h-16 w-16 items-center justify-center rounded-full bg-primary">
           <Ionicons name="information" size={32} color={colors.onPrimary} />

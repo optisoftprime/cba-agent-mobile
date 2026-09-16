@@ -1,56 +1,55 @@
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { getLoans } from '@/api/mock';
-import { AppHeader, NotificationsAction } from '@/components/layout/app-header';
+import { LOAN_FILTERS, loansQuery } from '@/api/loans';
+import { itemsOf, totalOf } from '@/api/pagination';
+import { AppHeader } from '@/components/layout/app-header';
 import { LoanCard } from '@/components/loans/loan-card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { FilterChips } from '@/components/ui/filter-chips';
+import { LoadingMore } from '@/components/ui/loading-more';
 import { SearchInput } from '@/components/ui/search-input';
+import { SkeletonCard } from '@/components/ui/skeleton';
 import { navigateTo } from '@/lib/navigate';
-
-/** Each filter is just a predicate, so adding one is a single line. */
-const FILTERS = {
-  all: () => true,
-  active: (loan) => loan.status === 'active',
-  due: (loan) => loan.status === 'due',
-  overdue: (loan) => loan.status === 'overdue',
-};
+import { useDebounced } from '@/lib/use-debounced';
 
 export default function LoansScreen() {
   const { t } = useTranslation();
+
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
 
-  const loans = getLoans();
+  // Server-side search, so the request waits for typing to settle.
+  const search = useDebounced(query.trim());
 
-  const options = Object.keys(FILTERS).map((value) => ({
+  const {
+    data,
+    isPending,
+    isError,
+    error,
+    refetch,
+    isRefetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery(loansQuery({ search, filter: LOAN_FILTERS[filter] }));
+
+  const loans = useMemo(() => itemsOf(data, 'loans'), [data]);
+  const total = totalOf(data);
+
+  const options = Object.keys(LOAN_FILTERS).map((value) => ({
     value,
     label: t(`loans.filters.${value}`),
   }));
-
-  const visible = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    const matchesFilter = FILTERS[filter] ?? FILTERS.all;
-
-    return loans.filter(matchesFilter).filter((loan) => {
-      if (!needle) return true;
-      // Matches what the placeholder promises: customer, loan ID or product.
-      return (
-        loan.customerName.toLowerCase().includes(needle) ||
-        loan.reference.toLowerCase().includes(needle) ||
-        loan.product.toLowerCase().includes(needle)
-      );
-    });
-  }, [loans, query, filter]);
 
   return (
     <View className="flex-1 bg-background">
       <AppHeader
         title={t('loans.title')}
-        subtitle={t('loans.assigned', { count: loans.length })}
-        right={<NotificationsAction />}
+        subtitle={isPending ? undefined : t('loans.assigned', { count: total })}
       />
 
       {/* Search and filters stay pinned; only the list scrolls. */}
@@ -65,23 +64,51 @@ export default function LoansScreen() {
         <FilterChips options={options} value={filter} onChange={setFilter} />
       </View>
 
-      <FlatList
-        data={visible}
-        keyExtractor={(loan) => loan.id}
-        renderItem={({ item }) => (
-          <LoanCard loan={item} onPress={() => navigateTo(`/loan/${item.id}`)} />
-        )}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <EmptyState
-            icon="cash-outline"
-            title={t('loans.empty.title')}
-            message={t('loans.empty.message')}
-          />
-        }
-      />
+      {isPending ? (
+        <View className="px-4 pt-4">
+          {[0, 1, 2, 3].map((i) => (
+            <SkeletonCard key={i} lines={4} />
+          ))}
+        </View>
+      ) : isError ? (
+        <ErrorState error={error} onRetry={refetch} />
+      ) : (
+        <FlatList
+          data={loans}
+          keyExtractor={(loan) => loan.loanCode}
+          renderItem={({ item }) => (
+            <LoanCard
+              loan={{
+                customerName: item.customerName,
+                product: item.product,
+                reference: item.loanCode,
+                status: item.status,
+                outstanding: item.outstanding,
+                nextPayment: item.nextPayment,
+                dueDate: item.nextDueDate,
+              }}
+              onPress={() => navigateTo(`/loan/${encodeURIComponent(item.loanCode)}`)}
+            />
+          )}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          refreshing={isRefetching && !isFetchingNextPage}
+          onRefresh={refetch}
+          onEndReachedThreshold={0.4}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+          }}
+          ListFooterComponent={<LoadingMore active={isFetchingNextPage} />}
+          ListEmptyComponent={
+            <EmptyState
+              icon="cash-outline"
+              title={t('loans.empty.title')}
+              message={search ? t('loans.empty.searchMessage') : t('loans.empty.message')}
+            />
+          }
+        />
+      )}
     </View>
   );
 }

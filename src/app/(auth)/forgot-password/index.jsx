@@ -1,21 +1,20 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
-import Toast from 'react-native-toast-message';
 import { z } from 'zod';
 
-import { forgotPasswordRequest } from '@/api/auth';
 import { AuthScreen } from '@/components/layout/auth-screen';
 import { Button } from '@/components/ui/button';
 import { ControlledField } from '@/components/ui/controlled-field';
 import { navigateBack } from '@/lib/navigate';
+import { toast } from '@/lib/toast';
 
 // Messages are translation keys — ControlledField translates them.
 const schema = z.object({
   email: z
     .string()
+    .trim()
     .min(1, 'auth.validation.emailRequired')
     .pipe(z.email('auth.validation.emailInvalid')),
 });
@@ -28,16 +27,14 @@ export default function ForgotPasswordScreen() {
     defaultValues: { email: '' },
   });
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: forgotPasswordRequest,
-    // Deliberately the same message whether or not the email exists, so this
-    // cannot be used to discover which addresses are registered.
-    onSuccess: () => {
-      Toast.show({ type: 'success', text1: t('auth.forgotPassword.sent') });
-      navigateBack('/(auth)/login');
-    },
-    onError: (error) => Toast.show({ type: 'error', text1: error.message }),
-  });
+  // TODO(backend): ezone-agent-service has no password-reset endpoint yet, so
+  // this confirms locally. When it exists, call it here — and keep the same
+  // message whether or not the email is registered, so the form can't be used
+  // to discover which addresses have accounts.
+  const onSubmit = () => {
+    toast.success(t('auth.forgotPassword.sentTitle'), t('auth.forgotPassword.sent'));
+    navigateBack('/(auth)/login');
+  };
 
   return (
     <AuthScreen
@@ -64,8 +61,7 @@ export default function ForgotPasswordScreen() {
 
         <Button
           label={t('auth.forgotPassword.submit')}
-          loading={isPending}
-          onPress={handleSubmit((values) => mutate(values))}
+          onPress={handleSubmit(onSubmit)}
           className="mt-2"
         />
       </View>

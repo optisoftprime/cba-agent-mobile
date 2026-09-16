@@ -3,8 +3,8 @@ import { I18nextProvider } from 'react-i18next';
 import { useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import Toast from 'react-native-toast-message';
 
+import { AppToast } from '@/components/layout/app-toast';
 import i18n from '@/i18n';
 import { AuthProvider } from '@/providers/auth-provider';
 import { ThemeProvider } from '@/theme/theme-provider';
@@ -32,7 +32,7 @@ export function AppProviders({ children }) {
             <QueryClientProvider client={queryClient}>
               <AuthProvider>
                 {children}
-                <Toast />
+                <AppToast />
               </AuthProvider>
             </QueryClientProvider>
           </ThemeProvider>

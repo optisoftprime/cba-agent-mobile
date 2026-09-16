@@ -16,7 +16,7 @@
   },
   "empty": {
     "title": "Aucun ticket",
-    "message": "Créez-en un lorsqu'un client rencontre un problème que vous ne pouvez pas résoudre."
+    "message": "Créez-en un lorsqu'un client rencontre un problème."
   },
   "create": {
     "title": "Créer un ticket",
@@ -37,10 +37,36 @@
     "priorities": {
       "low": "Faible",
       "medium": "Moyenne",
-      "high": "Haute"
+      "high": "Haute",
+      "critical": "Critique"
     },
     "attach": "Joindre une capture ou un document",
     "submit": "Envoyer le ticket",
-    "submitted": "Ticket envoyé."
+    "categoriesLoading": "Chargement des catégories…",
+    "categoryRequired": "Choisissez une catégorie",
+    "subjectRequired": "L'objet est requis",
+    "attachSoon": "Pièces jointes bientôt disponibles",
+    "success": {
+      "title": "Ticket créé",
+      "message": "Le support a reçu votre signalement et répondra sur ce ticket.",
+      "reference": "Numéro de ticket",
+      "priority": "Priorité",
+      "status": "Statut",
+      "view": "Voir le ticket",
+      "done": "Retour au support"
+    }
+  },
+  "detail": {
+    "title": "Ticket",
+    "statusLabel": "Statut",
+    "priority": "Priorité",
+    "category": "Catégorie",
+    "assignedTo": "Assigné à",
+    "created": "Créé le",
+    "lastActivity": "Dernière activité",
+    "description": "Description",
+    "thread": "Messages",
+    "noMessages": "Aucune réponse",
+    "noMessagesMessage": "Les réponses de l'assistance apparaîtront ici."
   }
 }

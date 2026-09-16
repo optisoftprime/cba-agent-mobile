@@ -7,7 +7,65 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v57.0.0/ before 
 ## Files & routing
 - **JSX/JS only** — no `.ts`/`.tsx`. `tsconfig.json` stays because Metro reads its `paths` for the `@/` alias.
 - **Folder-based routing**: every route is `src/app/<name>/index.jsx`. The only flat files are the group defaults (`src/app/index.jsx`, `src/app/(tabs)/index.jsx`) — expo-router requires those.
-- Navigate through `src/lib/navigate.js` (`navigateTo` / `navigateBack` / `navigateReplace`), never `router.push` directly. It carries the double-tap guard and toasts errors instead of throwing.
+- Navigate through `src/lib/navigate.js` (`navigateTo` / `navigateBack` / `navigateReplace` / `navigateReset`), never `router.*` or `<Link>` directly. It carries the double-tap guard and toasts errors instead of throwing.
+- **Ending a process needs two things**, or the agent can walk back into it: `navigateReset(...)` on the screen's action (replace only swaps the top screen — the finished ones survive underneath), and `<NoGoingBack onBack={...} />` from `components/layout/no-going-back` in the screen body (blocks Android's hardware back AND iOS's edge swipe; `onBack` makes the device back button do what the screen's own button does, rather than nothing). It registers via `useFocusEffect`, NOT `useEffect` — a pushed-over screen stays mounted, and a plain effect would leave it swallowing the back button of whatever sits on top of it. Applied to `code-verified` and `deposit/success`. Any screen that consumes a one-time code or posts money needs both.
+- A screen reached from another gets a back arrow via `showBack` on `SheetScreen` (it sits in the blue banner) or `MessageScreen`. A screen that ENDS a process gets neither.
+
+## Persistence — one API
+`src/lib/storage.js` exports `save` / `load` / `remove`, and nothing else touches AsyncStorage or SecureStore.
+- `await save(StorageKeys.user, user)`, `await load(StorageKeys.user)`, `await remove(StorageKeys.a, StorageKeys.b)`.
+- **Whether a key is secure is declared once, in `StorageKeys`** (`secure(...)` vs `plain(...)`). Call sites never choose a store, so a token can't end up in AsyncStorage by mistake.
+- Secure: tokens, the user, the device id, in-flight activation. Plain: theme, language. Nothing about the agent is kept in plain storage — signing out leaves the login screen knowing nobody.
+- Any JSON value round-trips; don't `JSON.stringify` at the call site. `save` never throws (resolves false); `load` resolves null.
+- Anything that must survive the app being killed goes here — never React state or AppState alone.
+
+## Session
+`src/lib/session.js` owns the signed-in agent. `await getUser()` returns everything the login response carried (tokens included) plus `expiresAt`, or null. `saveSession(loginData)` after login, `applyProfile(...)` to fold in `GET /agent/profile`, `clearSession()` on sign-out. Screens read it through `useAuth().user`, and `src/lib/agent.js`'s `agentView(user)` maps it to what the agent-facing screens render (login and profile disagree on field names).
+
+Whether a stored token is still good is answered by the SERVER (`GET /agent/profile`), never by reading an expiry off the device clock — the access token is an opaque UUID, not a JWT, so there is nothing to decode locally. Unreachable server ≠ signed out: the session is kept and the app opens.
+
+The startup check also confirms the token belongs to the agent stored on THIS device (`identityChanged`): a token re-issued to someone else, or a handset passed on without a proper sign-out, would otherwise show one agent another's name, customers and collections. `agentCode` is the identity; email is only consulted when one side has no agentCode — comparing a stored agentCode against a returned email flags every response that omits the code as an impostor.
+
+**A 401 ends the session.** The access token is opaque, so the server introspects it and a rejection is authoritative. Anything that is NOT a 401 (offline, server down) keeps the session — being unable to reach the server is not proof of being signed out.
+
+The startup check is SILENT — `fetchAgentProfile({ silent: true })` passes `skipSessionExpiry`, so a rejected token clears the session and lands on login without a toast. The agent didn't ask for that check and shouldn't be told it happened. Only a 401 on a call the agent actually triggered raises "session expired".
+
+## Backend
+- **`src/config/backend.js` is the only place the server URL lives** (`BASE_URL` = `https://gateway.ezoneapps.com:30002/ezone-agent-service`). Keep the `/ezone-agent-service` prefix — the OpenAPI doc's auto-generated server URL omits it and 404s.
+- Spec: `https://gateway.ezoneapps.com:30002/ezone-agent-service/v3/api-docs`. Take paths and bodies from it, not from guesses.
+- API modules contain real calls only — no stubs, no fake responses. Where the backend has no endpoint yet (login, password reset), the placeholder lives in the screen/provider with a `TODO(backend)` marker, never inside `src/api/`.
+- `src/api/client.js` has two clients. **`publicApi`** for calls that need no token (`resend-otp`, `verify-otp`, login): no token, and a 401 is just an error. Note `device-activation/activate` DOES need a signed-in token (live server: 401 "Sign in first") — it's on `publicApi` only until a login endpoint exists. **`api`** for everything else: sends the bearer token, and a 401 signs the user out via the handler the AuthProvider registers. Which client a call uses IS its auth policy — there is no path list.
+- **Request bodies are trimmed in the interceptor**, every string, at every depth — so a form that forgets to trim can't send `" AGT-ORG-123 "` and earn a "does not match" nobody can explain. `password` is excluded: spaces can be part of a real password, and silently altering one turns a correct password into a failed login.
+- Wrap calls in `send(...)`: it unwraps the `{ success, errorCode, message, data }` envelope, treats `success: false` as failure even on HTTP 200, and rejects with an `ApiError` whose `message` is safe to show.
+- Paths live in `src/api/endpoints.js`, each starting `/api/v1`.
+- Every call logs `apiAddress` / `apiPayload` / `apiResponse` / status / duration to the Metro console, toggled by `LOG_API` in `src/config/backend.js` (dev only by default). Passwords and tokens are redacted before printing — device logs reach crash reports and are readable on a rooted phone.
+
+### Enums the server actually enforces
+Taken from the server's own rejection messages, not the spec — send a wrong value and it names the valid set. Worth doing for every new filter, because the spec has been wrong before.
+- Collections `type`: `[ALL, DEPOSIT, AJO]`; `period`: `[TODAY, WEEK, MONTH, ALL]`. An unknown value is a 400, not an empty list.
+- Ticket `status`: `[OPEN, PENDING, CLOSED, RESOLVED, IN_PROGRESS]` — five, but the list endpoint only counts three of them (`open`, `inProgress`, `resolved`), so a PENDING or CLOSED ticket appears in the list under no tile. `src/lib/status.js` covers all five regardless.
+- Unknown ids are readable 404s (`Collection not found`, `Ticket not found`), so `ErrorState` can show the server's message as-is.
+- Paging is echoed back (`size=5` returns `size: 5`) and a page past the end is a 200 with no rows, never a 404 — `nextPageOf` stops on `totalPages`, so it never asks for one.
+- Ajo `frequency`: `[DAILY, WEEKLY, MONTHLY]`. Creating a plan requires `customerCode`, `planName`, `frequency`, `contributionAmount`, `startDate` — `duration` is optional, but without it there is no `expectedTotal` or `maturityDate`. `maturityDate` and `expectedTotal` are computed server-side and must never be sent.
+- Recording an Ajo contribution ALSO posts an Ajo_Contribution collection server-side, so it invalidates `collections` and `dashboard`, not just the plan.
+- **`POST /agent/deposits` answers 401 for an unknown account number** (errorCode `ERR_401`, "The deposit could not be posted. Please try again."), with a token that is provably still valid before and after. In this app a 401 ENDS THE SESSION, so as it stands a typo'd account number signs the agent out. Until the backend fixes it, the deposit call must pass `skipSessionExpiry` — reported to the backend team.
+- Notifications `unreadOnly` is strictly boolean — `unreadOnly=maybe` is a 400, so `src/api/notifications.js` omits the param rather than sending a string.
+- Notification `type` and `targetType` values have NOT been seen (this agent's inbox is empty), so `src/lib/notifications.js` matches them by keyword with a fallback bell and refuses to navigate on an unknown target. Tighten to exact values once real notifications exist.
+
+## Toasts and finishing an operation
+`import { toast } from '@/lib/toast'` → `toast.success(title, message)` / `toast.error(...)` / `toast.info(...)`. Never call `Toast.show` directly. Rendering and colours live in `components/layout/app-toast`.
+
+**Every toast shows two lines** — a short heading (`text1`) and the detail under it (`text2`, a step smaller). A one-line toast reads like a system error, and the heading is what actually registers while it slides past. The API guarantees it: called with ONE argument, that argument is the **message**, not the heading, and the heading comes from the type. `toast.error(error.message)` is the commonest call in the app and a raw server string ("Invalid credentials") is detail — never a heading. So a lazy call still gets two lines instead of a sentence where a title belongs.
+
+**A toast is for something passing. It is NOT how an operation ends.** Anything that finished — a deposit posted, a ticket raised — uses **`ui/success-modal`**: it blocks, it does not time out, the backdrop does nothing, and Android's back button does what the primary button does. A toast slides away on a timer and takes the reference number with it; the agent has to see the operation landed, read back what the server returned, and acknowledge it. Pass the server's own values through `details` (reference, new balance, status) rather than restating what was typed in. `tone="pending"` swaps the green tick for an amber clock — a deposit over the cap comes back `Pending`, which is a finished operation but not a completed one, and must not show a tick.
+
+## Unlocking
+The fingerprint lives on the LOGIN screen, never the splash. The splash does the waiting and routes; it never asks the agent for anything. A valid session therefore lands on login, which greets them by name and offers the fingerprint — unlocking is a decision, and decisions belong on a screen the agent can act on.
+
+Both the greeting and the fingerprint button hang off the same test — is there a stored session — so they can never disagree.
+
+## Device activation (resumable)
+Agent code + activation code → OTP sent → OTP verified. **The whole flow is keyed by `agentCode`** — `resend-otp` takes `{ agentCode }`, `verify-otp` takes `{ agentCode, otp }`, and responses carry `{ step, message, agentCode, sentTo }` where `sentTo` is a masked destination (`***3924`) for display only. There is no email anywhere in it. Progress is saved to secure storage the moment the code is accepted (`src/lib/activation.js`), and the splash screen resumes at the OTP screen if it finds it. Verifying clears it *before* navigating away, so a finished activation never resumes. The OTP screen reads everything from saved progress, never route params. `savePendingActivation` throws without an `agentCode`: a record missing it is unresumable, and silently writing one makes the OTP screen bounce back to the code screen, which looks like the screen refusing to advance. Code length/format and the resend cooldown are constants at the top of `src/lib/activation.js`.
 
 ## Theming — one file
 `src/theme/brand.js` is the ONLY place a colour is written down. Change it and the whole app follows.
@@ -20,7 +78,9 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v57.0.0/ before 
 ## Language
 - No user-facing string in a component. Add it to `src/i18n/locales/<lang>/<namespace>.json` and read it with `t('namespace.key')`.
 - Locale files are auto-discovered — a new namespace is a new file, a new language is a new folder. Nothing to wire up.
-- `npm run check:locales` fails if the languages drift apart.
+- `npm run check:locales` fails if the languages drift apart **or if any `t('...')` in `src/` names a key that doesn't exist** — so a raw key can't reach the screen.
+- i18next copies `resources` once at init, so a string added while Metro is running would otherwise render as a raw key until a restart. Three layers stop that reaching a screen, and all three exist because it happened repeatedly: `src/i18n/index.js` re-reads the locale files on a missing key (THROTTLED, never once-per-key — giving up after one try loses the race with the bundler), `module.hot.accept` re-applies them when a locale file changes, and `parseMissingKeyHandler` renders a humanised word rather than a dotted key path as a last resort. Never hand `addResourceBundle` a snapshot built at module load.
+- **A raw key on screen is a bug in this file's wiring, not in the locale data** — `npm run check:locales` validates the files, so it passes while the running app is stale. Reload before assuming a key is missing.
 
 ## Components — three folders, that's it
 - `components/ui/` — generic and reusable. Knows nothing about customers, loans or agents.
@@ -36,19 +96,43 @@ Reach for these before building anything new:
 - `ui/segmented-tabs` — muted track, selected item raised as a white pill. The OTHER tab style; the designs use both, so don't merge them.
 - `ui/balance-panel` — the dark emphasis panel (loan outstanding balance).
 - `ui/confirm-dialog` — the last check before an irreversible action.
+- `ui/date-field` — a date field shaped exactly like `select-field`, opening the platform's own picker (`@react-native-community/datetimepicker`, a NATIVE module — it needs a new dev build). It speaks plain `YYYY-MM-DD` and never exposes a Date: `toIsoDate`/`fromIsoDate` in `lib/format` work in LOCAL time, because `toISOString().slice(0,10)` sends "today" as the wrong day either side of Greenwich.
+- **`ui/success-modal`** — THE end of a completed operation (see Toasts below). `title` / `message` / `details` rows / `primaryLabel` / optional `secondaryLabel` / `tone`. Like `confirm-dialog` and `select-field` it is styled from `colors`, not classes — a Modal renders into its own host tree, which the theme's CSS variables do not reach.
 - `ui/scalloped-edge` — the torn-paper edge on the deposit receipt.
 - `ui/section-heading` — takes `action` (any node, e.g. a `SelectPill`) or `actionLabel`.
 - `ui/metric-panel` — tinted strip of 2–3 label/value pairs inside a card.
 - `ui/stat-card` — `layout="stacked"` (dashboard tiles) or `"count"` (value over label, centred).
-- `ui/activity-list`, `ui/section-heading`, `ui/status-pill`, `ui/avatar`, `ui/empty-state`.
+- **`ui/error-state`** — THE failure state. Every screen AND every tab that can fail uses it; `compact` inside a section. The icon and heading come from WHY it failed (`NETWORK` → no connection, `TIMEOUT` → took too long), with the server's own message underneath and a retry. Never a bare line of grey text with a plain button.
+- `ui/copyable` — a copy affordance for a value the agent reads out or retypes. **Detail rows only** (`copyable: true` on a `ui/detail-rows` row), on the record's own screen — the customer's phone, a loan's ID. NOT on list rows: a list is for scanning and tapping, and an icon on every card is clutter. Confirms with the icon turning to a tick, never a toast.
+- **`ui/empty-state`** — THE empty state. Every list that can come back empty uses it (icon + title + message); `compact` for an empty section inside a fuller screen. Never a bare line of grey text.
+- `ui/skeleton` (+`SkeletonCard`) — loading placeholders shaped like the real content, so nothing moves when data lands. Screens show these, not spinners.
+- **`ui/loading-more`** — THE next-page footer. `ListFooterComponent={<LoadingMore active={isFetchingNextPage} />}` on every infinite list, so "loading more" looks the same everywhere; it renders null when inactive, so it is passed unconditionally. It is NOT the first-page state — that's a skeleton. Do not inline another `ActivityIndicator` in a list footer.
+- `ui/alert-banner` — an in-page condition the agent must read (reconciliation hold). Not a toast: a toast disappears.
+- `ui/activity-list`, `ui/section-heading`, `ui/status-pill`, `ui/avatar`.
 - `ui/search-input`, `button` (`variant`: primary/secondary/outline/danger/ghost, plus `size` and `icon`), `text-field` (`multiline`), `select-field` (exports `SelectField` and the compact `SelectPill`), `password-field`, `otp-input`, `checkbox`, `controlled-field`, `link-text`.
 - `ui/brand-logo` — mark + wordmark, both from `brand.js`.
 - `layout/app-header` — the blue banner (`AppHeader`, `HeaderAction`, `HeaderAvatar`). `showBack` adds the back arrow; `overlap` leaves room for cards to pull up over it.
 - `layout/bottom-nav-bar` — the tab bar. Tabs are declared in `src/app/(tabs)/_layout.jsx`.
-- `layout/app-header` also exports **`NotificationsAction`** — the bell every screen carries, already wired to `/notifications`. Use it rather than hand-rolling a `HeaderAction`.
+- `layout/app-toast` — the themed toast host (mounted once in `AppProviders`).
+- `layout/app-header` also exports **`NotificationsAction`** — the bell, wired to `/notifications`. It belongs on the DASHBOARD ONLY. Repeating it on every screen meant tapping it on the notifications screen navigated to the notifications screen, and it crowded headers that already had a back arrow. Don't add it elsewhere; don't hand-roll a `HeaderAction` for it.
+
+## Screens and data
+Screens fetch with TanStack Query. The query lives next to its call — `src/api/dashboard.js` exports `fetchDashboard()` and `dashboardQuery` ({ queryKey, queryFn }) — so the key is defined once and the screen just spreads it into `useQuery`.
+
+Every screen handles four states: **pending** (a skeleton shaped like the content), **error** (the server's message plus a retry), **empty** (`ui/empty-state`), and data. Pull-to-refresh via `RefreshControl` where the screen scrolls.
+
+**Every list is infinite-scrolled** — `useInfiniteQuery` + `onEndReached`, never a "load more" button and never one unbounded fetch. The paginated envelope is identical across this backend (`{ totalElements, totalPages, page, size, <items> }`), so `src/api/pagination.js` carries the shared parts: `nextPageOf` (getNextPageParam), `itemsOf(data, key)` to flatten, `totalOf` for the server's count. A list screen supplies the endpoint and the item key, nothing more.
+
+**The one exception is Ajo**: `GET /agent/ajo` takes no `page`/`size` and answers with every plan in a plain array, so `src/app/ajo/index.jsx` uses `useQuery` and a plain `FlatList`. If the backend ever pages it, move it onto `useInfiniteQuery` like the rest.
+
+On the infinite-scroll rule proper: `PAGE_SIZE` is **30**, every page including the first: the server defaults to 20, and on a tall handset 20 rows can stop just short of the fold — a list that doesn't overflow never fires `onEndReached`, so it looks like there is no more data.
+
+Search that the server implements is sent server-side and debounced with `useDebounced` — otherwise every keystroke is a request, and slow replies can land out of order and show results for a prefix of what was typed.
+
+**The query cache is cleared on every entry point** — sign-in, biometric unlock, and sign-out (`queryClient.clear()` in the auth provider). Whatever is cached belongs to the previous session, so the first screen after signing in must never show the last agent's figures.
 
 ## Data
-Placeholder data lives in `src/api/mock.js` behind `getAgent()` / `getCustomers()` / `getCustomerById()` / `getLoans()` / `getLoanById()` / `getAccountById()` / `getTickets()` / `getTicketCounts()` / `getPaymentMethods()`. Screens call those, so swapping in the real endpoint changes only that file. Never hardcode a list inside a screen. Loans are stored on the customer and flattened by `getLoans()`, so a list and a detail screen can't disagree.
+Placeholder screen data lives in `src/api/mock.js` (each screen moves off it as it's wired to its real endpoint; delete the file when nothing imports it). **Only the deposit flow still reads it** — `getCustomers()` / `getCustomerById()` / `getAccountById()` / `getPaymentMethods()` / `postDeposit()`. The loan, ticket and collection getters in there are already dead and go when deposit is wired up. Screens call those, so swapping in the real endpoint changes only that file. Never hardcode a list inside a screen. Loans are stored on the customer and flattened by `getLoans()`, so a list and a detail screen can't disagree.
 
 Status → pill tone maps live in `src/lib/status.js`, one per entity. Never inline one in a screen.
 

@@ -2,18 +2,29 @@ import { useRef } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 /**
- * Boxed activation-code entry.
+ * Boxed code entry — activation codes and OTPs.
  *
  * One real TextInput sits invisibly over the boxes and holds the value — that
  * keeps paste, backspace and the OS SMS-autofill working, which a box-per-input
  * implementation always breaks.
  */
-export function OtpInput({ value = '', onChange, length = 6, autoFocus = false }) {
+export function OtpInput({
+  value = '',
+  onChange,
+  length = 6,
+  type = 'numeric',
+  autoFocus = false,
+  editable = true,
+}) {
   const inputRef = useRef(null);
+  const numeric = type === 'numeric';
 
   const handleChange = (next) => {
-    // Digits only; the keyboard type is a hint, not a guarantee (and paste ignores it).
-    onChange?.(next.replace(/\D/g, '').slice(0, length));
+    // Filter here: the keyboard type is only a hint, and paste ignores it.
+    const cleaned = numeric
+      ? next.replace(/\D/g, '')
+      : next.replace(/[^a-z0-9]/gi, '').toUpperCase();
+    onChange?.(cleaned.slice(0, length));
   };
 
   return (
@@ -42,9 +53,12 @@ export function OtpInput({ value = '', onChange, length = 6, autoFocus = false }
         ref={inputRef}
         value={value}
         onChangeText={handleChange}
-        keyboardType="number-pad"
+        keyboardType={numeric ? 'number-pad' : 'default'}
+        autoCapitalize={numeric ? 'none' : 'characters'}
+        autoCorrect={false}
         maxLength={length}
         autoFocus={autoFocus}
+        editable={editable}
         caretHidden
         textContentType="oneTimeCode"
         autoComplete="one-time-code"

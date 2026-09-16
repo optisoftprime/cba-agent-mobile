@@ -7,5 +7,30 @@
   "placeholder": "Screen placeholder — waiting on the Figma.",
   "notFound": "This screen does not exist.",
   "goHome": "Go to home screen",
-  "navigationError": "Navigation error"
+  "navigationError": "Navigation error",
+  "errors": {
+    "network": "No internet connection. Check your network and try again.",
+    "timeout": "The request took too long. Please try again.",
+    "generic": "Something went wrong. Please try again.",
+    "sessionExpiredTitle": "Session expired",
+    "sessionExpired": "Please log in again.",
+    "title": "Could not load this",
+    "offlineTitle": "No connection",
+    "timeoutTitle": "Took too long"
+  },
+  "retry": "Try again",
+  "notificationsUnread": "Notifications, {{count}} unread",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
+  "clearSearch": "Clear search",
+  "copyValue": "Copy {{value}}",
+  "cancel": "Cancel",
+  "toast": {
+    "successTitle": "Done",
+    "successDetail": "That went through.",
+    "errorTitle": "Something went wrong",
+    "infoTitle": "Heads up",
+    "infoDetail": "Nothing to report."
+  },
+  "done": "Done"
 }

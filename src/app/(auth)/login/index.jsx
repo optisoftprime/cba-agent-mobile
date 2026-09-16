@@ -1,56 +1,95 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import Toast from 'react-native-toast-message';
 
 import { SheetScreen } from '@/components/layout/sheet-screen';
 import { Button } from '@/components/ui/button';
 import { PasswordField } from '@/components/ui/password-field';
 import { TextField } from '@/components/ui/text-field';
+import { isBiometricAvailable } from '@/lib/biometrics';
+import { firstNameOf } from '@/lib/format';
 import { navigateReplace, navigateTo } from '@/lib/navigate';
+import { getUser } from '@/lib/session';
+import { toast } from '@/lib/toast';
 import { useAuth } from '@/providers/auth-provider';
 import { brand } from '@/theme/brand';
 import { useTheme } from '@/theme/theme-provider';
 
-// Template placeholder until the device knows who it belongs to. Once someone
-// signs in, their real first name replaces this.
-const TEMPLATE_NAME = 'John';
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const { signInWithPassword, signInWithBiometrics, lastUserName } = useAuth();
+  const { signIn, unlockWithBiometrics } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // No validation while we're converting screens — tapping Login goes straight
-  // through. Add the zod schema back with the real endpoint.
-  const signIn = async () => {
+  // A fingerprint can unlock a session; it can't create one. So the button
+  // only appears when there IS a session to unlock — which also means it
+  // disappears the moment a token is found to be no good, since that clears
+  // the session. Same test decides whether we can greet them by name.
+  const [knownName, setKnownName] = useState(null);
+  const [canUnlock, setCanUnlock] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      const session = await getUser();
+      if (cancelled) return;
+
+      setKnownName(firstNameOf(session?.fullName));
+      if (!session) return;
+
+      const available = await isBiometricAvailable();
+      if (!cancelled) setCanUnlock(available);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const validate = () => {
+    const next = {};
+    const trimmed = email.trim();
+
+    if (!trimmed) next.email = t('auth.validation.emailRequired');
+    else if (!EMAIL_PATTERN.test(trimmed)) next.email = t('auth.validation.emailInvalid');
+    if (!password) next.password = t('auth.validation.passwordRequired');
+
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  /** Where a signed-in agent goes next is the server's call, not ours. */
+  const enterApp = (session) => {
+    if (session?.deviceActivationRequired) navigateReplace('/(auth)/activate-device');
+    else navigateReplace('/(tabs)');
+  };
+
+  const onSubmit = async () => {
+    if (isSubmitting || !validate()) return;
+
     setIsSubmitting(true);
     try {
-      await signInWithPassword({ email, password });
-      navigateReplace('/(tabs)');
+      enterApp(await signIn({ email: email.trim(), password }));
     } catch (error) {
-      Toast.show({ type: 'error', text1: error.message });
+      toast.error(error.message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Uses the real face/fingerprint prompt when there's a kept session to
-  // unlock; otherwise it behaves like Login so the template stays clickable.
   const onBiometricPress = async () => {
-    const unlocked = await signInWithBiometrics(
+    const unlocked = await unlockWithBiometrics(
       t('auth.login.biometricPrompt', { appName: brand.appName }),
     );
-    if (unlocked) {
-      navigateReplace('/(tabs)');
-      return;
-    }
-    await signIn();
+    if (unlocked) navigateReplace('/(tabs)');
   };
 
   return (
@@ -58,24 +97,25 @@ export default function LoginScreen() {
       header={
         <View className="flex-row items-start justify-between gap-4">
           <View className="flex-1">
-            <Text className="text-[15px] text-on-primary">
-              {t('auth.login.greetingNamed', { name: lastUserName ?? TEMPLATE_NAME })}
-            </Text>
-            <Text className="mt-1.5 text-[26px] font-bold text-on-primary">
-              {t('auth.login.title')}
+            <Text className="text-[26px] font-bold text-on-primary">
+              {knownName
+                ? t('auth.login.titleNamed', { name: knownName })
+                : t('auth.login.title')}
             </Text>
             <Text className="mt-1.5 text-[14px] text-on-primary/85">
               {t('auth.login.subtitle')}
             </Text>
           </View>
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('auth.login.biometric')}
-            onPress={onBiometricPress}
-            className="h-12 w-12 items-center justify-center rounded-full bg-on-primary/20 active:bg-on-primary/30">
-            <Ionicons name="finger-print-outline" size={24} color={colors.onPrimary} />
-          </Pressable>
+          {canUnlock ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('auth.login.biometric')}
+              onPress={onBiometricPress}
+              className="h-12 w-12 items-center justify-center rounded-full bg-on-primary/20 active:bg-on-primary/30">
+              <Ionicons name="finger-print-outline" size={24} color={colors.onPrimary} />
+            </Pressable>
+          ) : null}
         </View>
       }>
       <View className="gap-5">
@@ -83,18 +123,30 @@ export default function LoginScreen() {
           label={t('auth.login.email')}
           placeholder={t('auth.login.emailPlaceholder')}
           value={email}
-          onChangeText={setEmail}
+          onChangeText={(value) => {
+            setEmail(value);
+            if (errors.email) setErrors((current) => ({ ...current, email: undefined }));
+          }}
+          error={errors.email}
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
           textContentType="emailAddress"
+          editable={!isSubmitting}
         />
 
         <PasswordField
           label={t('auth.login.password')}
           placeholder={t('auth.login.passwordPlaceholder')}
           value={password}
-          onChangeText={setPassword}
+          onChangeText={(value) => {
+            setPassword(value);
+            if (errors.password) setErrors((current) => ({ ...current, password: undefined }));
+          }}
+          error={errors.password}
+          editable={!isSubmitting}
+          onSubmitEditing={onSubmit}
+          returnKeyType="go"
         />
       </View>
 
@@ -111,7 +163,7 @@ export default function LoginScreen() {
       {/* Pushes the button to the bottom of the sheet. */}
       <View className="flex-1" />
 
-      <Button label={t('auth.login.submit')} size="lg" loading={isSubmitting} onPress={signIn} />
+      <Button label={t('auth.login.submit')} size="lg" loading={isSubmitting} onPress={onSubmit} />
     </SheetScreen>
   );
 }

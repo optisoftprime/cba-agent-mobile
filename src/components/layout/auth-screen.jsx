@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LinkText } from '@/components/ui/link-text';
@@ -31,6 +32,7 @@ export function AuthScreen({
   showBack = false,
   onBackPress,
 }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
 
   return (
@@ -47,7 +49,7 @@ export function AuthScreen({
           {showBack ? (
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Back"
+              accessibilityLabel={t('common.back')}
               hitSlop={12}
               onPress={() => (onBackPress ? onBackPress() : navigateBack('/(auth)/login'))}
               className="-ml-1 h-11 w-11 items-start justify-center">

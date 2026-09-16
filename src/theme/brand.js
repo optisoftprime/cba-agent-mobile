@@ -81,9 +81,12 @@ const light = {
   infoSoft: '#DCEBFB',
   onInfoSoft: '#1A56A8',
 
-  // Dark feature panel — the loan balance header. Deliberately near-black in
-  // BOTH themes: it is a designed emphasis surface, not a background.
-  panel: '#2B2B2B',
+  // Feature panel — the headline figure (collected today, loan balance).
+  // A blue gradient rather than a flat surface: it is the one place on a
+  // screen that should pull the eye. Both stops live here so a re-brand
+  // changes it in one move.
+  panelFrom: '#2A8CF0',
+  panelTo: '#0B4F9E',
   onPanel: '#FFFFFF',
 
   // Dashboard summary tiles, in the order they appear.
@@ -122,7 +125,8 @@ const dark = {
   infoSoft: '#14263D',
   onInfoSoft: '#93C5FD',
 
-  panel: '#20262E',
+  panelFrom: '#1C5FA8',
+  panelTo: '#0A3562',
   onPanel: '#F9FAFB',
 
   tile1: '#16302F',

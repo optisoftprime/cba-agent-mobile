@@ -7,7 +7,7 @@ the foundation (routing, styling, API layer, auth session, providers) is in plac
 
 ```bash
 npm install
-cp .env.example .env   # set EXPO_PUBLIC_API_URL
+# point the app at a server: set BASE_URL in src/config/backend.js
 npm start              # then press a / i / w, or scan the QR with Expo Go
 ```
 

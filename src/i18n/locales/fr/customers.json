@@ -18,7 +18,8 @@
   "loans": "prêts",
   "empty": {
     "title": "Aucun client trouvé",
-    "message": "Essayez une autre recherche ou un autre filtre."
+    "message": "Les clients qui vous sont assignés apparaîtront ici.",
+    "searchMessage": "Essayez un autre nom, ID client ou numéro de téléphone."
   },
   "type": {
     "individual": "Particulier",
@@ -41,6 +42,14 @@
     "noAccounts": "Aucun compte",
     "noLoans": "Aucun prêt",
     "noActivity": "Aucune activité",
-    "notFound": "Client introuvable"
+    "notFound": "Client introuvable",
+    "title": "Client",
+    "phone": "Téléphone",
+    "segment": "Segment",
+    "managedBalance": "Solde géré",
+    "noOverview": "Aucun détail disponible",
+    "noAccountsMessage": "Ce client n'a aucun compte que vous gérez.",
+    "noLoansMessage": "Ce client n'a aucun prêt sur les comptes que vous gérez.",
+    "noActivityMessage": "Les remboursements et événements apparaîtront ici."
   }
 }

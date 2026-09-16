@@ -4,6 +4,21 @@
   "unread": "Unread",
   "empty": {
     "title": "You're all caught up",
-    "message": "New alerts about your customers land here."
+    "message": "New alerts about your customers land here.",
+    "unreadTitle": "Nothing unread",
+    "unreadMessage": "You've read everything in your inbox."
+  },
+  "filters": {
+    "all": "All",
+    "unread": "Unread",
+    "unreadCount": "Unread ({{total}})"
+  },
+  "readAll": {
+    "action": "Mark all as read",
+    "title": "Mark all as read?",
+    "message": "This marks {{total}} unread notifications as read. It cannot be undone.",
+    "confirm": "Mark all read",
+    "done": "{{total}} notifications marked as read",
+    "doneTitle": "Inbox cleared"
   }
 }

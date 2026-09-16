@@ -1,12 +1,12 @@
 import { ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { getAgent } from '@/api/mock';
-import { AppHeader, NotificationsAction } from '@/components/layout/app-header';
+import { AppHeader } from '@/components/layout/app-header';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DetailRows } from '@/components/ui/detail-rows';
 import { StatusPill } from '@/components/ui/status-pill';
+import { agentView } from '@/lib/agent';
 import { navigateReplace } from '@/lib/navigate';
 import { CUSTOMER_STATUS_TONE } from '@/lib/status';
 import { useAuth } from '@/providers/auth-provider';
@@ -15,19 +15,23 @@ import { useTheme } from '@/theme/theme-provider';
 export default function ProfileScreen() {
   const { t } = useTranslation();
   const { shadows } = useTheme();
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
 
-  const agent = getAgent();
+  const agent = agentView(user);
+
+  // The server can report a status the locale files have no wording for; show
+  // its own word rather than a raw translation key.
+  const statusLabel = agent?.statusKey ? t(`profile.status.${agent.statusKey}`) : agent?.statusLabel;
 
   const rows = [
-    { key: 'phone', label: t('profile.phone'), value: agent.phone },
-    { key: 'email', label: t('profile.email'), value: agent.email },
-    { key: 'branch', label: t('profile.branch'), value: agent.branch },
-    { key: 'role', label: t('profile.role'), value: agent.role },
+    { key: 'phone', label: t('profile.phone'), value: agent?.phone },
+    { key: 'email', label: t('profile.email'), value: agent?.email },
+    { key: 'branch', label: t('profile.branch'), value: agent?.branch },
+    { key: 'role', label: t('profile.role'), value: agent?.role },
     {
       key: 'status',
       label: t('profile.statusLabel'),
-      value: t(`profile.status.${agent.status}`),
+      value: statusLabel,
     },
   ];
 
@@ -42,7 +46,6 @@ export default function ProfileScreen() {
         showBack
         title={t('profile.title')}
         subtitle={t('profile.more.subtitle')}
-        right={<NotificationsAction />}
       />
 
       <ScrollView
@@ -51,13 +54,13 @@ export default function ProfileScreen() {
         <View
           style={shadows.sm}
           className="items-center rounded-2xl border border-line bg-card px-5 py-7">
-          <Avatar name={agent.name} size={72} />
-          <Text className="mt-4 text-[19px] font-bold text-ink">{agent.name}</Text>
-          <Text className="mt-1 text-[13px] text-ink-muted">{agent.code}</Text>
+          <Avatar name={agent?.name} size={72} />
+          <Text className="mt-4 text-[19px] font-bold text-ink">{agent?.name ?? ''}</Text>
+          <Text className="mt-1 text-[13px] text-ink-muted">{agent?.code ?? ''}</Text>
           <View className="mt-3">
             <StatusPill
-              label={t(`profile.status.${agent.status}`)}
-              tone={CUSTOMER_STATUS_TONE[agent.status] ?? 'neutral'}
+              label={statusLabel}
+              tone={CUSTOMER_STATUS_TONE[agent?.statusKey] ?? 'neutral'}
             />
           </View>
         </View>

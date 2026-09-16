@@ -1,65 +1,67 @@
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { getCustomers } from '@/api/mock';
-import { AppHeader, NotificationsAction } from '@/components/layout/app-header';
+import { CUSTOMER_FILTERS, customersQuery } from '@/api/customers';
+import { itemsOf, totalOf } from '@/api/pagination';
+import { AppHeader } from '@/components/layout/app-header';
 import { Avatar } from '@/components/ui/avatar';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { FilterChips } from '@/components/ui/filter-chips';
 import { ListCard } from '@/components/ui/list-card';
+import { LoadingMore } from '@/components/ui/loading-more';
 import { SearchInput } from '@/components/ui/search-input';
+import { SkeletonCard } from '@/components/ui/skeleton';
 import { navigateTo } from '@/lib/navigate';
 import { CUSTOMER_STATUS_TONE } from '@/lib/status';
-
-/** Each filter is just a predicate, so adding one is a single line. */
-const FILTERS = {
-  all: () => true,
-  active: (customer) => customer.status === 'active',
-  inactive: (customer) => customer.status === 'inactive',
-  sme: (customer) => customer.segment === 'sme',
-};
+import { useDebounced } from '@/lib/use-debounced';
 
 export default function CustomersScreen() {
   const { t } = useTranslation();
+
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
 
-  const customers = getCustomers();
+  // Server-side search, so the request waits for typing to settle.
+  const search = useDebounced(query.trim());
 
-  const options = Object.keys(FILTERS).map((value) => ({
+  const {
+    data,
+    isPending,
+    isError,
+    error,
+    refetch,
+    isRefetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery(customersQuery({ search, filter: CUSTOMER_FILTERS[filter] }));
+
+  const customers = useMemo(() => itemsOf(data, 'customers'), [data]);
+  const total = totalOf(data);
+
+  const options = Object.keys(CUSTOMER_FILTERS).map((value) => ({
     value,
     label: t(`customers.filters.${value}`),
   }));
 
-  const visible = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    const matchesFilter = FILTERS[filter] ?? FILTERS.all;
-
-    return customers.filter(matchesFilter).filter((customer) => {
-      if (!needle) return true;
-      // Matches what the placeholder promises: name or customer ID.
-      return (
-        customer.name.toLowerCase().includes(needle) || customer.code.toLowerCase().includes(needle)
-      );
-    });
-  }, [customers, query, filter]);
-
-  /** "3 Accounts 1 loan" — counts are data, the words are UI labels. */
+  /** "3 Accounts 1 loan" — the counts are data, the words are UI labels. */
   const summaryFor = (customer) => {
-    const accounts = customer.accounts.length;
-    const loans = customer.loans.length;
-    const accountsLabel = t(accounts === 1 ? 'customers.account' : 'customers.accounts');
-    const loansLabel = t(loans === 1 ? 'customers.loan' : 'customers.loans');
-    return `${accounts} ${accountsLabel} ${loans} ${loansLabel}`;
+    const accounts = customer.accounts ?? 0;
+    const loans = customer.loans ?? 0;
+    return [
+      `${accounts} ${t(accounts === 1 ? 'customers.account' : 'customers.accounts')}`,
+      `${loans} ${t(loans === 1 ? 'customers.loan' : 'customers.loans')}`,
+    ].join(' ');
   };
 
   return (
     <View className="flex-1 bg-background">
       <AppHeader
         title={t('customers.title')}
-        subtitle={t('customers.assigned', { count: customers.length })}
-        right={<NotificationsAction />}
+        subtitle={isPending ? undefined : t('customers.assigned', { count: total })}
       />
 
       {/* Search and filters stay pinned; only the list scrolls. */}
@@ -74,33 +76,54 @@ export default function CustomersScreen() {
         <FilterChips options={options} value={filter} onChange={setFilter} />
       </View>
 
-      <FlatList
-        data={visible}
-        keyExtractor={(customer) => customer.id}
-        renderItem={({ item }) => (
-          <ListCard
-            leading={<Avatar name={item.name} />}
-            title={item.name}
-            subtitle={item.code}
-            meta={summaryFor(item)}
-            status={{
-              label: t(`customers.status.${item.status}`),
-              tone: CUSTOMER_STATUS_TONE[item.status] ?? 'neutral',
-            }}
-            onPress={() => navigateTo(`/customer/${item.id}`)}
-          />
-        )}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <EmptyState
-            icon="people-outline"
-            title={t('customers.empty.title')}
-            message={t('customers.empty.message')}
-          />
-        }
-      />
+      {isPending ? (
+        <View className="px-4 pt-4">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <SkeletonCard key={i} lines={3} />
+          ))}
+        </View>
+      ) : isError ? (
+        <ErrorState error={error} onRetry={refetch} />
+      ) : (
+        <FlatList
+          data={customers}
+          keyExtractor={(customer) => customer.customerCode}
+          renderItem={({ item }) => (
+            <ListCard
+              leading={<Avatar name={item.name} />}
+              title={item.name}
+              subtitle={item.customerCode}
+              meta={summaryFor(item)}
+              status={{
+                label: item.status,
+                tone: CUSTOMER_STATUS_TONE[String(item.status).toLowerCase()] ?? 'neutral',
+              }}
+              onPress={() => navigateTo(`/customer/${encodeURIComponent(item.customerCode)}`)}
+            />
+          )}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          refreshing={isRefetching && !isFetchingNextPage}
+          onRefresh={refetch}
+          // Infinite scroll: the next page is fetched before the agent reaches
+          // the bottom, so the list doesn't visibly stall.
+          onEndReachedThreshold={0.4}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+          }}
+          ListFooterComponent={<LoadingMore active={isFetchingNextPage} />}
+          ListEmptyComponent={
+            <EmptyState
+              icon="people-outline"
+              title={t('customers.empty.title')}
+              message={
+                search ? t('customers.empty.searchMessage') : t('customers.empty.message')
+              }
+            />
+          }
+        />
+      )}
     </View>
   );
 }

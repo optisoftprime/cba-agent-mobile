@@ -28,9 +28,27 @@
       "dueToday": "À échéance",
       "overdue": "En retard",
       "upcoming": "À venir"
-    }
+    },
+    "due": "Échéance {{date}}",
+    "seeAllCount": "Tout voir ({{count}})",
+    "empty": "Rien à échéance aujourd'hui",
+    "emptyMessage": "Les remboursements du jour apparaîtront ici."
   },
   "activity": {
-    "title": "Activité récente"
+    "title": "Activité récente",
+    "empty": "Aucune activité",
+    "emptyMessage": "Les dépôts et remboursements enregistrés apparaîtront ici."
+  },
+  "today": {
+    "collected": "Encaissé aujourd'hui",
+    "pending": "En attente : {{amount}}",
+    "transactions": "{{count}} transactions",
+    "cashInHand": "Espèces en caisse",
+    "pendingShort": "En attente aujourd'hui",
+    "transactionsShort": "Transactions"
+  },
+  "hold": {
+    "title": "Blocage de réconciliation",
+    "message": "Les opérations sont suspendues jusqu’à la réconciliation de votre agence. Contactez votre superviseur."
   }
 }

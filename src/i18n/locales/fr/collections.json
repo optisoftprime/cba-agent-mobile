@@ -21,7 +21,8 @@
   },
   "types": {
     "deposit": "Dépôt",
-    "ajo": "Cotisation Ajo"
+    "ajo": "Cotisation Ajo",
+    "all": "Tous"
   },
   "status": {
     "successful": "Réussi",
@@ -30,11 +31,11 @@
   },
   "empty": {
     "title": "Aucun encaissement",
-    "message": "Rien de collecté sur cette période."
+    "message": "L'argent collecté sur cette période apparaîtra ici."
   },
   "detail": {
+    "reference": "Référence",
     "title": "Détails de l'encaissement",
-    "subtitle": "Voir les détails de la transaction client",
     "amount": "Montant",
     "type": "Type",
     "customer": "Client",

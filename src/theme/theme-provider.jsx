@@ -3,7 +3,7 @@ import { Appearance, View } from 'react-native';
 import { vars } from 'nativewind';
 
 import { brand, hexToRgbChannels, palette, shadows, toKebab, toShadowStyle } from '@/theme/brand';
-import { StorageKeys, storage } from '@/lib/storage';
+import { load, save, StorageKeys } from '@/lib/storage';
 
 /**
  * Owns the active palette and publishes it three ways:
@@ -59,7 +59,7 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     (async () => {
-      const saved = await storage.get(StorageKeys.themeMode);
+      const saved = await load(StorageKeys.themeMode);
       if (saved && MODES.includes(saved)) setModeState(saved);
     })();
   }, []);
@@ -85,7 +85,7 @@ export function ThemeProvider({ children }) {
   const setMode = useCallback(async (next) => {
     if (!MODES.includes(next)) return;
     setModeState(next);
-    await storage.set(StorageKeys.themeMode, next);
+    await save(StorageKeys.themeMode, next);
   }, []);
 
   const toggleTheme = useCallback(() => setMode(isDark ? 'light' : 'dark'), [isDark, setMode]);

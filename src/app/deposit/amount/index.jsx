@@ -4,7 +4,7 @@ import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { getPaymentMethods } from '@/api/mock';
-import { AppHeader, NotificationsAction } from '@/components/layout/app-header';
+import { AppHeader } from '@/components/layout/app-header';
 import { Button } from '@/components/ui/button';
 import { SelectField } from '@/components/ui/select-field';
 import { TextField } from '@/components/ui/text-field';
@@ -36,7 +36,6 @@ export default function DepositAmountScreen() {
         showBack
         title={t('deposit.amount.title')}
         subtitle={t('deposit.amount.subtitle')}
-        right={<NotificationsAction />}
       />
 
       <KeyboardAvoidingView

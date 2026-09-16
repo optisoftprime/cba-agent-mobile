@@ -18,7 +18,8 @@
   "loans": "loans",
   "empty": {
     "title": "No customers found",
-    "message": "Try a different search or filter."
+    "message": "Customers assigned to you will appear here.",
+    "searchMessage": "Try a different name, customer ID or phone number."
   },
   "type": {
     "individual": "Individual",
@@ -38,9 +39,17 @@
     "accountsCount": "Accounts",
     "activeLoansCount": "Active loans",
     "currentBalance": "Current Balance:",
-    "noAccounts": "No accounts yet",
-    "noLoans": "No loans yet",
+    "noAccounts": "No accounts",
+    "noLoans": "No loans",
     "noActivity": "No activity yet",
-    "notFound": "Customer not found"
+    "notFound": "Customer not found",
+    "title": "Customer",
+    "phone": "Phone",
+    "segment": "Segment",
+    "managedBalance": "Managed balance",
+    "noOverview": "No details available",
+    "noAccountsMessage": "This customer has no accounts you manage.",
+    "noLoansMessage": "This customer has no loans on the accounts you manage.",
+    "noActivityMessage": "Repayments and account events will appear here."
   }
 }

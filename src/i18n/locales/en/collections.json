@@ -21,7 +21,8 @@
   },
   "types": {
     "deposit": "Deposit",
-    "ajo": "Ajo Contribution"
+    "ajo": "Ajo Contribution",
+    "all": "All"
   },
   "status": {
     "successful": "Successful",
@@ -30,11 +31,11 @@
   },
   "empty": {
     "title": "No collections",
-    "message": "Nothing collected in this period yet."
+    "message": "Money you collect in this period will appear here."
   },
   "detail": {
+    "reference": "Reference",
     "title": "Collection Details",
-    "subtitle": "See customer transaction details",
     "amount": "Amount",
     "type": "Type",
     "customer": "Customer",

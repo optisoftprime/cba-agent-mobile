@@ -232,24 +232,6 @@ export function getTicketCounts() {
   };
 }
 
-/** The signed-in agent. Replaced by GET /auth/profile when that lands. */
-const AGENT = {
-  id: 'AG-00125',
-  code: 'AG-00125',
-  firstName: 'Adebayo',
-  lastName: 'Musa',
-  name: 'Adebayo Musa',
-  role: 'Field Agent',
-  phone: '+234 803 555 0142',
-  email: 'john.adeyemi@ezonebank.com',
-  branch: 'Lagos Island Branch',
-  status: 'active',
-};
-
-export function getAgent() {
-  return AGENT;
-}
-
 /** How a deposit can be tendered. */
 export function getPaymentMethods() {
   return ['cash', 'transfer', 'cheque', 'pos'];
@@ -307,53 +289,4 @@ export function getCollectionById(id) {
 /** The four totals above the collection history. */
 export function getCollectionSummary() {
   return { today: 185_000, week: 580_000, month: 2_450_000, total: 8_750_000 };
-}
-
-const NOTIFICATIONS = [
-  {
-    id: 'n1',
-    title: 'New customer assigned',
-    detail: 'Grace Eze has been added to your portfolio.',
-    timestamp: 'Today, 08:15',
-    unread: true,
-  },
-  {
-    id: 'n2',
-    title: 'Overdue loan alert',
-    detail: 'LN-00126 - Mary Johnson is 6 days overdue.',
-    timestamp: 'Today, 07:00',
-    unread: true,
-  },
-  {
-    id: 'n3',
-    title: 'Repayment reminder',
-    detail: '₦41,850 due today on LN-00125.',
-    timestamp: 'Today, 06:30',
-    unread: true,
-  },
-  {
-    id: 'n4',
-    title: 'Support ticket updated',
-    detail: 'TCK-0412 is now In Progress.',
-    timestamp: 'Yesterday',
-    unread: false,
-  },
-  {
-    id: 'n5',
-    title: 'Support ticket updated',
-    detail: 'TCK-0412 is now In Progress.',
-    timestamp: 'Yesterday',
-    unread: false,
-  },
-  {
-    id: 'n6',
-    title: 'System announcement',
-    detail: 'Scheduled maintenance on 20 Aug, 11pm-1am.',
-    timestamp: '09 Aug 2026',
-    unread: false,
-  },
-];
-
-export function getNotifications() {
-  return NOTIFICATIONS;
 }

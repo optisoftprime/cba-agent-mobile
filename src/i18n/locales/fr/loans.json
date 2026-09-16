@@ -19,7 +19,8 @@
   "dueDate": "Échéance : {{date}}",
   "empty": {
     "title": "Aucun prêt trouvé",
-    "message": "Essayez une autre recherche ou un autre filtre."
+    "message": "Les prêts sur les comptes que vous gérez apparaîtront ici.",
+    "searchMessage": "Essayez un autre nom de client ou ID de prêt."
   },
   "detail": {
     "outstandingBalance": "Solde restant dû",
@@ -48,7 +49,19 @@
     "received": "{{amount}} reçus",
     "noRepayments": "Aucun échéancier",
     "noActivity": "Aucune activité",
-    "notFound": "Prêt introuvable"
+    "notFound": "Prêt introuvable",
+    "title": "Prêt",
+    "principalShort": "Principal",
+    "interestShort": "Intérêts",
+    "paid": "Payé : {{amount}}",
+    "noRepaymentsMessage": "L'échéancier apparaîtra ici.",
+    "noActivityMessage": "Les remboursements enregistrés apparaîtront ici.",
+    "units": {
+      "days": "jours",
+      "weeks": "semaines",
+      "months": "mois",
+      "years": "ans"
+    }
   },
   "scheduleStatus": {
     "paid": "Payé",

@@ -1,5 +1,5 @@
 import { router, usePathname, useSegments } from 'expo-router';
-import Toast from 'react-native-toast-message';
+import { toast } from '@/lib/toast';
 
 import i18n from '@/i18n';
 
@@ -36,7 +36,7 @@ export function navigateTo(path, params = {}) {
       router.push(path);
     }
   } catch (error) {
-    Toast.show({ type: 'error', text1: i18n.t('common.navigationError'), text2: error?.message });
+    toast.error(i18n.t('common.navigationError'), error?.message);
   }
 }
 
@@ -50,7 +50,7 @@ export function navigateBack(fallback = '/(tabs)') {
       router.replace(fallback);
     }
   } catch (error) {
-    Toast.show({ type: 'error', text1: i18n.t('common.navigationError'), text2: error?.message });
+    toast.error(i18n.t('common.navigationError'), error?.message);
     router.replace(fallback);
   }
 }
@@ -65,8 +65,26 @@ export function navigateReplace(path, params = {}) {
       router.replace(path);
     }
   } catch (error) {
-    Toast.show({ type: 'error', text1: i18n.t('common.navigationError'), text2: error?.message });
+    toast.error(i18n.t('common.navigationError'), error?.message);
   }
+}
+
+/**
+ * Leave a finished flow.
+ *
+ * Replacing only swaps the top screen, so the ones behind it survive — after
+ * activation that leaves "Device Activation Required" sitting under the login
+ * screen, one back press away. This clears the stack first, so there is
+ * nothing behind to go back to.
+ */
+export function navigateReset(path, params = {}) {
+  lastPush = { path: null, at: 0 };
+  try {
+    if (router.canDismiss()) router.dismissAll();
+  } catch {
+    // Nothing to dismiss — already at the root of the stack.
+  }
+  navigateReplace(path, params);
 }
 
 /** Current full pathname, e.g. "/customers". Component-only. */

@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 
 import { useTheme } from '@/theme/theme-provider';
@@ -15,6 +16,7 @@ export function SearchInput({
   autoFocus = false,
   className = '',
 }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
 
   return (
@@ -38,7 +40,7 @@ export function SearchInput({
       {value ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Clear search"
+          accessibilityLabel={t('common.clearSearch')}
           hitSlop={8}
           onPress={() => onChangeText?.('')}>
           <Ionicons name="close-circle" size={18} color={colors.inkSoft} />

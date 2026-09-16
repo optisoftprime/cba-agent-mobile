@@ -28,9 +28,27 @@
       "dueToday": "Due today",
       "overdue": "Overdue",
       "upcoming": "Upcoming"
-    }
+    },
+    "due": "Due {{date}}",
+    "seeAllCount": "See all ({{count}})",
+    "empty": "Nothing due today",
+    "emptyMessage": "Repayments due today will appear here."
   },
   "activity": {
-    "title": "Recent activity"
+    "title": "Recent activity",
+    "empty": "No activity yet",
+    "emptyMessage": "Deposits and repayments you record will appear here."
+  },
+  "today": {
+    "collected": "Collected today",
+    "pending": "Pending: {{amount}}",
+    "transactions": "{{count}} transactions",
+    "cashInHand": "Cash in hand",
+    "pendingShort": "Pending today",
+    "transactionsShort": "Transactions"
+  },
+  "hold": {
+    "title": "Reconciliation hold",
+    "message": "Posting is on hold until your branch reconciles. Contact your supervisor."
   }
 }

@@ -4,6 +4,21 @@
   "unread": "Non lu",
   "empty": {
     "title": "Tout est à jour",
-    "message": "Les nouvelles alertes sur vos clients apparaîtront ici."
+    "message": "Les nouvelles alertes sur vos clients apparaîtront ici.",
+    "unreadTitle": "Rien de non lu",
+    "unreadMessage": "Vous avez tout lu dans votre boîte de réception."
+  },
+  "filters": {
+    "all": "Toutes",
+    "unread": "Non lues",
+    "unreadCount": "Non lues ({{total}})"
+  },
+  "readAll": {
+    "action": "Tout marquer comme lu",
+    "title": "Tout marquer comme lu ?",
+    "message": "Cela marque {{total}} notifications non lues comme lues. Cette action est irréversible.",
+    "confirm": "Tout marquer comme lu",
+    "done": "{{total}} notifications marquées comme lues",
+    "doneTitle": "Boîte de réception vidée"
   }
 }

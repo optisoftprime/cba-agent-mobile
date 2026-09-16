@@ -37,10 +37,36 @@
     "priorities": {
       "low": "Low",
       "medium": "Medium",
-      "high": "High"
+      "high": "High",
+      "critical": "Critical"
     },
     "attach": "Attach screenshot or document",
     "submit": "Submit Ticket",
-    "submitted": "Ticket submitted."
+    "categoriesLoading": "Loading categories…",
+    "categoryRequired": "Choose a category",
+    "subjectRequired": "Subject is required",
+    "attachSoon": "Attachments coming soon",
+    "success": {
+      "title": "Ticket created",
+      "message": "Support has your report and will respond on this ticket.",
+      "reference": "Ticket number",
+      "priority": "Priority",
+      "status": "Status",
+      "view": "View ticket",
+      "done": "Back to support"
+    }
+  },
+  "detail": {
+    "title": "Ticket",
+    "statusLabel": "Status",
+    "priority": "Priority",
+    "category": "Category",
+    "assignedTo": "Assigned to",
+    "created": "Created",
+    "lastActivity": "Last activity",
+    "description": "Description",
+    "thread": "Messages",
+    "noMessages": "No replies yet",
+    "noMessagesMessage": "Support replies will appear here."
   }
 }

@@ -4,7 +4,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { getAccountById, getCustomerById, postDeposit } from '@/api/mock';
-import { AppHeader, NotificationsAction } from '@/components/layout/app-header';
+import { AppHeader } from '@/components/layout/app-header';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { DetailRows } from '@/components/ui/detail-rows';
@@ -71,7 +71,6 @@ export default function DepositReviewScreen() {
         showBack
         title={t('deposit.review.title')}
         subtitle={t('deposit.review.subtitle')}
-        right={<NotificationsAction />}
       />
 
       <ScrollView

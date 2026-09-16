@@ -19,7 +19,8 @@
   "dueDate": "Due: {{date}}",
   "empty": {
     "title": "No loans found",
-    "message": "Try a different search or filter."
+    "message": "Loans on the accounts you manage will appear here.",
+    "searchMessage": "Try a different customer name or loan ID."
   },
   "detail": {
     "outstandingBalance": "Outstanding balance",
@@ -48,7 +49,19 @@
     "received": "{{amount}} received",
     "noRepayments": "No repayment schedule yet",
     "noActivity": "No activity yet",
-    "notFound": "Loan not found"
+    "notFound": "Loan not found",
+    "title": "Loan",
+    "principalShort": "Principal",
+    "interestShort": "Interest",
+    "paid": "Paid: {{amount}}",
+    "noRepaymentsMessage": "The instalment schedule will appear here.",
+    "noActivityMessage": "Repayments recorded on this loan will appear here.",
+    "units": {
+      "days": "days",
+      "weeks": "weeks",
+      "months": "months",
+      "years": "years"
+    }
   },
   "scheduleStatus": {
     "paid": "Paid",

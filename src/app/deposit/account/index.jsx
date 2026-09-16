@@ -3,7 +3,7 @@ import { FlatList, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { getCustomerById } from '@/api/mock';
-import { AppHeader, NotificationsAction } from '@/components/layout/app-header';
+import { AppHeader } from '@/components/layout/app-header';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ListCard } from '@/components/ui/list-card';
 import { formatCurrency } from '@/lib/format';
@@ -23,7 +23,6 @@ export default function DepositAccountScreen() {
         showBack
         title={t('deposit.account.title')}
         subtitle={t('deposit.account.subtitle')}
-        right={<NotificationsAction />}
       />
 
       <FlatList

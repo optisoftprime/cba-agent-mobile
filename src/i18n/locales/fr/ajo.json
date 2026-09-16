@@ -1,0 +1,91 @@
+{
+  "title": "Ajo",
+  "subtitle": "Plans d'épargne que vous collectez",
+  "myPlans": "Mes Ajo actifs",
+  "durationDays": "{{days}} jours",
+  "progress": "{{paid}} sur {{expected}}",
+  "summary": {
+    "todaysExpected": "Attendu aujourd'hui",
+    "collectedToday": "Collecté aujourd'hui",
+    "activeAjo": "Ajo actifs",
+    "pending": "En attente"
+  },
+  "frequencies": {
+    "daily": "Quotidien",
+    "weekly": "Hebdomadaire",
+    "monthly": "Mensuel"
+  },
+  "empty": {
+    "title": "Aucun plan Ajo pour l'instant",
+    "message": "Créez un plan pour un client et il apparaîtra ici."
+  },
+  "customer": {
+    "title": "Choisir un client",
+    "subtitle": "Pour qui est ce plan Ajo ?",
+    "empty": {
+      "title": "Aucun client trouvé",
+      "message": "Essayez un autre nom, code ou numéro de téléphone."
+    }
+  },
+  "create": {
+    "action": "Créer un plan Ajo",
+    "title": "Nouveau plan Ajo",
+    "customer": "Client",
+    "customerCode": "Code client",
+    "customerRequired": "Choisissez d'abord un client.",
+    "planName": "Nom du plan",
+    "planNamePlaceholder": "ép. Épargne quotidienne du marché",
+    "planNameRequired": "Donnez un nom au plan.",
+    "frequency": "Fréquence",
+    "amount": "Montant de la cotisation",
+    "amountPlaceholder": "Montant par cotisation",
+    "amountRequired": "Saisissez un montant supérieur à zéro.",
+    "duration": "Durée (jours)",
+    "durationPlaceholder": "Nombre de cotisations, ex. 30",
+    "durationInvalid": "Saisissez un nombre entier de jours.",
+    "startDate": "Date de début",
+    "startDatePlaceholder": "Choisissez une date de début",
+    "startDateRequired": "Choisissez une date de début.",
+    "expectedTotal": "Total attendu",
+    "submit": "Créer le plan",
+    "success": {
+      "title": "Plan Ajo créé",
+      "message": "Le plan est actif et prêt à être collecté.",
+      "reference": "Référence du plan",
+      "maturity": "Échéance le",
+      "view": "Voir le plan",
+      "done": "Retour à Ajo"
+    }
+  },
+  "plan": {
+    "title": "Plan Ajo",
+    "statusLabel": "Statut",
+    "customer": "Client",
+    "customerCode": "Code client",
+    "frequency": "Fréquence",
+    "contributionAmount": "Montant de la cotisation",
+    "duration": "Durée",
+    "startDate": "Date de début",
+    "maturityDate": "Échéance le",
+    "expectedTotal": "Total attendu",
+    "contributionsMade": "Cotisations effectuées",
+    "contributedTotal": "Collecté à ce jour",
+    "remaining": "Restant",
+    "paidSoFar": "{{amount}} collectés",
+    "ofExpected": "sur {{amount}}",
+    "recordLabel": "Enregistrer une cotisation",
+    "recordPlaceholder": "Montant collecté",
+    "record": "Enregistrer la cotisation",
+    "amountRequired": "Saisissez un montant supérieur à zéro.",
+    "confirm": {
+      "title": "Enregistrer cette cotisation ?",
+      "message": "Ceci enregistre {{amount}} pour {{customer}}. Action irréversible.",
+      "confirm": "Enregistrer"
+    },
+    "success": {
+      "title": "Cotisation enregistrée",
+      "message": "Le plan et vos collectes ont été mis à jour.",
+      "done": "Terminé"
+    }
+  }
+}

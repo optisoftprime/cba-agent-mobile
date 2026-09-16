@@ -1,0 +1,91 @@
+{
+  "title": "Ajo",
+  "subtitle": "Savings plans you collect on",
+  "myPlans": "My Active Ajo",
+  "durationDays": "{{days}} days",
+  "progress": "{{paid}} of {{expected}}",
+  "summary": {
+    "todaysExpected": "Today's Expected",
+    "collectedToday": "Collected Today",
+    "activeAjo": "Active Ajo",
+    "pending": "Pending"
+  },
+  "frequencies": {
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly"
+  },
+  "empty": {
+    "title": "No Ajo plans yet",
+    "message": "Create a plan for a customer and it will appear here."
+  },
+  "customer": {
+    "title": "Select customer",
+    "subtitle": "Who is this Ajo plan for?",
+    "empty": {
+      "title": "No customers found",
+      "message": "Try a different name, code or phone number."
+    }
+  },
+  "create": {
+    "action": "Create Ajo plan",
+    "title": "New Ajo plan",
+    "customer": "Customer",
+    "customerCode": "Customer code",
+    "customerRequired": "Choose a customer first.",
+    "planName": "Plan name",
+    "planNamePlaceholder": "e.g. Daily market savings",
+    "planNameRequired": "Give the plan a name.",
+    "frequency": "Frequency",
+    "amount": "Contribution amount",
+    "amountPlaceholder": "How much per contribution",
+    "amountRequired": "Enter an amount greater than zero.",
+    "duration": "Duration (days)",
+    "durationPlaceholder": "Number of contributions, e.g. 30",
+    "durationInvalid": "Enter a whole number of days.",
+    "startDate": "Start date",
+    "startDatePlaceholder": "Pick a start date",
+    "startDateRequired": "Pick a start date.",
+    "expectedTotal": "Expected total",
+    "submit": "Create plan",
+    "success": {
+      "title": "Ajo plan created",
+      "message": "The plan is active and ready to collect against.",
+      "reference": "Plan reference",
+      "maturity": "Matures on",
+      "view": "View plan",
+      "done": "Back to Ajo"
+    }
+  },
+  "plan": {
+    "title": "Ajo plan",
+    "statusLabel": "Status",
+    "customer": "Customer",
+    "customerCode": "Customer code",
+    "frequency": "Frequency",
+    "contributionAmount": "Contribution amount",
+    "duration": "Duration",
+    "startDate": "Start date",
+    "maturityDate": "Matures on",
+    "expectedTotal": "Expected total",
+    "contributionsMade": "Contributions made",
+    "contributedTotal": "Collected so far",
+    "remaining": "Remaining",
+    "paidSoFar": "{{amount}} collected",
+    "ofExpected": "of {{amount}}",
+    "recordLabel": "Record a contribution",
+    "recordPlaceholder": "Amount collected",
+    "record": "Record contribution",
+    "amountRequired": "Enter an amount greater than zero.",
+    "confirm": {
+      "title": "Record this contribution?",
+      "message": "This posts {{amount}} against {{customer}}. It cannot be undone.",
+      "confirm": "Record it"
+    },
+    "success": {
+      "title": "Contribution recorded",
+      "message": "The plan and your collections have been updated.",
+      "done": "Done"
+    }
+  }
+}

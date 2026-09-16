@@ -2,34 +2,34 @@ import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { getAgent } from '@/api/mock';
-import { AppHeader, NotificationsAction } from '@/components/layout/app-header';
+import { AppHeader } from '@/components/layout/app-header';
 import { Avatar } from '@/components/ui/avatar';
 import { ListCard } from '@/components/ui/list-card';
+import { agentSubtitle, agentView } from '@/lib/agent';
 import { navigateTo } from '@/lib/navigate';
+import { useAuth } from '@/providers/auth-provider';
 import { useTheme } from '@/theme/theme-provider';
 
 export default function MoreScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
 
-  const agent = getAgent();
+  const agent = agentView(useAuth().user);
 
   return (
     <View className="flex-1 bg-background">
       <AppHeader
         title={t('profile.more.title')}
         subtitle={t('profile.more.subtitle')}
-        right={<NotificationsAction />}
       />
 
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}>
         <ListCard
-          leading={<Avatar name={agent.name} />}
-          title={agent.name}
-          subtitle={`${agent.code} \u00b7 ${agent.role}`}
+          leading={<Avatar name={agent?.name} />}
+          title={agent?.name ?? ''}
+          subtitle={agentSubtitle(agent)}
           trailing={null}
         />
 

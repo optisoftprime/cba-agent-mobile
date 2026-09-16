@@ -33,6 +33,7 @@ export function AppHeader({
   overlap = false,
   children = null,
 }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
 
   return (
@@ -42,7 +43,7 @@ export function AppHeader({
           {showBack ? (
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Back"
+              accessibilityLabel={t('common.back')}
               hitSlop={10}
               onPress={() => navigateBack()}>
               <Ionicons name="arrow-back" size={23} color={colors.onPrimary} />
@@ -91,15 +92,33 @@ export function HeaderAvatar({ name = '', uri }) {
   return <Avatar name={name} uri={uri} tone="inverse" />;
 }
 
-/** The bell every screen carries. Opens the notifications list. */
-export function NotificationsAction() {
+/**
+ * The bell. Dashboard only — see AGENTS.md.
+ *
+ * `count` shows unread notifications as a badge; anything over 9 reads "9+"
+ * so a big number can't stretch the dot out of shape.
+ */
+export function NotificationsAction({ count = 0 }) {
   const { t } = useTranslation();
+  const unread = Number(count) || 0;
 
   return (
-    <HeaderAction
-      icon="notifications-outline"
-      accessibilityLabel={t('common.notifications')}
-      onPress={() => navigateTo('/notifications')}
-    />
+    <View>
+      <HeaderAction
+        icon="notifications-outline"
+        accessibilityLabel={
+          unread > 0 ? t('common.notificationsUnread', { count: unread }) : t('common.notifications')
+        }
+        onPress={() => navigateTo('/notifications')}
+      />
+
+      {unread > 0 ? (
+        <View className="absolute -right-1.5 -top-1 min-w-[18px] items-center justify-center rounded-full bg-danger px-1">
+          <Text className="text-[10px] font-bold text-on-danger">
+            {unread > 9 ? '9+' : unread}
+          </Text>
+        </View>
+      ) : null}
+    </View>
   );
 }
