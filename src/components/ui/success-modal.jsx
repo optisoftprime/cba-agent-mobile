@@ -68,11 +68,14 @@ export function SuccessModal({
           backgroundColor: '#00000066',
           alignItems: 'center',
           justifyContent: 'center',
-          paddingHorizontal: 28,
+          // Narrow gutter: this card carries a reference number and a balance,
+          // and they should not have to wrap on a small handset.
+          paddingHorizontal: 16,
         }}>
         <View
           style={{
             width: '100%',
+            maxWidth: 520,
             maxHeight: '86%',
             backgroundColor: colors.card,
             borderRadius: 24,

@@ -103,8 +103,17 @@ export default function LoansScreen() {
           ListEmptyComponent={
             <EmptyState
               icon="cash-outline"
-              title={t('loans.empty.title')}
-              message={search ? t('loans.empty.searchMessage') : t('loans.empty.message')}
+              // BUG-088: each tab is a different question, so "no loans found"
+              // under Overdue told the agent nothing. A search that matched
+              // nothing is a third case again.
+              title={
+                search ? t('loans.empty.title') : t(`loans.empty.filters.${filter}.title`)
+              }
+              message={
+                search
+                  ? t('loans.empty.searchMessage')
+                  : t(`loans.empty.filters.${filter}.message`)
+              }
             />
           }
         />

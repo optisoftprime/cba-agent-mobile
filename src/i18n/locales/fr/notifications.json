@@ -1,12 +1,12 @@
 {
   "title": "Notifications",
-  "subtitle": "Voir toutes les notifications clients",
+  "subtitle": "Voir toutes vos notifications",
   "unread": "Non lu",
   "empty": {
     "title": "Tout est à jour",
     "message": "Les nouvelles alertes sur vos clients apparaîtront ici.",
-    "unreadTitle": "Rien de non lu",
-    "unreadMessage": "Vous avez tout lu dans votre boîte de réception."
+    "unreadTitle": "Aucune notification non lue",
+    "unreadMessage": "Vous êtes à jour. Vous avez lu toutes vos notifications."
   },
   "filters": {
     "all": "Toutes",

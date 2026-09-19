@@ -16,6 +16,14 @@ export const endpoints = {
     login: '/api/v1/agent/auth/login',
     /** The signed-in agent's profile. Doubles as the "is this token still good?" check. */
     profile: '/api/v1/agent/profile',
+    /** Revokes the token server-side. The token cannot be used again. */
+    logout: '/api/v1/agent/auth/logout',
+    /** Needs the CURRENT password; the agent is already signed in. */
+    changePassword: '/api/v1/agent/auth/change-password',
+    /** Forgotten password, three steps: request -> verify OTP -> confirm. */
+    passwordResetRequest: '/api/v1/agent/auth/password-reset/request',
+    passwordResetVerify: '/api/v1/agent/auth/password-reset/verify-otp',
+    passwordResetConfirm: '/api/v1/agent/auth/password-reset/confirm',
   },
 
   deviceActivation: {
@@ -26,6 +34,11 @@ export const endpoints = {
 
   dashboard: {
     summary: '/api/v1/agent/dashboard',
+  },
+
+  deposits: {
+    /** Needs the X-Agent-Device-Id header — added by the client interceptor. */
+    create: '/api/v1/agent/deposits',
   },
 
   loans: {

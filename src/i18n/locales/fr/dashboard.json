@@ -1,8 +1,8 @@
 {
   "greeting": {
-    "morning": "Bonjour, {{name}} 👋",
-    "afternoon": "Bon après-midi, {{name}} 👋",
-    "evening": "Bonsoir, {{name}} 👋"
+    "morning": "Bonjour, {{name}}",
+    "afternoon": "Bon après-midi, {{name}}",
+    "evening": "Bonsoir, {{name}}"
   },
   "agentId": "ID agent : {{code}}",
   "stats": {
@@ -31,8 +31,8 @@
     },
     "due": "Échéance {{date}}",
     "seeAllCount": "Tout voir ({{count}})",
-    "empty": "Rien à échéance aujourd'hui",
-    "emptyMessage": "Les remboursements du jour apparaîtront ici."
+    "empty": "Aucune tâche aujourd’hui",
+    "emptyMessage": "Les tâches qui requièrent votre attention aujourd’hui apparaîtront ici."
   },
   "activity": {
     "title": "Activité récente",

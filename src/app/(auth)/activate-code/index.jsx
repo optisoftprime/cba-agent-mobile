@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { OtpInput } from '@/components/ui/otp-input';
 import { TextField } from '@/components/ui/text-field';
 import { ACTIVATION_CODE, savePendingActivation } from '@/lib/activation';
+import { getUser } from '@/lib/session';
 import { getDeviceInfo } from '@/lib/device';
 import { navigateReplace } from '@/lib/navigate';
 import { toast } from '@/lib/toast';
@@ -23,6 +24,25 @@ export default function ActivateCodeScreen() {
   const [agentCode, setAgentCode] = useState('');
   const [code, setCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  // BUG-078: the agent code is already on the signed-in session, so making
+  // them retype it is a step that can only go wrong. It is filled in and
+  // locked when we know it; the field stays editable only when we don't (a
+  // handset being activated before anyone has signed in on it).
+  const [codeFromSession, setCodeFromSession] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getUser().then((session) => {
+      if (cancelled || !session?.agentCode) return;
+      setAgentCode(session.agentCode);
+      setCodeFromSession(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const complete = agentCode.trim().length > 0 && code.length === ACTIVATION_CODE.length;
 
@@ -75,7 +95,10 @@ export default function ActivateCodeScreen() {
         onChangeText={setAgentCode}
         autoCapitalize="characters"
         autoCorrect={false}
-        editable={!submitting}
+        // Read-only rather than hidden: the agent should be able to SEE which
+        // account the handset is being bound to before confirming it.
+        editable={!submitting && !codeFromSession}
+        hint={codeFromSession ? t('auth.activateCode.agentCodeFromAccount') : undefined}
       />
 
       <Text className="mb-3 mt-6 text-[15px] font-semibold text-ink">

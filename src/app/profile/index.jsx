@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { DetailRows } from '@/components/ui/detail-rows';
 import { StatusPill } from '@/components/ui/status-pill';
 import { agentView } from '@/lib/agent';
-import { navigateReplace } from '@/lib/navigate';
+import { navigateReplace, navigateTo } from '@/lib/navigate';
 import { CUSTOMER_STATUS_TONE } from '@/lib/status';
 import { useAuth } from '@/providers/auth-provider';
 import { useTheme } from '@/theme/theme-provider';
@@ -36,8 +36,12 @@ export default function ProfileScreen() {
   ];
 
   const onLogout = async () => {
-    await signOut();
-    navigateReplace('/(auth)/login');
+    try {
+      await signOut();
+    } finally {
+      // Leaving is not conditional on anything succeeding.
+      navigateReplace('/(auth)/login');
+    }
   };
 
   return (
@@ -76,7 +80,7 @@ export default function ProfileScreen() {
             size="lg"
             icon="lock-closed-outline"
             label={t('profile.changePassword')}
-            onPress={() => {}}
+            onPress={() => navigateTo('/change-password')}
           />
           <Button
             variant="danger"

@@ -1,40 +1,51 @@
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
-import { FlatList, Text, View } from 'react-native';
+import { FlatList, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { getCustomers } from '@/api/mock';
+import { CUSTOMER_FILTERS, customersQuery } from '@/api/customers';
+import { itemsOf } from '@/api/pagination';
 import { AppHeader } from '@/components/layout/app-header';
 import { Avatar } from '@/components/ui/avatar';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { ListCard } from '@/components/ui/list-card';
+import { LoadingMore } from '@/components/ui/loading-more';
 import { SearchInput } from '@/components/ui/search-input';
+import { SectionHeading } from '@/components/ui/section-heading';
+import { SkeletonCard } from '@/components/ui/skeleton';
 import { navigateTo } from '@/lib/navigate';
+import { useDebounced } from '@/lib/use-debounced';
 
 /** Step 1 of 4 — who the deposit is for. */
 export default function DepositCustomerScreen() {
   const { t } = useTranslation();
+
   const [query, setQuery] = useState('');
+  const search = useDebounced(query.trim());
 
-  const customers = getCustomers();
+  const {
+    data,
+    isPending,
+    isError,
+    error,
+    refetch,
+    isRefetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery(customersQuery({ search, filter: CUSTOMER_FILTERS.all }));
 
-  const visible = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    if (!needle) return customers;
+  const customers = useMemo(() => itemsOf(data, 'customers'), [data]);
 
-    return customers.filter(
-      (customer) =>
-        customer.name.toLowerCase().includes(needle) ||
-        customer.code.toLowerCase().includes(needle) ||
-        customer.accounts.some((account) => account.number.includes(needle)),
-    );
-  }, [customers, query]);
-
+  /** "1 Account 20 loans" — the counts are data, the words are UI labels. */
   const summaryFor = (customer) => {
-    const accounts = customer.accounts.length;
-    const loans = customer.loans.length;
-    const accountsLabel = t(accounts === 1 ? 'customers.account' : 'customers.accounts');
-    const loansLabel = t(loans === 1 ? 'customers.loan' : 'customers.loans');
-    return `${accounts} ${accountsLabel} ${loans} ${loansLabel}`;
+    const accounts = customer.accounts ?? 0;
+    const loans = customer.loans ?? 0;
+    return [
+      `${accounts} ${t(accounts === 1 ? 'customers.account' : 'customers.accounts')}`,
+      `${loans} ${t(loans === 1 ? 'customers.loan' : 'customers.loans')}`,
+    ].join(' ');
   };
 
   return (
@@ -53,34 +64,54 @@ export default function DepositCustomerScreen() {
         />
       </View>
 
-      <FlatList
-        data={visible}
-        keyExtractor={(customer) => customer.id}
-        renderItem={({ item }) => (
-          <ListCard
-            leading={<Avatar name={item.name} />}
-            title={item.name}
-            subtitle={item.code}
-            meta={summaryFor(item)}
-            onPress={() => navigateTo('/deposit/account', { customerId: item.id })}
-          />
-        )}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <Text className="py-4 text-[13px] font-medium text-primary">
-            {t('deposit.customer.results')}
-          </Text>
-        }
-        ListEmptyComponent={
-          <EmptyState
-            icon="people-outline"
-            title={t('deposit.customer.empty.title')}
-            message={t('deposit.customer.empty.message')}
-          />
-        }
-      />
+      {isError ? (
+        <ErrorState error={error} onRetry={refetch} />
+      ) : (
+        <FlatList
+          data={isPending ? [] : customers}
+          keyExtractor={(customer) => customer.customerCode}
+          renderItem={({ item }) => (
+            <ListCard
+              leading={<Avatar name={item.name} />}
+              title={item.name}
+              subtitle={item.customerCode}
+              meta={summaryFor(item)}
+              onPress={() =>
+                navigateTo('/deposit/account', {
+                  customerCode: item.customerCode,
+                  customerName: item.name,
+                })
+              }
+            />
+          )}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          refreshing={isRefetching && !isFetchingNextPage}
+          onRefresh={refetch}
+          onEndReachedThreshold={0.4}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+          }}
+          ListHeaderComponent={<SectionHeading className="py-4" title={t('deposit.customer.results')} />}
+          ListFooterComponent={<LoadingMore active={isFetchingNextPage} />}
+          ListEmptyComponent={
+            isPending ? (
+              <View>
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <SkeletonCard key={i} lines={3} />
+                ))}
+              </View>
+            ) : (
+              <EmptyState
+                icon="people-outline"
+                title={t('deposit.customer.empty.title')}
+                message={t('deposit.customer.empty.message')}
+              />
+            )
+          }
+        />
+      )}
     </View>
   );
 }

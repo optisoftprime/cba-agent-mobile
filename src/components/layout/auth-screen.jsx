@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { KeyboardView } from '@/components/layout/keyboard-view';
 import { LinkText } from '@/components/ui/link-text';
 import { navigateBack } from '@/lib/navigate';
 import { useTheme } from '@/theme/theme-provider';
@@ -37,9 +38,7 @@ export function AuthScreen({
 
   return (
     <SafeAreaView className="flex-1 bg-card">
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardView>
         <ScrollView
           className="flex-1"
           contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingBottom: 24 }}
@@ -68,7 +67,7 @@ export function AuthScreen({
 
           {footer ? <LinkText {...footer} className="pb-2 pt-4" /> : null}
         </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardView>
     </SafeAreaView>
   );
 }

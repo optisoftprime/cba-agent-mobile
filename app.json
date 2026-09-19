@@ -38,11 +38,32 @@
       ],
       "expo-secure-store",
       "expo-localization",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-image",
+      "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to attach a screenshot or photo to a support ticket.",
+          "cameraPermission": "Allow $(PRODUCT_NAME) to take a photo to attach to a support ticket."
+        }
+      ],
+      [
+        "expo-navigation-bar",
+        {
+          "hidden": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "98c07ac7-f2d9-4f05-b631-eb22d6d276d8"
+      }
     }
   }
 }

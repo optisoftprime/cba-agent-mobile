@@ -1,13 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { z } from 'zod';
 
+import { requestPasswordReset } from '@/api/agent-auth';
 import { AuthScreen } from '@/components/layout/auth-screen';
 import { Button } from '@/components/ui/button';
 import { ControlledField } from '@/components/ui/controlled-field';
-import { navigateBack } from '@/lib/navigate';
+import { navigateBack, navigateTo } from '@/lib/navigate';
 import { toast } from '@/lib/toast';
 
 // Messages are translation keys — ControlledField translates them.
@@ -19,6 +21,14 @@ const schema = z.object({
     .pipe(z.email('auth.validation.emailInvalid')),
 });
 
+/**
+ * Step 1 of 3 — where to send the code.
+ *
+ * The server answers 200 whether or not the address has an account, and says
+ * so in words ("If an account exists for that email address…"). This screen
+ * keeps that property: it advances to the OTP screen either way, so the form
+ * cannot be used to discover which emails are registered.
+ */
 export default function ForgotPasswordScreen() {
   const { t } = useTranslation();
 
@@ -27,14 +37,18 @@ export default function ForgotPasswordScreen() {
     defaultValues: { email: '' },
   });
 
-  // TODO(backend): ezone-agent-service has no password-reset endpoint yet, so
-  // this confirms locally. When it exists, call it here — and keep the same
-  // message whether or not the email is registered, so the form can't be used
-  // to discover which addresses have accounts.
-  const onSubmit = () => {
-    toast.success(t('auth.forgotPassword.sentTitle'), t('auth.forgotPassword.sent'));
-    navigateBack('/(auth)/login');
-  };
+  const { mutate, isPending } = useMutation({
+    mutationFn: requestPasswordReset,
+    onSuccess: (data, variables) => {
+      toast.success(t('auth.forgotPassword.sentTitle'), t('auth.forgotPassword.sent'));
+      navigateTo('/(auth)/reset-otp', {
+        email: variables.email,
+        // The server states its own expiry (10 minutes today); don't hardcode it.
+        expiryMinutes: data?.otpExpiryMinutes != null ? String(data.otpExpiryMinutes) : '',
+      });
+    },
+    onError: (error) => toast.error(error.message),
+  });
 
   return (
     <AuthScreen
@@ -57,11 +71,13 @@ export default function ForgotPasswordScreen() {
           autoCapitalize="none"
           autoCorrect={false}
           textContentType="emailAddress"
+          editable={!isPending}
         />
 
         <Button
           label={t('auth.forgotPassword.submit')}
-          onPress={handleSubmit(onSubmit)}
+          loading={isPending}
+          onPress={handleSubmit((values) => mutate({ email: values.email }))}
           className="mt-2"
         />
       </View>

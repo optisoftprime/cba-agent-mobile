@@ -25,15 +25,12 @@
     "amountPlaceholder": "₦0.00",
     "narration": "Libellé",
     "narrationPlaceholder": "Saisissez le motif du dépôt",
-    "paymentMethod": "Mode de paiement",
-    "paymentMethodPlaceholder": "Saisissez le mode de paiement",
-    "methods": {
-      "cash": "Espèces",
-      "transfer": "Virement",
-      "cheque": "Chèque",
-      "pos": "TPE"
-    },
-    "continue": "Continuer"
+    "continue": "Continuer",
+    "customer": "Client",
+    "account": "Compte",
+    "amountRequired": "Saisissez le montant collecté.",
+    "tooSmall": "Le montant doit être d’au moins 0,01.",
+    "youArePosting": "Vous enregistrez"
   },
   "review": {
     "title": "Vérifier le dépôt",
@@ -58,7 +55,16 @@
     "account": "Compte",
     "newBalance": "Nouveau solde",
     "done": "Terminé",
-    "viewReceipt": "Voir le reçu"
+    "viewReceipt": "Voir le reçu",
+    "transactionId": "ID de transaction",
+    "cashInHand": "Votre encaisse",
+    "dateTime": "Date et heure",
+    "pendingTitle": "En attente d’approbation",
+    "pendingMessage": "{{amount}} dépasse votre plafond : l’opération a été envoyée pour approbation. L’argent n’est pas encore arrivé chez le client.",
+    "pendingReason": "Motif de l’attente",
+    "duplicateTitle": "Déjà enregistré",
+    "duplicateMessage": "Ce dépôt avait déjà été effectué : il n’a pas été pris une seconde fois. Ne le ressaisissez pas.",
+    "businessDate": "Date comptable {{date}}"
   },
   "receipt": {
     "title": "Reçu de dépôt",
@@ -68,8 +74,8 @@
     "transactionId": "ID de transaction",
     "dateTime": "Date et heure",
     "statusLabel": "Statut",
-    "status": "Réussi",
     "share": "Partager le reçu",
-    "shareMessage": "Reçu de dépôt {{appName}}\n{{amount}} vers {{account}}\nTransaction {{transactionId}} le {{dateTime}}"
+    "shareMessage": "Reçu de dépôt {{appName}}\n{{amount}} vers {{account}}\nTransaction {{transactionId}} le {{dateTime}}",
+    "newBalance": "Nouveau solde"
   }
 }

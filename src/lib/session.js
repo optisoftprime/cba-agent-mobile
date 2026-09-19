@@ -99,7 +99,29 @@ export function applyProfile(profile) {
   return updateUser(mapped);
 }
 
-/** Sign out. Leaves preferences (theme, language, the greeting name) alone. */
+/**
+ * Sign out. Removes EVERYTHING about the agent from this handset — tokens, the
+ * stored agent, and any half-finished device activation, which is keyed by
+ * agentCode and so belongs to them too. After this the login screen knows
+ * nobody: no name to greet, no fingerprint offer.
+ *
+ * Three things deliberately SURVIVE, and none of them is about the agent:
+ *
+ * - `deviceId` — the handset's identity, registered with the bank at
+ *   activation and compared on every deposit (`X-Agent-Device-Id`). Wiping it
+ *   would make the phone mint a new one, and the bank would then refuse
+ *   deposits with "This device is not the one registered to your account"
+ *   until somebody re-activated the handset. Signing out is not handing the
+ *   phone back.
+ * - `deviceActivated` — whether THIS HANDSET has been through activation. Same
+ *   reasoning: a sign-out is not a de-registration.
+ * - `themeMode` and `language` — preferences of whoever holds the phone.
+ */
 export function clearSession() {
-  return remove(StorageKeys.accessToken, StorageKeys.refreshToken, StorageKeys.user);
+  return remove(
+    StorageKeys.accessToken,
+    StorageKeys.refreshToken,
+    StorageKeys.user,
+    StorageKeys.pendingActivation,
+  );
 }

@@ -116,9 +116,15 @@ export default function CustomersScreen() {
           ListEmptyComponent={
             <EmptyState
               icon="people-outline"
-              title={t('customers.empty.title')}
+              // BUG-089: same reasoning as the loans tabs — the empty state has
+              // to answer the question the selected tab asked.
+              title={
+                search ? t('customers.empty.title') : t(`customers.empty.filters.${filter}.title`)
+              }
               message={
-                search ? t('customers.empty.searchMessage') : t('customers.empty.message')
+                search
+                  ? t('customers.empty.searchMessage')
+                  : t(`customers.empty.filters.${filter}.message`)
               }
             />
           }

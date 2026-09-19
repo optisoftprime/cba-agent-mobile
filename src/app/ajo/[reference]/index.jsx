@@ -1,11 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { ajoPlanQuery, recordAjoContribution } from '@/api/ajo';
 import { AppHeader } from '@/components/layout/app-header';
+import { KeyboardView } from '@/components/layout/keyboard-view';
+import { AmountField } from '@/components/ui/amount-field';
 import { BalancePanel } from '@/components/ui/balance-panel';
 import { Button } from '@/components/ui/button';
 import { DetailRows } from '@/components/ui/detail-rows';
@@ -14,7 +16,6 @@ import { MetricPanel } from '@/components/ui/metric-panel';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatusPill } from '@/components/ui/status-pill';
 import { SuccessModal } from '@/components/ui/success-modal';
-import { TextField } from '@/components/ui/text-field';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { AJO_STATUS_TONE } from '@/lib/status';
@@ -132,9 +133,7 @@ export default function AjoPlanScreen() {
         subtitle={data?.reference ?? reference}
       />
 
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardView>
         <ScrollView
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32 }}
           showsVerticalScrollIndicator={false}
@@ -192,13 +191,12 @@ export default function AjoPlanScreen() {
               <DetailRows className="mt-4" rows={rows} />
 
               <View className="mt-7 gap-4 rounded-2xl border border-line bg-card p-4">
-                <TextField
+                <AmountField
                   label={t('ajo.plan.recordLabel')}
                   placeholder={t('ajo.plan.recordPlaceholder')}
-                  keyboardType="numeric"
                   value={amount}
                   onChangeText={(value) => {
-                    setAmount(value.replace(/[^0-9.]/g, ''));
+                    setAmount(value);
                     if (amountError) setAmountError(undefined);
                   }}
                   error={amountError}
@@ -215,7 +213,7 @@ export default function AjoPlanScreen() {
             </>
           )}
         </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardView>
 
       <ConfirmDialog
         visible={confirming}

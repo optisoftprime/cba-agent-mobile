@@ -1,12 +1,12 @@
 {
   "title": "Notifications",
-  "subtitle": "View all customers notifications",
+  "subtitle": "View all your notifications",
   "unread": "Unread",
   "empty": {
     "title": "You're all caught up",
     "message": "New alerts about your customers land here.",
-    "unreadTitle": "Nothing unread",
-    "unreadMessage": "You've read everything in your inbox."
+    "unreadTitle": "No unread notifications",
+    "unreadMessage": "You're all caught up. You've read all your notifications."
   },
   "filters": {
     "all": "All",

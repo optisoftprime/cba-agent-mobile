@@ -20,7 +20,25 @@
   "empty": {
     "title": "No loans found",
     "message": "Loans on the accounts you manage will appear here.",
-    "searchMessage": "Try a different customer name or loan ID."
+    "searchMessage": "Try a different customer name or loan ID.",
+    "filters": {
+      "all": {
+        "title": "No loans found",
+        "message": "Loans on the accounts you manage will appear here."
+      },
+      "active": {
+        "title": "No active loans",
+        "message": "Active loans on the accounts you manage will appear here."
+      },
+      "due": {
+        "title": "No loans due",
+        "message": "Loans with repayments due will appear here."
+      },
+      "overdue": {
+        "title": "No overdue loans",
+        "message": "Loans with overdue repayments will appear here."
+      }
+    }
   },
   "detail": {
     "outstandingBalance": "Outstanding balance",

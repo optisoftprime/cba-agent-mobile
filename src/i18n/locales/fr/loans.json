@@ -20,7 +20,25 @@
   "empty": {
     "title": "Aucun prêt trouvé",
     "message": "Les prêts sur les comptes que vous gérez apparaîtront ici.",
-    "searchMessage": "Essayez un autre nom de client ou ID de prêt."
+    "searchMessage": "Essayez un autre nom de client ou ID de prêt.",
+    "filters": {
+      "all": {
+        "title": "Aucun prêt trouvé",
+        "message": "Les prêts des comptes que vous gérez apparaîtront ici."
+      },
+      "active": {
+        "title": "Aucun prêt actif",
+        "message": "Les prêts actifs des comptes que vous gérez apparaîtront ici."
+      },
+      "due": {
+        "title": "Aucun prêt à échéance",
+        "message": "Les prêts dont un remboursement est dû apparaîtront ici."
+      },
+      "overdue": {
+        "title": "Aucun prêt en retard",
+        "message": "Les prêts avec des remboursements en retard apparaîtront ici."
+      }
+    }
   },
   "detail": {
     "outstandingBalance": "Solde restant dû",

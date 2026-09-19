@@ -1,16 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { createTicket, ticketCategoriesQuery, TICKET_PRIORITIES } from '@/api/support';
 import { AppHeader } from '@/components/layout/app-header';
+import { KeyboardView } from '@/components/layout/keyboard-view';
 import { Button } from '@/components/ui/button';
 import { FilterChips } from '@/components/ui/filter-chips';
 import { SelectField } from '@/components/ui/select-field';
 import { SuccessModal } from '@/components/ui/success-modal';
 import { TextField } from '@/components/ui/text-field';
+import { pickImageFromLibrary, takePhoto } from '@/lib/image-picker';
 import { navigateBack, navigateReplace } from '@/lib/navigate';
 import { toast } from '@/lib/toast';
 import { useTheme } from '@/theme/theme-provider';
@@ -27,6 +29,8 @@ export default function CreateTicketScreen() {
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('MEDIUM');
   const [errors, setErrors] = useState({});
+  // { uri, name, type } from the picker, ready for FormData.
+  const [image, setImage] = useState(null);
   // The created ticket, held so the success modal can read back what the
   // server assigned — the number is the thing the agent has to keep.
   const [created, setCreated] = useState(null);
@@ -61,6 +65,7 @@ export default function CreateTicketScreen() {
       description: description.trim(),
       categoryId,
       priority,
+      image,
     });
   };
 
@@ -68,9 +73,7 @@ export default function CreateTicketScreen() {
     <View className="flex-1 bg-background">
       <AppHeader showBack title={t('support.create.title')} subtitle={t('support.subtitle')} />
 
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardView>
         <ScrollView
           contentContainerStyle={{ flexGrow: 1, padding: 20, paddingBottom: 28 }}
           keyboardShouldPersistTaps="handled"
@@ -132,16 +135,62 @@ export default function CreateTicketScreen() {
               />
             </View>
 
-            {/* TODO(backend): the API takes an imageUrl, so an attachment needs
-                an upload endpoint first — there isn't one in the spec. */}
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('support.create.attach')}
-              disabled
-              className="h-14 flex-row items-center justify-center gap-2 rounded-xl bg-card-muted opacity-60">
-              <Ionicons name="attach-outline" size={20} color={colors.inkSoft} />
-              <Text className="text-[15px] text-ink-soft">{t('support.create.attachSoon')}</Text>
-            </Pressable>
+            {image ? (
+              <View className="flex-row items-center gap-3 rounded-xl border border-line bg-card p-3">
+                <Image
+                  source={{ uri: image.uri }}
+                  style={{ width: 56, height: 56, borderRadius: 8 }}
+                  resizeMode="cover"
+                />
+                <View className="flex-1">
+                  <Text className="text-[14px] font-medium text-ink" numberOfLines={1}>
+                    {image.name}
+                  </Text>
+                  <Text className="mt-0.5 text-[12px] text-ink-soft">
+                    {t('support.create.attached')}
+                  </Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('support.create.removeImage')}
+                  hitSlop={10}
+                  disabled={isPending}
+                  onPress={() => setImage(null)}>
+                  <Ionicons name="close-circle" size={22} color={colors.inkSoft} />
+                </Pressable>
+              </View>
+            ) : (
+              <View className="flex-row gap-3">
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('support.create.attach')}
+                  disabled={isPending}
+                  onPress={async () => {
+                    const picked = await pickImageFromLibrary();
+                    if (picked) setImage(picked);
+                  }}
+                  className="h-14 flex-1 flex-row items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-card active:bg-card-muted">
+                  <Ionicons name="attach-outline" size={20} color={colors.primary} />
+                  <Text className="text-[15px] font-medium text-primary">
+                    {t('support.create.attach')}
+                  </Text>
+                </Pressable>
+
+                {/* A field agent is often looking at the problem rather than a
+                    screenshot of it. */}
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('support.create.takePhoto')}
+                  disabled={isPending}
+                  onPress={async () => {
+                    const shot = await takePhoto();
+                    if (shot) setImage(shot);
+                  }}
+                  className="h-14 w-14 items-center justify-center rounded-xl border border-dashed border-line bg-card active:bg-card-muted">
+                  <Ionicons name="camera-outline" size={20} color={colors.primary} />
+                </Pressable>
+              </View>
+            )}
           </View>
 
           {/* Pushes the button to the bottom when the form is short. */}
@@ -155,7 +204,7 @@ export default function CreateTicketScreen() {
             onPress={onSubmit}
           />
         </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardView>
 
       <SuccessModal
         visible={created !== null}

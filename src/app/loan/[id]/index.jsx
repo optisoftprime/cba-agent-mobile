@@ -9,7 +9,7 @@ import { AppHeader } from '@/components/layout/app-header';
 import { RepaymentCard } from '@/components/loans/repayment-card';
 import { ActivityList } from '@/components/ui/activity-list';
 import { BalancePanel } from '@/components/ui/balance-panel';
-import { Button } from '@/components/ui/button';
+// import { Button } from '@/components/ui/button';  // see the commented Record Payment block
 import { DetailRows } from '@/components/ui/detail-rows';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -17,7 +17,7 @@ import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { Skeleton, SkeletonCard } from '@/components/ui/skeleton';
 import { StatusPill } from '@/components/ui/status-pill';
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/format';
-import { navigateTo } from '@/lib/navigate';
+// import { navigateTo } from '@/lib/navigate';  // see the commented Record Payment block
 import { LOAN_STATUS_TONE } from '@/lib/status';
 
 const TABS = ['overview', 'repayment', 'activity'];
@@ -99,6 +99,12 @@ export default function LoanDetailScreen() {
         ) : null}
       </ScrollView>
 
+      {/* Record Payment is commented out, NOT deleted: the designer is removing
+          it from this screen, and there is no loan-repayment endpoint anyway —
+          it was routing into the deposit flow, which posts to a savings account
+          rather than reducing a loan. Restore this block only alongside a real
+          POST /agent/loans/{loanCode}/repayments.
+
       {loan ? (
         <View className="border-t border-line bg-card px-4 pb-6 pt-3">
           <Button
@@ -109,6 +115,7 @@ export default function LoanDetailScreen() {
           />
         </View>
       ) : null}
+      */}
     </View>
   );
 }

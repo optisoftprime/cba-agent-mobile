@@ -45,18 +45,41 @@ export const ticketCategoriesQuery = {
 };
 
 /**
- * Raise a ticket. The reporter is taken from the token, so it isn't sent.
- * Only `subject` is required by the server; `categoryId` is the numeric id
- * from ticketCategoriesQuery, and `priority` one of TICKET_PRIORITIES.
+ * Raise a ticket.
+ *
+ * The endpoint changed shape when image upload was added, and it is an unusual
+ * one: the TEXT fields are QUERY PARAMETERS and the body is multipart carrying
+ * only `image`. Sending the old JSON body silently loses the subject, because
+ * the server no longer reads it from there.
+ *
+ * `image` is `{ uri, name, type }` straight from the picker, or omitted. With
+ * no image the body is an empty multipart envelope, which the server accepts —
+ * sending NO body at all is a 500, so the FormData always goes.
+ *
+ * The reporter comes from the token, so it is not sent. Only `subject` is
+ * required. FormData is passed through the request interceptor untouched
+ * (see `trimDeep`), so the multipart envelope is not mangled.
  */
-export function createTicket({ subject, description, categoryId, priority, imageUrl }) {
+export function createTicket({ subject, description, categoryId, priority, image }) {
+  const form = new FormData();
+
+  if (image?.uri) {
+    form.append('image', {
+      uri: image.uri,
+      name: image.name || 'attachment.jpg',
+      type: image.type || 'image/jpeg',
+    });
+  }
+
   return send(
-    api.post(endpoints.support.tickets, {
-      subject,
-      description,
-      categoryId,
-      priority,
-      imageUrl,
+    api.post(endpoints.support.tickets, form, {
+      params: {
+        subject,
+        description: description || undefined,
+        categoryId: categoryId ?? undefined,
+        priority: priority || undefined,
+      },
+      headers: { 'Content-Type': 'multipart/form-data' },
     }),
   );
 }

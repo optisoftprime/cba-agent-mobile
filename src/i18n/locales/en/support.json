@@ -45,7 +45,6 @@
     "categoriesLoading": "Loading categories…",
     "categoryRequired": "Choose a category",
     "subjectRequired": "Subject is required",
-    "attachSoon": "Attachments coming soon",
     "success": {
       "title": "Ticket created",
       "message": "Support has your report and will respond on this ticket.",
@@ -54,7 +53,10 @@
       "status": "Status",
       "view": "View ticket",
       "done": "Back to support"
-    }
+    },
+    "attached": "Ready to send",
+    "removeImage": "Remove image",
+    "takePhoto": "Take a photo"
   },
   "detail": {
     "title": "Ticket",

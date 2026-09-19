@@ -7,6 +7,7 @@ import { NoGoingBack } from '@/components/layout/no-going-back';
 import { SheetScreen } from '@/components/layout/sheet-screen';
 import { Button } from '@/components/ui/button';
 import { OtpInput } from '@/components/ui/otp-input';
+import { ResendLink } from '@/components/ui/resend-link';
 import {
   clearPendingActivation,
   completeActivation,
@@ -148,24 +149,15 @@ export default function VerifyOtpScreen() {
             autoFocus
           />
 
-          <View className="mt-5 flex-row flex-wrap items-center gap-1.5">
-            <Text className="text-[14px] text-ink-muted">{t('auth.verifyOtp.noCode')}</Text>
-            {secondsLeft > 0 ? (
-              <Text className="text-[14px] font-medium text-ink-soft">
-                {t('auth.verifyOtp.resendIn', { seconds: secondsLeft })}
-              </Text>
-            ) : (
-              <Pressable
-                accessibilityRole="button"
-                disabled={resending}
-                hitSlop={8}
-                onPress={onResend}>
-                <Text className="text-[14px] font-semibold text-primary">
-                  {t('auth.verifyOtp.resend')}
-                </Text>
-              </Pressable>
-            )}
-          </View>
+          <ResendLink
+            className="mt-5"
+            prompt={t('auth.verifyOtp.noCode')}
+            action={resending ? t('auth.verifyOtp.resending') : t('auth.verifyOtp.resend')}
+            countdown={t('auth.verifyOtp.resendIn', { seconds: secondsLeft })}
+            secondsLeft={secondsLeft}
+            loading={resending}
+            onPress={onResend}
+          />
 
           {/* The way out of a resumed activation that the agent no longer wants. */}
           <Pressable

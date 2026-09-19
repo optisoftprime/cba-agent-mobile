@@ -19,7 +19,25 @@
   "empty": {
     "title": "Aucun client trouvé",
     "message": "Les clients qui vous sont assignés apparaîtront ici.",
-    "searchMessage": "Essayez un autre nom, ID client ou numéro de téléphone."
+    "searchMessage": "Essayez un autre nom, ID client ou numéro de téléphone.",
+    "filters": {
+      "all": {
+        "title": "Aucun client trouvé",
+        "message": "Les clients qui vous sont attribués apparaîtront ici."
+      },
+      "active": {
+        "title": "Aucun client actif",
+        "message": "Les clients actifs qui vous sont attribués apparaîtront ici."
+      },
+      "inactive": {
+        "title": "Aucun client inactif",
+        "message": "Les clients inactifs qui vous sont attribués apparaîtront ici."
+      },
+      "sme": {
+        "title": "Aucun client PME",
+        "message": "Les clients PME qui vous sont attribués apparaîtront ici."
+      }
+    }
   },
   "type": {
     "individual": "Particulier",

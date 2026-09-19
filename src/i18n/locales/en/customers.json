@@ -19,7 +19,25 @@
   "empty": {
     "title": "No customers found",
     "message": "Customers assigned to you will appear here.",
-    "searchMessage": "Try a different name, customer ID or phone number."
+    "searchMessage": "Try a different name, customer ID or phone number.",
+    "filters": {
+      "all": {
+        "title": "No customers found",
+        "message": "Customers assigned to you will appear here."
+      },
+      "active": {
+        "title": "No active customers",
+        "message": "Active customers assigned to you will appear here."
+      },
+      "inactive": {
+        "title": "No inactive customers",
+        "message": "Inactive customers assigned to you will appear here."
+      },
+      "sme": {
+        "title": "No SME customers",
+        "message": "SME customers assigned to you will appear here."
+      }
+    }
   },
   "type": {
     "individual": "Individual",

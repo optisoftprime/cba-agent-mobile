@@ -4,32 +4,57 @@ import { ScrollView, Share, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { getAccountById, getCustomerById } from '@/api/mock';
 import { BrandLogo } from '@/components/ui/brand-logo';
 import { Button } from '@/components/ui/button';
 import { DetailRows } from '@/components/ui/detail-rows';
 import { ScallopedEdge } from '@/components/ui/scalloped-edge';
-import { formatCurrencyPrecise, maskAccount } from '@/lib/format';
+import { formatCurrencyPrecise, formatDateTime, maskAccount } from '@/lib/format';
 import { brand } from '@/theme/brand';
 import { useTheme } from '@/theme/theme-provider';
 
+/**
+ * The receipt, built entirely from what the server returned.
+ *
+ * TODO(backend): there is no `GET /agent/deposits/{reference}`, so this can
+ * only be reached straight after posting — a receipt cannot be reopened later
+ * from the collections history or after the app restarts.
+ */
 export default function DepositReceiptScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const { customerId, accountId, amount, transactionId, dateTime } = useLocalSearchParams();
+  const {
+    customerName,
+    accountNumber,
+    amount,
+    status,
+    transactionId,
+    capturedAt,
+    customerBalanceAfter,
+  } = useLocalSearchParams();
 
-  const customer = getCustomerById(customerId);
-  const account = getAccountById(accountId);
-  const maskedAccount = maskAccount(account?.number);
+  const posted = String(status ?? '').toUpperCase() === 'POSTED';
+  const maskedAccount = maskAccount(String(accountNumber ?? ''));
   const depositedAmount = formatCurrencyPrecise(Number(amount) || 0);
+  const when = capturedAt ? formatDateTime(capturedAt) : '';
 
   const rows = [
-    { key: 'customer', label: t('deposit.receipt.customer'), value: customer?.name ?? '' },
+    { key: 'customer', label: t('deposit.receipt.customer'), value: String(customerName ?? '') },
     { key: 'account', label: t('deposit.receipt.account'), value: maskedAccount },
     { key: 'amount', label: t('deposit.receipt.amount'), value: depositedAmount },
-    { key: 'txn', label: t('deposit.receipt.transactionId'), value: transactionId ?? '' },
-    { key: 'when', label: t('deposit.receipt.dateTime'), value: dateTime ?? '' },
-    { key: 'status', label: t('deposit.receipt.statusLabel'), value: t('deposit.receipt.status') },
+    ...(posted && customerBalanceAfter
+      ? [
+          {
+            key: 'balance',
+            label: t('deposit.receipt.newBalance'),
+            value: formatCurrencyPrecise(Number(customerBalanceAfter) || 0),
+          },
+        ]
+      : []),
+    { key: 'txn', label: t('deposit.receipt.transactionId'), value: String(transactionId ?? '') },
+    { key: 'when', label: t('deposit.receipt.dateTime'), value: when },
+    // The server's own word, not a hardcoded "Successful" — a Pending deposit
+    // must not print a receipt that says the money is in.
+    { key: 'status', label: t('deposit.receipt.statusLabel'), value: String(status ?? '') },
   ];
 
   const onShare = () => {
@@ -38,8 +63,8 @@ export default function DepositReceiptScreen() {
         appName: brand.appName,
         amount: depositedAmount,
         account: maskedAccount,
-        transactionId,
-        dateTime,
+        transactionId: String(transactionId ?? ''),
+        dateTime: when,
       }),
     });
   };
@@ -54,9 +79,13 @@ export default function DepositReceiptScreen() {
           </View>
 
           <View className="items-center px-8 pb-6">
-            <MaterialCommunityIcons name="check-decagram" size={56} color={colors.success} />
+            <MaterialCommunityIcons
+              name={posted ? 'check-decagram' : 'clock-outline'}
+              size={56}
+              color={posted ? colors.success : colors.warning}
+            />
             <Text className="mt-4 text-[19px] font-bold text-ink">
-              {t('deposit.success.title')}
+              {posted ? t('deposit.success.title') : t('deposit.success.pendingTitle')}
             </Text>
             <Text className="mt-2 text-[15px] text-ink-muted">{brand.appName}</Text>
             <Text className="mt-1 text-[12px] text-ink-soft">{t('deposit.receipt.title')}</Text>

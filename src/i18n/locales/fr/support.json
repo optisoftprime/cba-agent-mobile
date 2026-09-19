@@ -45,7 +45,6 @@
     "categoriesLoading": "Chargement des catégories…",
     "categoryRequired": "Choisissez une catégorie",
     "subjectRequired": "L'objet est requis",
-    "attachSoon": "Pièces jointes bientôt disponibles",
     "success": {
       "title": "Ticket créé",
       "message": "Le support a reçu votre signalement et répondra sur ce ticket.",
@@ -54,7 +53,10 @@
       "status": "Statut",
       "view": "Voir le ticket",
       "done": "Retour au support"
-    }
+    },
+    "attached": "Prêt à envoyer",
+    "removeImage": "Retirer l’image",
+    "takePhoto": "Prendre une photo"
   },
   "detail": {
     "title": "Ticket",

@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import { fetchAgentProfile, login as loginRequest } from '@/api/agent-auth';
+import { fetchAgentProfile, login as loginRequest, logout } from '@/api/agent-auth';
 import { setSessionExpiredHandler } from '@/api/client';
 import i18n from '@/i18n';
 import { authenticateWithBiometrics } from '@/lib/biometrics';
@@ -91,11 +91,33 @@ export function AuthProvider({ children }) {
     [queryClient],
   );
 
-  /** Clears the session. Preferences (theme, language) are untouched. */
+  /**
+   * Clears the session. Preferences (theme, language) are untouched.
+   *
+   * Tells the server first so the token is REVOKED rather than left alive
+   * until it expires — a handset that is lost after a sign-out should not
+   * carry a working token. But the local clear happens regardless: an agent
+   * who is offline, or whose token the server has already dropped, must still
+   * be able to sign out of their own phone. A failed revoke is not a reason
+   * to keep someone signed in.
+   */
   const signOut = useCallback(async () => {
-    await clearSession();
-    queryClient.clear();
-    setUser(null);
+    try {
+      await logout();
+    } catch {
+      // Already invalid, or unreachable. Either way, sign out locally.
+    }
+
+    try {
+      await clearSession();
+    } finally {
+      // In `finally` on purpose: signing out must NEVER be blocked by a failure
+      // anywhere above it. Whatever happened to the network or to storage, the
+      // agent asked to be signed out, so the app forgets them and the caller
+      // gets to route away.
+      queryClient.clear();
+      setUser(null);
+    }
   }, [queryClient]);
 
   /**
@@ -160,19 +182,31 @@ export function AuthProvider({ children }) {
   }, []);
 
   /** Unlock an existing session with a face/fingerprint. */
+  /**
+   * Resolves with the unlocked SESSION, or null if there was nothing to unlock
+   * or the fingerprint failed.
+   *
+   * It returns the session rather than a boolean on purpose. A fingerprint
+   * unlocks a session; it does not decide where that session is allowed to go.
+   * Returning a bare `true` invited the caller to send everyone to the
+   * dashboard, which is exactly how an agent whose device access had been
+   * reset walked straight past the activation screen — the password path
+   * checked `deviceActivationRequired` and the fingerprint path did not.
+   * Handing back the session forces both paths through the same routing.
+   */
   const unlockWithBiometrics = useCallback(
     async (promptMessage) => {
       const session = await getUser();
-      if (!session) return false;
+      if (!session) return null;
 
       const passed = await authenticateWithBiometrics(promptMessage);
-      if (!passed) return false;
+      if (!passed) return null;
 
       // Unlocking is an entry point too: whatever was cached is from an older
       // session and may be hours stale, so the screens refetch.
       queryClient.clear();
       setUser(session);
-      return true;
+      return session;
     },
     [queryClient],
   );

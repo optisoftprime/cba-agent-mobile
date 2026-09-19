@@ -1,11 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AJO_FREQUENCIES, createAjoPlan } from '@/api/ajo';
 import { AppHeader } from '@/components/layout/app-header';
+import { KeyboardView } from '@/components/layout/keyboard-view';
+import { AmountField } from '@/components/ui/amount-field';
 import { Button } from '@/components/ui/button';
 import { DateField } from '@/components/ui/date-field';
 import { DetailRows } from '@/components/ui/detail-rows';
@@ -92,9 +94,7 @@ export default function AjoCreateScreen() {
         subtitle={customerName ? String(customerName) : t('ajo.subtitle')}
       />
 
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardView>
         <ScrollView
           contentContainerStyle={{ flexGrow: 1, padding: 20, paddingBottom: 28 }}
           keyboardShouldPersistTaps="handled"
@@ -143,13 +143,12 @@ export default function AjoCreateScreen() {
               />
             </View>
 
-            <TextField
+            <AmountField
               label={t('ajo.create.amount')}
               placeholder={t('ajo.create.amountPlaceholder')}
-              keyboardType="numeric"
               value={amount}
               onChangeText={(value) => {
-                setAmount(value.replace(/[^0-9.]/g, ''));
+                setAmount(value);
                 if (errors.amount) setErrors((e) => ({ ...e, amount: undefined }));
               }}
               error={errors.amount}
@@ -208,7 +207,7 @@ export default function AjoCreateScreen() {
             onPress={onSubmit}
           />
         </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardView>
 
       <SuccessModal
         visible={created !== null}

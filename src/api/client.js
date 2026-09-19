@@ -143,6 +143,18 @@ function createClient({ authenticated }) {
     if (authenticated) {
       const token = await load(StorageKeys.accessToken);
       if (token) config.headers.Authorization = `Bearer ${token}`;
+
+      // Core banking binds an agent to ONE handset and compares this against
+      // the device registered at activation. The deposit endpoint declares it
+      // required, and the server's own refusal says "Send your device id with
+      // every request", so it rides on every authenticated call rather than
+      // being remembered at each new call site. Without it: 403 "Send your
+      // device id with every request"; with a different one: 403 "This device
+      // is not the one registered to your account". Neither is a 401, so
+      // neither ends the session — which is right, because a wrong handset is
+      // not an expired token.
+      const deviceId = await load(StorageKeys.deviceId);
+      if (deviceId) config.headers['X-Agent-Device-Id'] = String(deviceId);
     }
     // Trimmed before logging, so the log shows exactly what went on the wire.
     if (config.data !== undefined) config.data = trimDeep(config.data);

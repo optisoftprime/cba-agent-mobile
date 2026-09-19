@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { navigateBack } from '@/lib/navigate';
@@ -16,7 +16,8 @@ import { useTheme } from '@/theme/theme-provider';
  *
  * `showBack` puts the back arrow in the blue banner, above the header text.
  * Leave it off for a screen that ends a process — pair that with NoGoingBack.
- */
+ */import { KeyboardView } from '@/components/layout/keyboard-view';
+
 export function SheetScreen({ header, children, showBack = false, onBackPress }) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -24,9 +25,7 @@ export function SheetScreen({ header, children, showBack = false, onBackPress })
 
   return (
     <View className="flex-1 bg-primary">
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardView>
         <View style={{ paddingTop: insets.top + 12 }} className="px-6 pb-8">
           {showBack ? (
             <Pressable
@@ -56,7 +55,7 @@ export function SheetScreen({ header, children, showBack = false, onBackPress })
             {children}
           </ScrollView>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardView>
     </View>
   );
 }

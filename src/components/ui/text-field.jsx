@@ -15,6 +15,9 @@ export const TextField = forwardRef(function TextField(
   ref,
 ) {
   const { colors } = useTheme();
+  // A field that cannot be typed into should not look like one that can —
+  // otherwise the agent taps it, nothing happens, and they assume it is broken.
+  const readOnly = rest.editable === false;
 
   return (
     <View className={`gap-1.5 ${className}`}>
@@ -22,7 +25,7 @@ export const TextField = forwardRef(function TextField(
 
       <View
         style={multiline ? { minHeight } : undefined}
-        className={`flex-row border bg-card ${
+        className={`flex-row border ${readOnly ? 'bg-card-muted' : 'bg-card'} ${
           multiline ? 'rounded-2xl px-4 py-3' : 'h-[52px] items-center rounded-full px-5'
         } ${error ? 'border-danger' : 'border-line'}`}>
         <TextInput

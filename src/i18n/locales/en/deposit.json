@@ -25,15 +25,12 @@
     "amountPlaceholder": "₦0.00",
     "narration": "Narration",
     "narrationPlaceholder": "Enter reason for deposit",
-    "paymentMethod": "Payment Method",
-    "paymentMethodPlaceholder": "Enter payment method",
-    "methods": {
-      "cash": "Cash",
-      "transfer": "Transfer",
-      "cheque": "Cheque",
-      "pos": "POS"
-    },
-    "continue": "Continue"
+    "continue": "Continue",
+    "customer": "Customer",
+    "account": "Account",
+    "amountRequired": "Enter the amount collected.",
+    "tooSmall": "Amount must be at least 0.01.",
+    "youArePosting": "You are posting"
   },
   "review": {
     "title": "Review Deposit",
@@ -58,7 +55,16 @@
     "account": "Account",
     "newBalance": "New Balance",
     "done": "Done",
-    "viewReceipt": "View Receipt"
+    "viewReceipt": "View Receipt",
+    "transactionId": "Transaction ID",
+    "cashInHand": "Your cash in hand",
+    "dateTime": "Date & Time",
+    "pendingTitle": "Awaiting approval",
+    "pendingMessage": "{{amount}} is over your limit, so it has been sent for approval. The money has not reached the customer yet.",
+    "pendingReason": "Why it is pending",
+    "duplicateTitle": "Already posted",
+    "duplicateMessage": "This deposit had already gone through, so it was not taken again. Do not re-enter it.",
+    "businessDate": "Business date {{date}}"
   },
   "receipt": {
     "title": "Deposit Receipt",
@@ -68,8 +74,8 @@
     "transactionId": "Transaction ID",
     "dateTime": "Date & Time",
     "statusLabel": "Status",
-    "status": "Successful",
     "share": "Share Receipt",
-    "shareMessage": "{{appName}} deposit receipt\n{{amount}} to {{account}}\nTransaction {{transactionId}} on {{dateTime}}"
+    "shareMessage": "{{appName}} deposit receipt\n{{amount}} to {{account}}\nTransaction {{transactionId}} on {{dateTime}}",
+    "newBalance": "New balance"
   }
 }

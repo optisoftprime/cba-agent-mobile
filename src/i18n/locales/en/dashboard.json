@@ -1,8 +1,8 @@
 {
   "greeting": {
-    "morning": "Good morning, {{name}} 👋",
-    "afternoon": "Good afternoon, {{name}} 👋",
-    "evening": "Good evening, {{name}} 👋"
+    "morning": "Good morning, {{name}}",
+    "afternoon": "Good afternoon, {{name}}",
+    "evening": "Good evening, {{name}}"
   },
   "agentId": "Agent ID: {{code}}",
   "stats": {
@@ -31,8 +31,8 @@
     },
     "due": "Due {{date}}",
     "seeAllCount": "See all ({{count}})",
-    "empty": "Nothing due today",
-    "emptyMessage": "Repayments due today will appear here."
+    "empty": "No tasks due today",
+    "emptyMessage": "Tasks that need your attention today will appear here."
   },
   "activity": {
     "title": "Recent activity",

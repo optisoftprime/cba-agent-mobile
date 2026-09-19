@@ -1,32 +1,57 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { getPaymentMethods } from '@/api/mock';
 import { AppHeader } from '@/components/layout/app-header';
+import { KeyboardView } from '@/components/layout/keyboard-view';
+import { AmountField } from '@/components/ui/amount-field';
 import { Button } from '@/components/ui/button';
-import { SelectField } from '@/components/ui/select-field';
+import { DetailRows } from '@/components/ui/detail-rows';
 import { TextField } from '@/components/ui/text-field';
+import { formatCurrencyPrecise } from '@/lib/format';
 import { navigateTo } from '@/lib/navigate';
 
-/** Step 3 of 4 — how much, why, and how it was tendered. */
+/** The server rejects anything under this: "must be greater than or equal to 0.01". */
+const MIN_AMOUNT = 0.01;
+
+/**
+ * Step 3 of 4 — how much, and why.
+ *
+ * TODO(backend): the design also has a Payment method selector, and it is
+ * deliberately NOT here. `POST /agent/deposits` has no `paymentMethod` field,
+ * so anything chosen would be silently discarded and the resulting collection
+ * record would show the wrong tender — worse than not asking. Restore it the
+ * moment the field exists (and `GET /agent/payment-methods` with it, so the
+ * options are the bank's rather than four hardcoded strings).
+ */
 export default function DepositAmountScreen() {
   const { t } = useTranslation();
-  const { customerId, accountId } = useLocalSearchParams();
+  const { customerCode, customerName, accountNumber, accountName } = useLocalSearchParams();
 
   const [amount, setAmount] = useState('');
   const [narration, setNarration] = useState('');
-  const [method, setMethod] = useState(null);
+  const [error, setError] = useState(undefined);
 
-  // No validation while we're converting screens — Continue goes straight through.
+  const value = Number(amount);
+  const valid = Number.isFinite(value) && value >= MIN_AMOUNT;
+
   const onContinue = () => {
+    if (!valid) {
+      setError(
+        amount.trim() ? t('deposit.amount.tooSmall') : t('deposit.amount.amountRequired'),
+      );
+      return;
+    }
+
     navigateTo('/deposit/review', {
-      customerId,
-      accountId,
-      amount,
-      narration,
-      method: method ?? '',
+      customerCode,
+      customerName: customerName ?? '',
+      accountNumber,
+      accountName: accountName ?? '',
+      // Normalised here so the review screen and the request agree to the kobo.
+      amount: String(value),
+      narration: narration.trim(),
     });
   };
 
@@ -35,24 +60,40 @@ export default function DepositAmountScreen() {
       <AppHeader
         showBack
         title={t('deposit.amount.title')}
-        subtitle={t('deposit.amount.subtitle')}
+        subtitle={accountName ? String(accountName) : t('deposit.amount.subtitle')}
       />
 
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardView>
         <ScrollView
           contentContainerStyle={{ flexGrow: 1, padding: 20, paddingBottom: 28 }}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}>
           <View className="gap-5">
-            <TextField
+            <DetailRows
+              rows={[
+                {
+                  key: 'customer',
+                  label: t('deposit.amount.customer'),
+                  value: customerName ? String(customerName) : String(customerCode ?? ''),
+                },
+                {
+                  key: 'account',
+                  label: t('deposit.amount.account'),
+                  value: String(accountNumber ?? ''),
+                },
+              ]}
+            />
+
+            <AmountField
               label={t('deposit.amount.amount')}
               placeholder={t('deposit.amount.amountPlaceholder')}
               value={amount}
-              onChangeText={setAmount}
-              keyboardType="decimal-pad"
+              onChangeText={(next) => {
+                setAmount(next);
+                if (error) setError(undefined);
+              }}
+              error={error}
             />
 
             <TextField
@@ -62,23 +103,27 @@ export default function DepositAmountScreen() {
               onChangeText={setNarration}
             />
 
-            <SelectField
-              label={t('deposit.amount.paymentMethod')}
-              placeholder={t('deposit.amount.paymentMethodPlaceholder')}
-              value={method}
-              onChange={setMethod}
-              options={getPaymentMethods().map((value) => ({
-                value,
-                label: t(`deposit.amount.methods.${value}`),
-              }))}
-            />
+            {/* Reads the typed figure back in full so a mistyped extra zero is
+                obvious before the review screen, not after. */}
+            {valid ? (
+              <DetailRows
+                rows={[
+                  {
+                    key: 'preview',
+                    label: t('deposit.amount.youArePosting'),
+                    value: formatCurrencyPrecise(value),
+                    tone: 'primary',
+                  },
+                ]}
+              />
+            ) : null}
           </View>
 
-          <View className="h-8" />
+          <View className="min-h-8 flex-1" />
 
           <Button label={t('deposit.amount.continue')} size="lg" onPress={onContinue} />
         </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardView>
     </View>
   );
 }

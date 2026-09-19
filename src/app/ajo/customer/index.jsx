@@ -85,6 +85,10 @@ export default function AjoCustomerScreen() {
             />
           )}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}
+          // Without this the first tap on a customer while the keyboard is up
+          // is swallowed dismissing it, and the agent has to tap twice.
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}
           refreshing={isRefetching && !isFetchingNextPage}
           onRefresh={refetch}
