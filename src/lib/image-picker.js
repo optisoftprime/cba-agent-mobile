@@ -38,15 +38,26 @@ function toFilePart(asset) {
   return { uri: asset.uri, name, type };
 }
 
-/** Choose from the photo library. Resolves null if cancelled or refused. */
+/**
+ * Choose from the photo library. Resolves null if cancelled.
+ *
+ * NO permission is requested, and that is deliberate. On Android 13+
+ * `launchImageLibraryAsync` uses the SYSTEM PHOTO PICKER: the agent picks one
+ * image in an OS-owned sheet and the app receives only that image, never the
+ * library. Calling `requestMediaLibraryPermissionsAsync` is what drags
+ * READ_MEDIA_IMAGES into the manifest — and Google Play rejects that
+ * permission for an app that only needs the occasional attachment ("Use
+ * alternative system pickers for photos / videos"). It cost us a review
+ * cycle; do not add the request back.
+ *
+ * `photosPermission: false` on the expo-image-picker plugin keeps the
+ * permission out of the manifest to match.
+ */
 export async function pickImageFromLibrary() {
   const Picker = loadPicker();
   if (!Picker) return null;
 
   try {
-    const permission = await Picker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) return null;
-
     const result = await Picker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       quality: QUALITY,
@@ -60,7 +71,13 @@ export async function pickImageFromLibrary() {
   }
 }
 
-/** Take a photo. Resolves null if cancelled or refused. */
+/**
+ * Take a photo. Resolves null if cancelled or refused.
+ *
+ * This one DOES request a permission: there is no system picker equivalent for
+ * the camera, and CAMERA is not a restricted permission the way the media ones
+ * are.
+ */
 export async function takePhoto() {
   const Picker = loadPicker();
   if (!Picker) return null;
