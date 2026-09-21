@@ -85,20 +85,23 @@ export default function SplashScreen() {
   const retry = useCallback(() => setAttempt((n) => n + 1), []);
 
   return (
-    <View className="flex-1 items-center justify-center bg-primary px-8">
-      <BrandLogo />
+    // White, not the brand blue: the logo lockup's wordmark is dark navy and
+    // disappeared against it. It also matches the native splash this screen
+    // hands over from, so there is no colour flash between the two.
+    <View className="flex-1 items-center justify-center bg-card px-8">
+      <BrandLogo size={64} />
 
       {failed ? (
         <View className="mt-10 w-full items-center gap-5">
-          <Text className="text-center text-[15px] leading-6 text-on-primary/85">
+          <Text className="text-center text-[15px] leading-6 text-ink-muted">
             {t('auth.splash.failed')}
           </Text>
           <Button label={t('auth.splash.retry')} variant="secondary" onPress={retry} />
         </View>
       ) : (
         <View className="absolute bottom-24 items-center gap-3">
-          <ActivityIndicator color={colors.onPrimary} />
-          <Text className="text-[13px] text-on-primary/80">{t('auth.splash.loading')}</Text>
+          <ActivityIndicator color={colors.primary} />
+          <Text className="text-[13px] text-ink-soft">{t('auth.splash.loading')}</Text>
         </View>
       )}
     </View>

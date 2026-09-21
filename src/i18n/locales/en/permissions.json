@@ -1,0 +1,17 @@
+{
+  "denied": {
+    "title": "Permission needed",
+    "message": "You do not have permission to do this. Contact your administrator to request access.",
+    "messageNamed": "You do not have permission to use {{feature}}. Contact your administrator to request access.",
+    "dismiss": "Got it"
+  },
+  "codes": {
+    "ACCOUNT_OPENING": "Account Opening",
+    "AJO": "Ajo",
+    "CUSTOMER_MANAGEMENT": "Customer Management",
+    "DEPOSIT": "Deposit",
+    "LOAN_COLLECTION": "Loan Collection",
+    "SUPPORT_TICKETS": "Support Tickets",
+    "WITHDRAWAL": "Withdrawal"
+  }
+}

@@ -6,8 +6,15 @@ import { brand } from '@/theme/brand';
  * The app's mark and wordmark, both driven by `src/theme/brand.js`. A new
  * client sets `appName` and `logo` there; nothing here changes.
  *
- * With no `logo` asset yet it renders a monogram from the first letter of
- * `appName`, so the splash screen always shows something deliberate.
+ * `size` is the logo's HEIGHT. The width comes from the asset's own aspect
+ * ratio, read at runtime — a square mark and a wide lockup both render
+ * correctly without anyone editing this file. Squeezing a 2.47:1 lockup into a
+ * square box is how a logo ends up looking shrunken and off-centre.
+ *
+ * A lockup usually contains the wordmark already, so the `appName` text is NOT
+ * printed underneath one — that would show the name twice. The text only
+ * appears with the monogram fallback, which is what renders when no `logo`
+ * asset is set, so the splash is never blank.
  */
 const TONES = {
   /** On the brand colour — the splash screen. */
@@ -19,24 +26,35 @@ const TONES = {
 export function BrandLogo({ size = 88, showName = true, tone = 'onPrimary' }) {
   const { mark, letter, name } = TONES[tone] ?? TONES.onPrimary;
 
-  return (
-    <View className="items-center">
-      {brand.logo ? (
+  // resolveAssetSource gives the asset's real pixel dimensions, so the aspect
+  // ratio follows whatever file brand.js points at.
+  const asset = brand.logo ? Image.resolveAssetSource(brand.logo) : null;
+  const aspect = asset?.width && asset?.height ? asset.width / asset.height : 1;
+
+  if (brand.logo) {
+    return (
+      <View className="items-center">
         <Image
           source={brand.logo}
-          style={{ width: size, height: size }}
+          // maxWidth so a wide lockup shrinks to fit a narrow phone rather
+          // than running off the edge; `contain` keeps the aspect while it does.
+          style={{ width: size * aspect, height: size, maxWidth: '100%' }}
           resizeMode="contain"
           accessibilityLabel={brand.appName}
         />
-      ) : (
-        <View
-          style={{ width: size, height: size, borderRadius: size / 2 }}
-          className={`items-center justify-center ${mark}`}>
-          <Text style={{ fontSize: size * 0.44 }} className={`font-bold ${letter}`}>
-            {brand.appName.charAt(0).toUpperCase()}
-          </Text>
-        </View>
-      )}
+      </View>
+    );
+  }
+
+  return (
+    <View className="items-center">
+      <View
+        style={{ width: size, height: size, borderRadius: size / 2 }}
+        className={`items-center justify-center ${mark}`}>
+        <Text style={{ fontSize: size * 0.44 }} className={`font-bold ${letter}`}>
+          {brand.appName.charAt(0).toUpperCase()}
+        </Text>
+      </View>
 
       {showName ? (
         <Text className={`mt-4 text-[15px] font-bold tracking-[3px] ${name}`}>

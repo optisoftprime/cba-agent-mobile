@@ -8,6 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppToast } from '@/components/layout/app-toast';
 import i18n from '@/i18n';
 import { AuthProvider } from '@/providers/auth-provider';
+import { PermissionProvider } from '@/providers/permission-provider';
 import { ThemeProvider } from '@/theme/theme-provider';
 
 export function AppProviders({ children }) {
@@ -38,8 +39,11 @@ export function AppProviders({ children }) {
             <ThemeProvider>
               <QueryClientProvider client={queryClient}>
                 <AuthProvider>
-                  {children}
-                  <AppToast />
+                  {/* Inside AuthProvider: fetching permissions needs a token. */}
+                  <PermissionProvider>
+                    {children}
+                    <AppToast />
+                  </PermissionProvider>
                 </AuthProvider>
               </QueryClientProvider>
             </ThemeProvider>

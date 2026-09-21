@@ -16,6 +16,8 @@ export const endpoints = {
     login: '/api/v1/agent/auth/login',
     /** The signed-in agent's profile. Doubles as the "is this token still good?" check. */
     profile: '/api/v1/agent/profile',
+    /** What this agent is allowed to do: [{ code, label }], granted ones only. */
+    permissions: '/api/v1/agent/profile/permissions',
     /** Revokes the token server-side. The token cannot be used again. */
     logout: '/api/v1/agent/auth/logout',
     /** Needs the CURRENT password; the agent is already signed in. */

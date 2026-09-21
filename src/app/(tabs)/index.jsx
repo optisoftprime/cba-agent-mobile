@@ -3,6 +3,7 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { dashboardQuery } from '@/api/dashboard';
+import { Permission } from '@/api/permissions';
 import { DashboardSkeleton } from '@/components/dashboard/dashboard-skeleton';
 import { QuickAction } from '@/components/dashboard/quick-action';
 import { TaskCard } from '@/components/dashboard/task-card';
@@ -24,6 +25,7 @@ import {
   greetingKey,
 } from '@/lib/format';
 import { navigateTo } from '@/lib/navigate';
+import { usePermission, useRefreshWithPermissions } from '@/providers/permission-provider';
 import { useAuth } from '@/providers/auth-provider';
 
 /** Home shows a preview of the task list; the rest lives behind "See all". */
@@ -34,9 +36,17 @@ const EMDASH = '—';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
+  const customers = usePermission(Permission.customerManagement);
+  const deposit = usePermission(Permission.deposit);
+  const ajo = usePermission(Permission.ajo);
+  const loans = usePermission(Permission.loanCollection);
   const agent = agentView(useAuth().user);
 
   const { data, isPending, isError, error, refetch, isRefetching } = useQuery(dashboardQuery);
+
+  // Pulling to refresh on the home screen re-asks what this agent may do, so a
+  // permission an administrator just changed takes effect without restarting.
+  const onRefresh = useRefreshWithPermissions(refetch);
 
   // Branch and business date ride along with the agent code: an agent posting
   // cash needs to know which book day the server has them on.
@@ -54,7 +64,7 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 24 }}
         refreshControl={
-          <RefreshControl refreshing={isRefetching && !isPending} onRefresh={refetch} />
+          <RefreshControl refreshing={isRefetching && !isPending} onRefresh={onRefresh} />
         }>
         {/* `overlap` leaves room for the tiles below to pull up over the banner. */}
         <AppHeader
@@ -156,22 +166,26 @@ export default function HomeScreen() {
                 <QuickAction
                   label={t('dashboard.quickActions.customers')}
                   icon="people-outline"
-                  onPress={() => navigateTo('/(tabs)/customers')}
+                  className={customers.lockedClass}
+                  onPress={customers.press(() => navigateTo('/(tabs)/customers'))}
                 />
                 <QuickAction
                   label={t('dashboard.quickActions.deposit')}
                   icon="card-outline"
-                  onPress={() => navigateTo('/deposit/customer')}
+                  className={deposit.lockedClass}
+                  onPress={deposit.press(() => navigateTo('/deposit/customer'))}
                 />
                 <QuickAction
                   label={t('dashboard.quickActions.ajo')}
                   icon="albums-outline"
-                  onPress={() => navigateTo('/ajo')}
+                  className={ajo.lockedClass}
+                  onPress={ajo.press(() => navigateTo('/ajo'))}
                 />
                 <QuickAction
                   label={t('dashboard.quickActions.loan')}
                   icon="cash-outline"
-                  onPress={() => navigateTo('/(tabs)/loans')}
+                  className={loans.lockedClass}
+                  onPress={loans.press(() => navigateTo('/(tabs)/loans'))}
                 />
               </View>
             </View>

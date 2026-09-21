@@ -3,6 +3,7 @@ import { FlatList, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { ajoHomeQuery } from '@/api/ajo';
+import { Permission } from '@/api/permissions';
 import { AppHeader } from '@/components/layout/app-header';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -13,6 +14,7 @@ import { Skeleton, SkeletonCard } from '@/components/ui/skeleton';
 import { StatCard } from '@/components/ui/stat-card';
 import { formatCurrency } from '@/lib/format';
 import { navigateTo } from '@/lib/navigate';
+import { usePermission, useRefreshWithPermissions } from '@/providers/permission-provider';
 import { AJO_STATUS_TONE } from '@/lib/status';
 
 const TILE = 'bg-card border border-line';
@@ -25,8 +27,11 @@ const TILE = 'bg-card border border-line';
  */
 export default function AjoScreen() {
   const { t } = useTranslation();
+  const ajo = usePermission(Permission.ajo);
 
   const { data, isPending, isError, error, refetch, isRefetching } = useQuery(ajoHomeQuery);
+
+  const onRefresh = useRefreshWithPermissions(refetch);
 
   const plans = data?.plans ?? [];
 
@@ -78,11 +83,11 @@ export default function AjoScreen() {
       )}
 
       <Button
-        className="mb-7 mt-5"
+        className={`mb-7 mt-5 ${ajo.lockedClass}`}
         label={t('ajo.create.action')}
         icon="add"
         size="lg"
-        onPress={() => navigateTo('/ajo/customer')}
+        onPress={ajo.press(() => navigateTo('/ajo/customer'))}
       />
 
       <SectionHeading title={t('ajo.myPlans')} />
@@ -136,7 +141,7 @@ export default function AjoScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
           showsVerticalScrollIndicator={false}
           refreshing={isRefetching}
-          onRefresh={refetch}
+          onRefresh={onRefresh}
           ListHeaderComponent={header}
           ListEmptyComponent={
             isPending ? (

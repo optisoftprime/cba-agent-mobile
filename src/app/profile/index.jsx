@@ -33,7 +33,9 @@ export default function ProfileScreen() {
       label: t('profile.statusLabel'),
       value: statusLabel,
     },
-  ];
+    // A labelled row with nothing beside it reads as broken. If the server
+    // omits a field, drop the row rather than show an empty one.
+  ].filter((row) => row.value);
 
   const onLogout = async () => {
     try {

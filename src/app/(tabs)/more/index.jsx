@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, Switch, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppHeader } from '@/components/layout/app-header';
@@ -12,7 +12,7 @@ import { useTheme } from '@/theme/theme-provider';
 
 export default function MoreScreen() {
   const { t } = useTranslation();
-  const { colors } = useTheme();
+  const { colors, isDark, toggleTheme } = useTheme();
 
   const agent = agentView(useAuth().user);
 
@@ -37,6 +37,30 @@ export default function MoreScreen() {
           leading={<Ionicons name="person-outline" size={20} color={colors.ink} />}
           title={t('profile.more.profile')}
           onPress={() => navigateTo('/profile')}
+        />
+
+        {/* The row itself toggles as well as the switch — a thin switch is a
+            small target for someone working one-handed in the field. */}
+        <ListCard
+          leading={
+            <Ionicons
+              name={isDark ? 'moon-outline' : 'sunny-outline'}
+              size={20}
+              color={colors.ink}
+            />
+          }
+          title={t('profile.more.darkMode')}
+          subtitle={isDark ? t('profile.more.darkOn') : t('profile.more.darkOff')}
+          onPress={toggleTheme}
+          trailing={
+            <Switch
+              value={isDark}
+              onValueChange={toggleTheme}
+              accessibilityLabel={t('profile.more.darkMode')}
+              trackColor={{ false: colors.line, true: colors.primary }}
+              thumbColor={colors.card}
+            />
+          }
         />
       </ScrollView>
     </View>

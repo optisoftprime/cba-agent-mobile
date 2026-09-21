@@ -1,0 +1,17 @@
+{
+  "denied": {
+    "title": "Autorisation requise",
+    "message": "Vous n’avez pas l’autorisation de faire cela. Contactez votre administrateur pour demander l’accès.",
+    "messageNamed": "Vous n’avez pas l’autorisation d’utiliser {{feature}}. Contactez votre administrateur pour demander l’accès.",
+    "dismiss": "Compris"
+  },
+  "codes": {
+    "ACCOUNT_OPENING": "Ouverture de compte",
+    "AJO": "Ajo",
+    "CUSTOMER_MANAGEMENT": "Gestion des clients",
+    "DEPOSIT": "Dépôt",
+    "LOAN_COLLECTION": "Recouvrement de prêt",
+    "SUPPORT_TICKETS": "Tickets de support",
+    "WITHDRAWAL": "Retrait"
+  }
+}

@@ -16,7 +16,8 @@
     "sessionExpired": "Veuillez vous reconnecter.",
     "title": "Chargement impossible",
     "offlineTitle": "Pas de connexion",
-    "timeoutTitle": "Délai dépassé"
+    "timeoutTitle": "Délai dépassé",
+    "accessRevokedTitle": "Accès révoqué"
   },
   "retry": "Réessayer",
   "notificationsUnread": "Notifications, {{count}} non lues",

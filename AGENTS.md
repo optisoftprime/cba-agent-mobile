@@ -30,6 +30,16 @@ The startup check also confirms the token belongs to the agent stored on THIS de
 
 **A 401 ends the session.** The access token is opaque, so the server introspects it and a rejection is authoritative. Anything that is NOT a 401 (offline, server down) keeps the session — being unable to reach the server is not proof of being signed out.
 
+**A 403 ends it too — every 403, no exceptions.** The live server refuses a suspended agent with `403 "Your agent access is suspended"` on every endpoint, and an unregistered handset with `403 "This device is not the one registered to your account"`. Neither is something the agent can resolve from inside the app, and leaving them there means every screen errors while the session looks fine — which is what QA hit.
+
+Signing out costs nothing in either case, because the way back in is the login screen regardless: a suspended agent is refused by login itself (correct), and a device-reset agent logs in fine and is routed to Activate Device by `deviceActivationRequired`. Activation runs on `publicApi` and needs NO token, so having signed out never blocks it.
+
+An earlier version tried to tell the two 403s apart by reading the message, because `errorCode` is a bare `ERR_403` for both. That was brittle and pointless once the answer is the same either way — don't reintroduce it.
+
+When a 403 ends the session the agent sees the SERVER's words ("Your agent access is suspended"), not "session expired", which would send them to retype a password that is also going to be refused.
+
+**`GET /agent/profile` returns 200 for a suspended agent** (verified), so the startup check cannot detect suspension on its own — the app opens normally and only finds out on the first dashboard call, which then signs them out. When the backend moves suspension to 401 it has to cover profile too.
+
 The startup check is SILENT — `fetchAgentProfile({ silent: true })` passes `skipSessionExpiry`, so a rejected token clears the session and lands on login without a toast. The agent didn't ask for that check and shouldn't be told it happened. Only a 401 on a call the agent actually triggered raises "session expired".
 
 ## Backend

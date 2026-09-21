@@ -5,6 +5,7 @@ import { ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { ajoPlanQuery, recordAjoContribution } from '@/api/ajo';
+import { Permission } from '@/api/permissions';
 import { AppHeader } from '@/components/layout/app-header';
 import { KeyboardView } from '@/components/layout/keyboard-view';
 import { AmountField } from '@/components/ui/amount-field';
@@ -19,6 +20,7 @@ import { SuccessModal } from '@/components/ui/success-modal';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { AJO_STATUS_TONE } from '@/lib/status';
+import { usePermissions } from '@/providers/permission-provider';
 import { toast } from '@/lib/toast';
 
 /**
@@ -30,6 +32,7 @@ import { toast } from '@/lib/toast';
  */
 export default function AjoPlanScreen() {
   const { t } = useTranslation();
+  const { can, guard } = usePermissions();
   const queryClient = useQueryClient();
   const { reference: routeReference } = useLocalSearchParams();
 
@@ -63,6 +66,7 @@ export default function AjoPlanScreen() {
 
   const onRecord = () => {
     if (isRecording) return;
+    if (!can(Permission.ajo)) return guard(Permission.ajo);
     if (!Number.isFinite(contribution) || contribution < 0.01) {
       setAmountError(t('ajo.plan.amountRequired'));
       return;

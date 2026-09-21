@@ -16,7 +16,8 @@
     "sessionExpired": "Please log in again.",
     "title": "Could not load this",
     "offlineTitle": "No connection",
-    "timeoutTitle": "Took too long"
+    "timeoutTitle": "Took too long",
+    "accessRevokedTitle": "Access revoked"
   },
   "retry": "Try again",
   "notificationsUnread": "Notifications, {{count}} unread",

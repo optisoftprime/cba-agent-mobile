@@ -86,6 +86,20 @@ export function AuthProvider({ children }) {
       // first screen loads the incoming agent's data, never the last one's.
       queryClient.clear();
       setUser(await saveSession(data));
+
+      // The login response does NOT carry `role` — only GET /agent/profile
+      // does. Without this the Role row on the profile screen sits blank until
+      // the app is next relaunched, because the startup check was the only
+      // thing that ever folded the profile in.
+      //
+      // Deliberately not awaited: routing after sign-in should not wait on a
+      // second round trip over a field connection. The profile lands a moment
+      // later and re-renders whatever is on screen. If it fails, the agent is
+      // still signed in and only a display field is missing.
+      fetchAgentProfile({ silent: true })
+        .then((profile) => applyProfile(profile).then(setUser))
+        .catch(() => {});
+
       return data;
     },
     [queryClient],
@@ -214,11 +228,17 @@ export function AuthProvider({ children }) {
   // A 401 from any signed-in call lands here (see src/api/client.js). Calls on
   // publicApi — login, resend/verify OTP — never trigger it.
   useEffect(() => {
-    setSessionExpiredHandler(async () => {
+    // `reason` is the server's own message when the session ended because the
+    // ACCOUNT was revoked rather than the token expiring. "Your agent access is
+    // suspended" tells the agent what happened and who to talk to; "session
+    // expired" would send them to retype a password that is also going to fail.
+    setSessionExpiredHandler(async (reason) => {
       await signOut();
       toast.error(
-        i18n.t('common.errors.sessionExpiredTitle'),
-        i18n.t('common.errors.sessionExpired'),
+        reason
+          ? i18n.t('common.errors.accessRevokedTitle')
+          : i18n.t('common.errors.sessionExpiredTitle'),
+        reason || i18n.t('common.errors.sessionExpired'),
       );
       navigateReplace('/(auth)/login');
     });

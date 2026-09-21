@@ -26,20 +26,36 @@
  * bundle (Metro) both read it, so there is exactly one source of truth.
  */
 
+/**
+ * The logo lockup. Metro resolves a PNG `require` to an asset id, but this
+ * file is ALSO loaded by plain Node — `tailwind.config.js` reads the palette
+ * from it and so does `npm run check:theme` — and Node cannot require a PNG.
+ * So the require is guarded: in the bundler it resolves, outside it falls back
+ * to null, which only affects tooling that never renders anything.
+ */
+function loadLogo() {
+  try {
+    return require('../../assets/images/splashLogo.png');
+  } catch {
+    return null;
+  }
+}
+
 const brand = {
   // Shown on the splash screen, in the biometric prompt and anywhere the app
   // refers to itself. Change it here and nowhere else.
-  appName: 'OASIS',
+  appName: 'CBA-Agent',
   /**
-   * The logo mark on the splash screen. Drop the client's file into
-   * `assets/images/` and point at it:
+   * The logo on the splash screen and the receipt. Drop a client's file into
+   * `assets/images/` and point `loadLogo()` at it — `ui/brand-logo` reads the
+   * asset's real dimensions, so a differently-shaped logo needs no other
+   * change. Set it to null and the splash falls back to a monogram built from
+   * `appName`, so it is never broken.
    *
-   *   logo: require('../../assets/images/oasis-logo.png'),
-   *
-   * Left null until the real asset arrives — BrandLogo falls back to a
-   * monogram built from `appName` so the splash is never broken.
+   * NOTE: this file's lockup already contains the wordmark, so `ui/brand-logo`
+   * does not print `appName` underneath it as well.
    */
-  logo: null,
+  logo: loadLogo(),
   // Drives formatNaira()/formatCurrencyCompact() in src/lib/format.js.
   currency: { symbol: '\u20A6', code: 'NGN', locale: 'en-NG' },
   // Fallback when no language is saved and the device locale isn't shipped.

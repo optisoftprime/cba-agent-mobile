@@ -4,6 +4,7 @@ import { FlatList, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { itemsOf } from '@/api/pagination';
+import { Permission } from '@/api/permissions';
 import { ticketsQuery } from '@/api/support';
 import { AppHeader } from '@/components/layout/app-header';
 import { Button } from '@/components/ui/button';
@@ -16,12 +17,14 @@ import { Skeleton, SkeletonCard } from '@/components/ui/skeleton';
 import { StatCard } from '@/components/ui/stat-card';
 import { formatDate } from '@/lib/format';
 import { navigateTo } from '@/lib/navigate';
+import { usePermission, useRefreshWithPermissions } from '@/providers/permission-provider';
 import { TICKET_STATUS_TONE } from '@/lib/status';
 
 const TILE = 'bg-card border border-line';
 
 export default function SupportScreen() {
   const { t } = useTranslation();
+  const raiseTicket = usePermission(Permission.supportTickets);
 
   const {
     data,
@@ -34,6 +37,8 @@ export default function SupportScreen() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery(ticketsQuery());
+
+  const onRefresh = useRefreshWithPermissions(refetch);
 
   const tickets = useMemo(() => itemsOf(data, 'tickets'), [data]);
   // The three counts ride along on every page; page 0 is as good as any.
@@ -74,11 +79,11 @@ export default function SupportScreen() {
       )}
 
       <Button
-        className="mb-7 mt-5"
         label={t('support.createTicket')}
         icon="add"
         size="lg"
-        onPress={() => navigateTo('/ticket/create')}
+        className={`mb-7 mt-5 ${raiseTicket.lockedClass}`}
+        onPress={raiseTicket.press(() => navigateTo('/ticket/create'))}
       />
 
       <SectionHeading title={t('support.myTickets')} />
@@ -114,7 +119,7 @@ export default function SupportScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
           showsVerticalScrollIndicator={false}
           refreshing={isRefetching && !isFetchingNextPage}
-          onRefresh={refetch}
+          onRefresh={onRefresh}
           onEndReachedThreshold={0.4}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) fetchNextPage();

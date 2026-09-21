@@ -24,10 +24,11 @@ export default function ActivateCodeScreen() {
   const [agentCode, setAgentCode] = useState('');
   const [code, setCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  // BUG-078: the agent code is already on the signed-in session, so making
-  // them retype it is a step that can only go wrong. It is filled in and
-  // locked when we know it; the field stays editable only when we don't (a
-  // handset being activated before anyone has signed in on it).
+  // BUG-078: the agent code is already on the signed-in session, so it is
+  // filled in for them. It stays EDITABLE either way — a handset that has been
+  // reactivated, or passed to a different agent, has a stale code sitting in
+  // the session, and locking the field would leave that agent unable to
+  // correct it and unable to activate at all.
   const [codeFromSession, setCodeFromSession] = useState(false);
 
   useEffect(() => {
@@ -95,9 +96,7 @@ export default function ActivateCodeScreen() {
         onChangeText={setAgentCode}
         autoCapitalize="characters"
         autoCorrect={false}
-        // Read-only rather than hidden: the agent should be able to SEE which
-        // account the handset is being bound to before confirming it.
-        editable={!submitting && !codeFromSession}
+        editable={!submitting}
         hint={codeFromSession ? t('auth.activateCode.agentCodeFromAccount') : undefined}
       />
 

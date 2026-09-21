@@ -2,7 +2,10 @@
   "more": {
     "title": "More",
     "subtitle": "Manage your account and preferences.",
-    "profile": "Profile"
+    "profile": "Profile",
+    "darkMode": "Dark mode",
+    "darkOn": "On",
+    "darkOff": "Off"
   },
   "title": "Profile",
   "phone": "Phone",

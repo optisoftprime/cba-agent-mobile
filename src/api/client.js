@@ -41,7 +41,7 @@ export function setSessionExpiredHandler(handler) {
  * the session it belonged to is already over — acting on it would mean a
  * second "session expired" toast, or signing out a perfectly good new session.
  */
-async function handleUnauthorized(sentToken) {
+async function handleUnauthorized(sentToken, reason = null) {
   if (isHandlingExpiry || !onSessionExpired || !sentToken) return;
 
   const currentToken = await load(StorageKeys.accessToken);
@@ -49,10 +49,75 @@ async function handleUnauthorized(sentToken) {
 
   isHandlingExpiry = true;
   try {
-    await onSessionExpired();
+    await onSessionExpired(reason);
   } finally {
     isHandlingExpiry = false;
   }
+}
+
+let onPermissionDenied = null;
+
+/** The UI registers how to say "you cannot do this" — see PermissionProvider. */
+export function setPermissionDeniedHandler(handler) {
+  onPermissionDenied = handler;
+}
+
+/**
+ * Is this 401 the server saying "not allowed", rather than "not signed in"?
+ *
+ * The backend returns **401 for a permission refusal** as well as for a dead
+ * token, which collides badly: one must sign the agent out, the other must
+ * not. A permission refusal is not an authentication failure and should be a
+ * 403 — raised with the backend team.
+ *
+ * Until it moves, they are told apart by the message. This defaults to SIGNING
+ * OUT: an unrecognised 401 is treated as a dead token, because leaving an
+ * agent inside the app on a token the server rejects means every screen fails
+ * with no way out. Being signed out unnecessarily is recoverable; the reverse
+ * is not.
+ *
+ * In normal use this should never fire — `PermissionProvider` knows the
+ * agent's permissions up front and stops the call being made at all. This
+ * catches the case where an administrator changes a permission mid-session.
+ */
+const PERMISSION_REFUSAL = /permission|not allowed|not permitted|forbidden|unauthoriz(ed|ation) to|no access to/i;
+
+function isPermissionRefusal(status, body) {
+  if (status !== 401) return false;
+  const message = String(body?.message ?? '');
+  if (!message) return false;
+  // "Invalid access token: <uuid>" and friends are dead tokens, not refusals.
+  if (/token|expired|sign in|log ?in|credential/i.test(message)) return false;
+  return PERMISSION_REFUSAL.test(message);
+}
+
+/**
+ * Both 401 and 403 end the session.
+ *
+ * 401 is the token being rejected. 403 is the SERVER refusing this agent —
+ * observed on the live server as a suspended account ("Your agent access is
+ * suspended", returned by every endpoint) and as an unregistered handset
+ * ("This device is not the one registered to your account"). Neither is
+ * something the agent can do anything about from inside the app, and leaving
+ * them in it means every screen errors while the session looks fine. That is
+ * exactly what QA hit.
+ *
+ * Signing out costs nothing in either case, because the way back in is through
+ * the login screen anyway:
+ *   suspended  -> login itself returns 403, so they cannot get back in, which
+ *                 is correct.
+ *   device     -> login succeeds and returns `deviceActivationRequired`, which
+ *                 routes them to Activate Device. Activation runs on
+ *                 `publicApi` and needs NO token, so having signed out does not
+ *                 block it.
+ *
+ * This deliberately does no message matching. An earlier version tried to tell
+ * a revoked account from a device rejection by reading the message, because
+ * `errorCode` is a bare `ERR_403` for both — brittle, and unnecessary once the
+ * answer is the same either way.
+ */
+function endsSession(status) {
+  return status === 401 || status === 403;
 }
 
 const tokenFrom = (config) => {
@@ -194,12 +259,25 @@ function createClient({ authenticated }) {
       // `skipSessionExpiry` is for the startup token check: it EXPECTS a 401
       // to be possible, handles it itself, and must not make the user read a
       // "session expired" toast for something they didn't do.
-      if (
-        authenticated &&
-        error.response?.status === 401 &&
-        !error.config?.skipSessionExpiry
-      ) {
-        await handleUnauthorized(tokenFrom(error.config));
+      const status = error.response?.status;
+      const body = error.response?.data;
+
+      // A permission refusal is NOT a dead session — the agent stays signed in
+      // and is told what they cannot do.
+      if (authenticated && isPermissionRefusal(status, body)) {
+        onPermissionDenied?.(body?.message ?? null);
+        return Promise.reject(error);
+      }
+
+      if (authenticated && endsSession(status) && !error.config?.skipSessionExpiry) {
+        // Hand the server's own words through when it gave a reason: "Your
+        // agent access is suspended" tells the agent what happened and who to
+        // ask; a generic "session expired" would send them to retype a
+        // password that is also going to be refused.
+        await handleUnauthorized(
+          tokenFrom(error.config),
+          status === 403 ? body?.message : null,
+        );
       }
       return Promise.reject(error);
     },
