@@ -45,10 +45,13 @@
     "transactions": "{{count}} transactions",
     "cashInHand": "Espèces en caisse",
     "pendingShort": "En attente aujourd'hui",
-    "transactionsShort": "Transactions"
+    "transactionsShort": "Transactions",
+    "endOfDay": "Fin de journée",
+    "remit": "Reverser"
   },
   "hold": {
     "title": "Blocage de réconciliation",
-    "message": "Les opérations sont suspendues jusqu’à la réconciliation de votre agence. Contactez votre superviseur."
+    "message": "Les opérations sont suspendues jusqu’à la réconciliation de votre agence. Contactez votre superviseur.",
+    "action": "Ouvrir la fin de journée"
   }
 }

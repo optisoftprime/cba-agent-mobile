@@ -45,10 +45,13 @@
     "transactions": "{{count}} transactions",
     "cashInHand": "Cash in hand",
     "pendingShort": "Pending today",
-    "transactionsShort": "Transactions"
+    "transactionsShort": "Transactions",
+    "endOfDay": "End of day",
+    "remit": "Remit cash"
   },
   "hold": {
     "title": "Reconciliation hold",
-    "message": "Posting is on hold until your branch reconciles. Contact your supervisor."
+    "message": "Posting is on hold until your branch reconciles. Contact your supervisor.",
+    "action": "Open end of day"
   }
 }

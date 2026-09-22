@@ -38,6 +38,19 @@ export const endpoints = {
     summary: '/api/v1/agent/dashboard',
   },
 
+  eod: {
+    /** Today's position: expected cash and whether the day is closed. */
+    current: '/api/v1/agent/eod/current',
+    /** Past end-of-day results, newest first. Paginated; items under `items`. */
+    history: '/api/v1/agent/eod/history',
+    submit: '/api/v1/agent/eod/submit',
+  },
+
+  remittances: {
+    /** Hand cash back to the branch. Idempotent on clientReference. */
+    create: '/api/v1/agent/remittances',
+  },
+
   deposits: {
     /** Needs the X-Agent-Device-Id header — added by the client interceptor. */
     create: '/api/v1/agent/deposits',

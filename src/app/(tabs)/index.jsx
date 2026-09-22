@@ -11,6 +11,7 @@ import { AppHeader, HeaderAvatar, NotificationsAction } from '@/components/layou
 import { ActivityList } from '@/components/ui/activity-list';
 import { AlertBanner } from '@/components/ui/alert-banner';
 import { BalancePanel } from '@/components/ui/balance-panel';
+import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { MetricPanel } from '@/components/ui/metric-panel';
@@ -85,12 +86,15 @@ export default function HomeScreen() {
 
         {data ? (
           <>
-            {/* A work-blocking condition stays on screen, unlike a toast. */}
+            {/* A work-blocking condition stays on screen, unlike a toast. It opens
+                End of day because a Balanced count is what lifts the hold. */}
             {data.reconciliationHold ? (
               <View className="-mt-8 px-4 pb-4">
                 <AlertBanner
                   title={t('dashboard.hold.title')}
                   message={data.holdReason ?? t('dashboard.hold.message')}
+                  actionLabel={t('dashboard.hold.action')}
+                  onPress={() => navigateTo('/eod')}
                 />
               </View>
             ) : null}
@@ -153,6 +157,25 @@ export default function HomeScreen() {
                   },
                 ]}
               />
+
+              {/* The two things an agent does with the cash in hand, right under
+                  the figure they act on. */}
+              <View className="mt-3 flex-row gap-3">
+                <Button
+                  className="flex-1"
+                  variant="outline"
+                  icon="calculator-outline"
+                  label={t('dashboard.today.endOfDay')}
+                  onPress={() => navigateTo('/eod')}
+                />
+                <Button
+                  className="flex-1"
+                  variant="outline"
+                  icon="arrow-up-circle-outline"
+                  label={t('dashboard.today.remit')}
+                  onPress={() => navigateTo('/remittance')}
+                />
+              </View>
             </View>
 
             <View className="mt-7 px-4">

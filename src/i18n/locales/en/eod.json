@@ -1,0 +1,57 @@
+{
+  "title": "End of day",
+  "subtitle": "Count your cash and close the day",
+  "remit": "Remit cash to branch",
+  "position": {
+    "status": "Status",
+    "settled": "Settled cash",
+    "settledShort": "Settled: {{amount}}",
+    "pendingIn": "Pending in",
+    "pendingOut": "Pending out",
+    "expected": "Expected cash",
+    "counted": "Cash counted",
+    "variance": "Difference",
+    "submittedAt": "Submitted",
+    "resolution": "Resolution note"
+  },
+  "state": {
+    "open": "Open",
+    "varianceTitle": "Your count did not match",
+    "varianceMessage": "Recount the cash and submit again, or wait for your supervisor to resolve it.",
+    "closedTitle": "Day closed",
+    "closedMessage": "Your cash balanced. There is nothing left to submit today."
+  },
+  "count": {
+    "label": "Cash counted",
+    "placeholder": "Enter the cash you are holding",
+    "required": "Enter the cash you counted. Enter 0 if you are holding none.",
+    "difference": "Difference",
+    "submit": "Submit count",
+    "resubmit": "Submit new count"
+  },
+  "confirm": {
+    "title": "Submit your count?",
+    "message": "You are declaring {{amount}} as the cash you are holding.",
+    "confirm": "Submit"
+  },
+  "done": {
+    "balancedTitle": "Day closed",
+    "balancedMessage": "Your cash balanced. See you tomorrow.",
+    "varianceTitle": "Count submitted",
+    "varianceMessage": "Your count does not match what was expected. Your supervisor will review it.",
+    "ok": "Done"
+  },
+  "variance": {
+    "balanced": "Balanced",
+    "over": "{{amount}} over",
+    "short": "{{amount}} short"
+  },
+  "history": {
+    "title": "Past days",
+    "subtitle": "Your end-of-day submissions",
+    "open": "View past days",
+    "expected": "Expected {{amount}}",
+    "emptyTitle": "No past days yet",
+    "emptyMessage": "Each day you close will appear here."
+  }
+}

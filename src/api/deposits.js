@@ -1,6 +1,9 @@
 import { api, send } from '@/api/client';
 import { endpoints } from '@/api/endpoints';
 
+// The idempotency key and the posted test are shared with remittances.
+export { isPosted, newClientReference } from '@/lib/cash-movement';
+
 /**
  * Agent Deposits — POST /api/v1/agent/deposits.
  *
@@ -23,16 +26,6 @@ import { endpoints } from '@/api/endpoints';
  *   over the agent's cap and it is waiting on approval — the money has NOT
  *   landed, `pendingReason` says why, and the screen must not claim success.
  */
-
-/**
- * An idempotency key for one deposit attempt. Random, not derived from the
- * amount or account: two genuine deposits of the same amount to the same
- * account minutes apart are legitimate and must not collide.
- */
-export function newClientReference() {
-  const random = Math.random().toString(36).slice(2, 10);
-  return `cba-${Date.now()}-${random}`;
-}
 
 /**
  * Post a deposit. Resolves with:
@@ -62,7 +55,3 @@ export function postDeposit({
   );
 }
 
-/** True when the server took the money; false when it is awaiting approval. */
-export function isPosted(result) {
-  return String(result?.status ?? '').toUpperCase() === 'POSTED';
-}

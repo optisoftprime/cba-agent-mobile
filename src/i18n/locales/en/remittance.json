@@ -1,0 +1,29 @@
+{
+  "title": "Remit to branch",
+  "subtitle": "Hand cash back to your branch",
+  "holding": "Cash you should be holding",
+  "amount": "Amount",
+  "amountPlaceholder": "Enter amount",
+  "amountRequired": "Enter the amount you are remitting.",
+  "tooSmall": "The amount must be at least ₦0.01.",
+  "narration": "Narration (optional)",
+  "narrationPlaceholder": "e.g. Handed to teller",
+  "youAreRemitting": "You are remitting",
+  "submit": "Remit cash",
+  "confirm": {
+    "title": "Remit this cash?",
+    "message": "You are handing {{amount}} back to your branch.",
+    "confirm": "Remit"
+  },
+  "done": {
+    "title": "Cash remitted",
+    "message": "{{amount}} has been remitted to your branch.",
+    "pendingTitle": "Remittance pending",
+    "pendingMessage": "{{amount}} is awaiting approval. It has not been remitted yet.",
+    "duplicate": "This remittance was already recorded. It was not taken a second time.",
+    "reference": "Reference",
+    "cashInHand": "Cash in hand now",
+    "when": "Date & time",
+    "ok": "Done"
+  }
+}

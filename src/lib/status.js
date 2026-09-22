@@ -92,3 +92,15 @@ export const TICKET_PRIORITY_TONE = {
   high: 'warning',
   critical: 'danger',
 };
+
+/**
+ * End-of-day results. The server documents Balanced and Variance; anything
+ * else it sends falls back to neutral rather than guessing.
+ */
+export const EOD_STATUS_TONE = {
+  balanced: 'success',
+  resolved: 'success',
+  variance: 'warning',
+  open: 'info',
+  pending: 'info',
+};

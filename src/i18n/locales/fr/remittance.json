@@ -1,0 +1,29 @@
+{
+  "title": "Reverser à l'agence",
+  "subtitle": "Rendez des espèces à votre agence",
+  "holding": "Espèces que vous devriez détenir",
+  "amount": "Montant",
+  "amountPlaceholder": "Saisissez le montant",
+  "amountRequired": "Saisissez le montant à reverser.",
+  "tooSmall": "Le montant doit être d'au moins 0,01 ₦.",
+  "narration": "Libellé (facultatif)",
+  "narrationPlaceholder": "ex. Remis au guichetier",
+  "youAreRemitting": "Vous reversez",
+  "submit": "Reverser",
+  "confirm": {
+    "title": "Reverser ces espèces ?",
+    "message": "Vous rendez {{amount}} à votre agence.",
+    "confirm": "Reverser"
+  },
+  "done": {
+    "title": "Espèces reversées",
+    "message": "{{amount}} a été reversé à votre agence.",
+    "pendingTitle": "Reversement en attente",
+    "pendingMessage": "{{amount}} est en attente d'approbation. Il n'a pas encore été reversé.",
+    "duplicate": "Ce reversement était déjà enregistré. Il n'a pas été pris une seconde fois.",
+    "reference": "Référence",
+    "cashInHand": "Espèces en main maintenant",
+    "when": "Date et heure",
+    "ok": "Terminé"
+  }
+}

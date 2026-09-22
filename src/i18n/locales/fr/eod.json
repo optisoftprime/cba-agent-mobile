@@ -1,0 +1,57 @@
+{
+  "title": "Fin de journée",
+  "subtitle": "Comptez votre caisse et clôturez la journée",
+  "remit": "Reverser l'argent à l'agence",
+  "position": {
+    "status": "Statut",
+    "settled": "Espèces réglées",
+    "settledShort": "Réglé : {{amount}}",
+    "pendingIn": "Entrées en attente",
+    "pendingOut": "Sorties en attente",
+    "expected": "Espèces attendues",
+    "counted": "Espèces comptées",
+    "variance": "Écart",
+    "submittedAt": "Soumis",
+    "resolution": "Note de résolution"
+  },
+  "state": {
+    "open": "Ouvert",
+    "varianceTitle": "Votre comptage ne correspond pas",
+    "varianceMessage": "Recomptez la caisse et soumettez à nouveau, ou attendez que votre superviseur le résolve.",
+    "closedTitle": "Journée clôturée",
+    "closedMessage": "Votre caisse est équilibrée. Il n'y a plus rien à soumettre aujourd'hui."
+  },
+  "count": {
+    "label": "Espèces comptées",
+    "placeholder": "Saisissez les espèces que vous détenez",
+    "required": "Saisissez les espèces comptées. Saisissez 0 si vous n'en détenez aucune.",
+    "difference": "Écart",
+    "submit": "Soumettre le comptage",
+    "resubmit": "Soumettre un nouveau comptage"
+  },
+  "confirm": {
+    "title": "Soumettre votre comptage ?",
+    "message": "Vous déclarez détenir {{amount}} en espèces.",
+    "confirm": "Soumettre"
+  },
+  "done": {
+    "balancedTitle": "Journée clôturée",
+    "balancedMessage": "Votre caisse est équilibrée. À demain.",
+    "varianceTitle": "Comptage soumis",
+    "varianceMessage": "Votre comptage ne correspond pas au montant attendu. Votre superviseur va l'examiner.",
+    "ok": "Terminé"
+  },
+  "variance": {
+    "balanced": "Équilibré",
+    "over": "{{amount}} en trop",
+    "short": "{{amount}} manquant"
+  },
+  "history": {
+    "title": "Jours précédents",
+    "subtitle": "Vos soumissions de fin de journée",
+    "open": "Voir les jours précédents",
+    "expected": "Attendu {{amount}}",
+    "emptyTitle": "Aucun jour précédent",
+    "emptyMessage": "Chaque journée clôturée apparaîtra ici."
+  }
+}
