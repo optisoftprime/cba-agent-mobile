@@ -19,7 +19,9 @@
     "varianceTitle": "Your count did not match",
     "varianceMessage": "Recount the cash and submit again, or wait for your supervisor to resolve it.",
     "closedTitle": "Day closed",
-    "closedMessage": "Your cash balanced. There is nothing left to submit today."
+    "closedMessage": "Your cash balanced. There is nothing left to submit today.",
+    "resolvedTitle": "Day closed by your supervisor",
+    "resolvedMessage": "The difference in your count has been resolved. There is nothing left to submit today."
   },
   "count": {
     "label": "Cash counted",

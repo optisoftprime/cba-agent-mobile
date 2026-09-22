@@ -44,14 +44,18 @@ export function postDeposit({
   longitude,
 }) {
   return send(
-    api.post(endpoints.deposits.create, {
-      accountNumber,
-      amount,
-      clientReference,
-      narration: narration || undefined,
-      latitude: Number.isFinite(latitude) ? latitude : undefined,
-      longitude: Number.isFinite(longitude) ? longitude : undefined,
-    }),
+    api.post(
+      endpoints.deposits.create,
+      {
+        accountNumber,
+        amount,
+        clientReference,
+        narration: narration || undefined,
+        latitude: Number.isFinite(latitude) ? latitude : undefined,
+        longitude: Number.isFinite(longitude) ? longitude : undefined,
+      },
+      // A refusal (hold, cap, not enough cash) must not sign the agent out.
+      { confirmSession: true },
+    ),
   );
 }
-

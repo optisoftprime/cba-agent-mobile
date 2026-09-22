@@ -37,10 +37,9 @@ const EMDASH = '—';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
-  const customers = usePermission(Permission.customerManagement);
+  // Only codes the server enforces are gated — see Permission in api/permissions.
   const deposit = usePermission(Permission.deposit);
   const ajo = usePermission(Permission.ajo);
-  const loans = usePermission(Permission.loanCollection);
   const agent = agentView(useAuth().user);
 
   const { data, isPending, isError, error, refetch, isRefetching } = useQuery(dashboardQuery);
@@ -189,8 +188,7 @@ export default function HomeScreen() {
                 <QuickAction
                   label={t('dashboard.quickActions.customers')}
                   icon="people-outline"
-                  className={customers.lockedClass}
-                  onPress={customers.press(() => navigateTo('/(tabs)/customers'))}
+                  onPress={() => navigateTo('/(tabs)/customers')}
                 />
                 <QuickAction
                   label={t('dashboard.quickActions.deposit')}
@@ -207,8 +205,7 @@ export default function HomeScreen() {
                 <QuickAction
                   label={t('dashboard.quickActions.loan')}
                   icon="cash-outline"
-                  className={loans.lockedClass}
-                  onPress={loans.press(() => navigateTo('/(tabs)/loans'))}
+                  onPress={() => navigateTo('/(tabs)/loans')}
                 />
               </View>
             </View>

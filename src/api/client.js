@@ -1,5 +1,6 @@
 import { create, isAxiosError } from 'axios';
 
+import { endpoints } from '@/api/endpoints';
 import { BASE_URL, LOG_API, REQUEST_TIMEOUT_MS } from '@/config/backend';
 import i18n from '@/i18n';
 import { load, StorageKeys } from '@/lib/storage';
@@ -118,6 +119,41 @@ function isPermissionRefusal(status, body) {
  */
 function endsSession(status) {
   return status === 401 || status === 403;
+}
+
+/**
+ * A money action refused with 401/403 — was it the ACTION or the SESSION?
+ *
+ * Finman refuses a deposit for reasons that have nothing to do with being
+ * signed in (a reconciliation hold, not enough cash, a cap), and it uses 401
+ * freely for refusals. ezone-agent-service relays and rewords those, so the
+ * status that reaches the app cannot be relied on to tell the two apart — and
+ * signing an agent out because a deposit was refused under a hold would lock
+ * them out of the very remittance and end of day that lift the hold.
+ *
+ * So instead of guessing from the status or the message, ask the server: one
+ * quiet profile call on the same token. It answers → the session is fine and
+ * only the action was refused (the screen shows the server's message). It is
+ * refused too → the session really is over. It cannot be reached → keep the
+ * session; unreachable is not signed out.
+ *
+ * Opt in per call with `{ confirmSession: true }` — see deposits, remittances
+ * and the EOD submit.
+ *
+ * @returns {Promise<{ ended: boolean, reason?: string | null }>}
+ */
+async function confirmSessionAfterRefusal(client) {
+  try {
+    await client.get(endpoints.agent.profile, { skipSessionExpiry: true });
+    return { ended: false };
+  } catch (probeError) {
+    const probeStatus = probeError.response?.status;
+    if (!endsSession(probeStatus)) return { ended: false };
+    return {
+      ended: true,
+      reason: probeStatus === 403 ? (probeError.response?.data?.message ?? null) : null,
+    };
+  }
 }
 
 const tokenFrom = (config) => {
@@ -266,6 +302,12 @@ function createClient({ authenticated }) {
       // and is told what they cannot do.
       if (authenticated && isPermissionRefusal(status, body)) {
         onPermissionDenied?.(body?.message ?? null);
+        return Promise.reject(error);
+      }
+
+      if (authenticated && endsSession(status) && error.config?.confirmSession) {
+        const { ended, reason } = await confirmSessionAfterRefusal(client);
+        if (ended) await handleUnauthorized(tokenFrom(error.config), reason);
         return Promise.reject(error);
       }
 

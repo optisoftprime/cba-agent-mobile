@@ -19,7 +19,9 @@
     "varianceTitle": "Votre comptage ne correspond pas",
     "varianceMessage": "Recomptez la caisse et soumettez à nouveau, ou attendez que votre superviseur le résolve.",
     "closedTitle": "Journée clôturée",
-    "closedMessage": "Votre caisse est équilibrée. Il n'y a plus rien à soumettre aujourd'hui."
+    "closedMessage": "Votre caisse est équilibrée. Il n'y a plus rien à soumettre aujourd'hui.",
+    "resolvedTitle": "Journée clôturée par votre superviseur",
+    "resolvedMessage": "L'écart de votre comptage a été résolu. Il n'y a plus rien à soumettre aujourd'hui."
   },
   "count": {
     "label": "Espèces comptées",

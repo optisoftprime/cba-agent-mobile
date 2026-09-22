@@ -26,8 +26,10 @@ import { nextPageOf, PAGE_SIZE } from '@/api/pagination';
 
 /** Statuses the server documents. Compared case-insensitively — see `eodState`. */
 export const EodStatus = {
+  open: 'OPEN',
   balanced: 'BALANCED',
   variance: 'VARIANCE',
+  resolved: 'RESOLVED',
 };
 
 /** The key every EOD query sits under, so one invalidation refreshes them all. */
@@ -49,20 +51,22 @@ export const eodHistoryQuery = {
 
 /** Submit the cash counted. `countedCash` may be 0 — holding nothing is valid. */
 export function submitEod({ countedCash }) {
-  return send(api.post(endpoints.eod.submit, { countedCash }));
+  // A refusal must not sign the agent out — see confirmSession in client.js.
+  return send(api.post(endpoints.eod.submit, { countedCash }, { confirmSession: true }));
 }
 
 /**
  * What a record means for the screen, in one place so the EOD screen, the
  * history list and anything else read it the same way.
  *
- *   closed      — Balanced: nothing left to do today
+ *   closed      — Balanced, or a variance a supervisor has Resolved: nothing
+ *                 left to do today
  *   variance    — submitted, but the count did not match
  *   open        — not submitted yet
  */
 export function eodState(record) {
   const status = String(record?.status ?? '').toUpperCase();
-  if (status === EodStatus.balanced) return 'closed';
+  if (status === EodStatus.balanced || status === EodStatus.resolved) return 'closed';
   if (status === EodStatus.variance) return 'variance';
   return 'open';
 }

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { EOD_KEY, eodCurrentQuery, eodState, submitEod } from '@/api/eod';
+import { EOD_KEY, EodStatus, eodCurrentQuery, eodState, submitEod } from '@/api/eod';
 import { VarianceText, useVarianceLabel } from '@/components/eod/variance-text';
 import { AppHeader } from '@/components/layout/app-header';
 import { KeyboardView } from '@/components/layout/keyboard-view';
@@ -48,6 +48,7 @@ export default function EodScreen() {
   const [result, setResult] = useState(null);
 
   const state = eodState(data);
+  const resolved = String(data?.status ?? '').toUpperCase() === EodStatus.resolved;
   const expected = Number(data?.expectedCash ?? 0);
   // Empty is "not entered yet", which is different from a count of zero.
   const countedValue = counted.trim() === '' ? null : Number(counted);
@@ -171,11 +172,13 @@ export default function EodScreen() {
                 />
               ) : null}
 
+              {/* Closed either way; the wording says whether it balanced or a
+                  supervisor settled the difference. */}
               {state === 'closed' ? (
                 <AlertBanner
                   tone="info"
-                  title={t('eod.state.closedTitle')}
-                  message={t('eod.state.closedMessage')}
+                  title={resolved ? t('eod.state.resolvedTitle') : t('eod.state.closedTitle')}
+                  message={resolved ? t('eod.state.resolvedMessage') : t('eod.state.closedMessage')}
                 />
               ) : null}
 

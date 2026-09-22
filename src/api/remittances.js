@@ -19,10 +19,15 @@ import { endpoints } from '@/api/endpoints';
  */
 export function postRemittance({ amount, clientReference, narration }) {
   return send(
-    api.post(endpoints.remittances.create, {
-      amount,
-      clientReference,
-      narration: narration || undefined,
-    }),
+    api.post(
+      endpoints.remittances.create,
+      {
+        amount,
+        clientReference,
+        narration: narration || undefined,
+      },
+      // A refusal must not sign the agent out — see confirmSession in client.js.
+      { confirmSession: true },
+    ),
   );
 }
