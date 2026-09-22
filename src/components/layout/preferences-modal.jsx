@@ -23,6 +23,8 @@ const THEME_OPTIONS = [
  *
  * Styled from `colors`, not classes: a Modal renders into its own host tree,
  * which the theme's CSS variables do not reach (same as `ui/success-modal`).
+ * Pressables take a plain style OBJECT — NativeWind wraps Pressable, and a
+ * `style={({ pressed }) => …}` function gets dropped, leaving an unstyled row.
  */
 export function PreferencesModal({ visible, onClose }) {
   const { t, i18n } = useTranslation();
@@ -91,15 +93,15 @@ export function PreferencesModal({ visible, onClose }) {
             <Pressable
               accessibilityRole="button"
               onPress={onClose}
-              style={({ pressed }) => ({
+              className="active:opacity-80"
+              style={{
                 marginTop: 22,
                 height: 52,
                 borderRadius: 999,
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: colors.primary,
-                opacity: pressed ? 0.85 : 1,
-              })}>
+              }}>
               <Text style={{ fontSize: 16, fontWeight: '600', color: colors.onPrimary }}>
                 {t('preferences.done')}
               </Text>
@@ -163,7 +165,8 @@ function OptionRow({ colors, icon, label, selected, onPress }) {
       accessibilityRole="radio"
       accessibilityState={{ selected }}
       onPress={onPress}
-      style={({ pressed }) => ({
+      className="active:opacity-80"
+      style={{
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
@@ -174,8 +177,7 @@ function OptionRow({ colors, icon, label, selected, onPress }) {
         borderWidth: 1.5,
         borderColor: selected ? colors.primary : colors.line,
         backgroundColor: selected ? colors.primaryLight : colors.background,
-        opacity: pressed ? 0.85 : 1,
-      })}>
+      }}>
       <Ionicons name={icon} size={20} color={selected ? colors.primary : colors.ink} />
       <Text style={{ flex: 1, fontSize: 15, fontWeight: '500', color: colors.ink }}>{label}</Text>
       <Ionicons
