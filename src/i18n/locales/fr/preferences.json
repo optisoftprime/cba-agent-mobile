@@ -1,0 +1,12 @@
+{
+  "title": "Bienvenue sur CBA-Agent",
+  "message": "Choisissez l'apparence de l'application et sa langue. Vous pourrez les modifier à tout moment depuis Plus.",
+  "theme": "Thème",
+  "themes": {
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Comme mon téléphone"
+  },
+  "language": "Langue",
+  "done": "Continuer"
+}

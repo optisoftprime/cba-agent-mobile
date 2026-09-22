@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { FirstLaunchPreferences } from '@/components/layout/preferences-modal';
 import { SheetScreen } from '@/components/layout/sheet-screen';
 import { Button } from '@/components/ui/button';
 import { PasswordField } from '@/components/ui/password-field';
@@ -194,6 +195,9 @@ export default function LoginScreen() {
           />
         </>
       ) : null}
+
+      {/* Fresh install only: pick a theme and language before anything else. */}
+      <FirstLaunchPreferences />
     </SheetScreen>
   );
 }

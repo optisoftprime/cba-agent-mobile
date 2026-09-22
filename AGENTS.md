@@ -97,6 +97,8 @@ Taken from the server's own rejection messages, not the spec — send a wrong va
 
 The fingerprint lives on the LOGIN screen, never the splash. The splash does the waiting and routes; it never asks the agent for anything. A valid session therefore lands on login, which greets them by name and offers the fingerprint — unlocking is a decision, and decisions belong on a screen the agent can act on.
 
+**First launch asks for theme and language** — `FirstLaunchPreferences` (`components/layout/preferences-modal`) is mounted on the LOGIN screen, for the same reason: the splash never asks. It shows once, until `StorageKeys.preferencesChosen` is set; that flag is plain storage and survives sign-out, like the theme and language themselves (they belong to the handset). Choices apply as they are tapped. The same `PreferencesModal` opens from More → Theme & language.
+
 Both the greeting and the fingerprint button hang off the same test — is there a stored session — so they can never disagree.
 
 ## Device activation (resumable)

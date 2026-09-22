@@ -5,7 +5,8 @@
     "profile": "Profile",
     "darkMode": "Dark mode",
     "darkOn": "On",
-    "darkOff": "Off"
+    "darkOff": "Off",
+    "preferences": "Theme & language"
   },
   "title": "Profile",
   "phone": "Phone",

@@ -37,6 +37,8 @@ export const StorageKeys = {
 
   themeMode: plain('cba.themeMode'),
   language: plain('cba.language'),
+  /** Set once the first-launch theme/language choice has been made. */
+  preferencesChosen: plain('cba.preferencesChosen'),
   deviceActivated: plain('cba.deviceActivated'),
 };
 
