@@ -35,7 +35,10 @@
  */
 function loadLogo() {
   try {
-    return require('../../assets/images/splashLogo.png');
+    return {
+      light: require('../../assets/images/receiptLogo.png'),
+      dark: require('../../assets/images/receiptLogoDark.png'),
+    };
   } catch {
     return null;
   }
@@ -54,6 +57,12 @@ const brand = {
    *
    * NOTE: this file's lockup already contains the wordmark, so `ui/brand-logo`
    * does not print `appName` underneath it as well.
+   *
+   * TWO files, both on a TRANSPARENT background: `light` (dark wordmark) and
+   * `dark` (the same lockup with a white wordmark). An opaque logo shows as a
+   * white box on a dark-mode screen, and a transparent one with a dark
+   * wordmark vanishes into it — so the theme picks the file. The native launch
+   * splash (app.json) keeps `splashLogo.png`; its background is always white.
    */
   logo: loadLogo(),
   // Drives formatNaira()/formatCurrencyCompact() in src/lib/format.js.

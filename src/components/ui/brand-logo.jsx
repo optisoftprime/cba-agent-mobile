@@ -1,6 +1,7 @@
 import { Image, Text, View } from 'react-native';
 
 import { brand } from '@/theme/brand';
+import { useTheme } from '@/theme/theme-provider';
 
 /**
  * The app's mark and wordmark, both driven by `src/theme/brand.js`. A new
@@ -25,17 +26,20 @@ const TONES = {
 
 export function BrandLogo({ size = 88, showName = true, tone = 'onPrimary' }) {
   const { mark, letter, name } = TONES[tone] ?? TONES.onPrimary;
+  const { isDark } = useTheme();
+  // The white-wordmark file in dark mode — see `logo` in brand.js.
+  const source = brand.logo ? (isDark ? brand.logo.dark : brand.logo.light) : null;
 
   // resolveAssetSource gives the asset's real pixel dimensions, so the aspect
   // ratio follows whatever file brand.js points at.
-  const asset = brand.logo ? Image.resolveAssetSource(brand.logo) : null;
+  const asset = source ? Image.resolveAssetSource(source) : null;
   const aspect = asset?.width && asset?.height ? asset.width / asset.height : 1;
 
-  if (brand.logo) {
+  if (source) {
     return (
       <View className="items-center">
         <Image
-          source={brand.logo}
+          source={source}
           // maxWidth so a wide lockup shrinks to fit a narrow phone rather
           // than running off the edge; `contain` keeps the aspect while it does.
           style={{ width: size * aspect, height: size, maxWidth: '100%' }}
