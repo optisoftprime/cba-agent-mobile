@@ -3,6 +3,7 @@ import { create, isAxiosError } from 'axios';
 import { endpoints } from '@/api/endpoints';
 import { BASE_URL, LOG_API, REQUEST_TIMEOUT_MS } from '@/config/backend';
 import i18n from '@/i18n';
+import { getDeviceId } from '@/lib/device';
 import { load, StorageKeys } from '@/lib/storage';
 
 /**
@@ -254,8 +255,14 @@ function createClient({ authenticated }) {
       // is not the one registered to your account". Neither is a 401, so
       // neither ends the session — which is right, because a wrong handset is
       // not an expired token.
-      const deviceId = await load(StorageKeys.deviceId);
-      if (deviceId) config.headers['X-Agent-Device-Id'] = String(deviceId);
+      //
+      // `getDeviceId()`, NOT a bare storage read: the id used to be saved only
+      // during activation, so a reinstalled app (Android wipes SecureStore on
+      // uninstall) on a handset the bank still has bound sent NO header, and
+      // every deposit came back "Send your device id with every request".
+      // getDeviceId() re-derives the same Android ID activation sent.
+      const deviceId = await getDeviceId();
+      if (deviceId) config.headers['X-Agent-Device-Id'] = deviceId;
     }
     // Trimmed before logging, so the log shows exactly what went on the wire.
     if (config.data !== undefined) config.data = trimDeep(config.data);
