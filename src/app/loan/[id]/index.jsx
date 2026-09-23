@@ -5,7 +5,9 @@ import { ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { loanActivityQuery, loanOverviewQuery, loanScheduleQuery } from '@/api/loans';
+import { Permission } from '@/api/permissions';
 import { AppHeader } from '@/components/layout/app-header';
+import { LockedScreen } from '@/components/layout/locked-screen';
 import { RepaymentCard } from '@/components/loans/repayment-card';
 import { ActivityList } from '@/components/ui/activity-list';
 import { BalancePanel } from '@/components/ui/balance-panel';
@@ -19,6 +21,7 @@ import { StatusPill } from '@/components/ui/status-pill';
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/format';
 // import { navigateTo } from '@/lib/navigate';  // see the commented Record Payment block
 import { LOAN_STATUS_TONE } from '@/lib/status';
+import { usePermission } from '@/providers/permission-provider';
 
 const TABS = ['overview', 'repayment', 'activity'];
 
@@ -40,6 +43,7 @@ function tenureLabel(t, tenure, tenureType) {
 
 export default function LoanDetailScreen() {
   const { t } = useTranslation();
+  const access = usePermission(Permission.loanCollection);
   const { id } = useLocalSearchParams();
   const [tab, setTab] = useState('overview');
 
@@ -51,6 +55,10 @@ export default function LoanDetailScreen() {
     value,
     label: t(`loans.detail.tabs.${value}`),
   }));
+
+  if (!access.allowed) {
+    return <LockedScreen showBack title={t('loans.title')} code={Permission.loanCollection} />;
+  }
 
   return (
     <View className="flex-1 bg-background">

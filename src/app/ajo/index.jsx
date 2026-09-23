@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ajoHomeQuery } from '@/api/ajo';
 import { Permission } from '@/api/permissions';
 import { AppHeader } from '@/components/layout/app-header';
+import { LockedScreen } from '@/components/layout/locked-screen';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -27,7 +28,7 @@ const TILE = 'bg-card border border-line';
  */
 export default function AjoScreen() {
   const { t } = useTranslation();
-  const ajo = usePermission(Permission.ajo);
+  const access = usePermission(Permission.ajo);
 
   const { data, isPending, isError, error, refetch, isRefetching } = useQuery(ajoHomeQuery);
 
@@ -83,16 +84,20 @@ export default function AjoScreen() {
       )}
 
       <Button
-        className={`mb-7 mt-5 ${ajo.lockedClass}`}
+        className="mb-7 mt-5"
         label={t('ajo.create.action')}
         icon="add"
         size="lg"
-        onPress={ajo.press(() => navigateTo('/ajo/customer'))}
+        onPress={() => navigateTo('/ajo/customer')}
       />
 
       <SectionHeading title={t('ajo.myPlans')} />
     </View>
   );
+
+  if (!access.allowed) {
+    return <LockedScreen showBack title={t('ajo.title')} code={Permission.ajo} />;
+  }
 
   return (
     <View className="flex-1 bg-background">

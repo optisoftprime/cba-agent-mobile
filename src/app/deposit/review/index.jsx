@@ -5,7 +5,9 @@ import { ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { newClientReference, postDeposit } from '@/api/deposits';
+import { Permission } from '@/api/permissions';
 import { AppHeader } from '@/components/layout/app-header';
+import { LockedScreen } from '@/components/layout/locked-screen';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { DetailRows } from '@/components/ui/detail-rows';
@@ -13,10 +15,12 @@ import { formatCurrencyPrecise } from '@/lib/format';
 import { getCaptureLocation } from '@/lib/location';
 import { navigateReplace } from '@/lib/navigate';
 import { toast } from '@/lib/toast';
+import { usePermission } from '@/providers/permission-provider';
 
 /** Step 4 of 4 — confirm, then post. */
 export default function DepositReviewScreen() {
   const { t } = useTranslation();
+  const access = usePermission(Permission.deposit);
   const queryClient = useQueryClient();
   const { customerCode, customerName, accountNumber, accountName, amount, narration } =
     useLocalSearchParams();
@@ -102,6 +106,10 @@ export default function DepositReviewScreen() {
       value: narration ? String(narration) : '—',
     },
   ];
+
+  if (!access.allowed) {
+    return <LockedScreen showBack title={t('deposit.review.title')} code={Permission.deposit} />;
+  }
 
   return (
     <View className="flex-1 bg-background">

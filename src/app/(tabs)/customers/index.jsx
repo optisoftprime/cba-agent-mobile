@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 
 import { CUSTOMER_FILTERS, customersQuery } from '@/api/customers';
 import { itemsOf, totalOf } from '@/api/pagination';
+import { Permission } from '@/api/permissions';
 import { AppHeader } from '@/components/layout/app-header';
+import { LockedScreen } from '@/components/layout/locked-screen';
 import { Avatar } from '@/components/ui/avatar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -17,9 +19,11 @@ import { SkeletonCard } from '@/components/ui/skeleton';
 import { navigateTo } from '@/lib/navigate';
 import { CUSTOMER_STATUS_TONE } from '@/lib/status';
 import { useDebounced } from '@/lib/use-debounced';
+import { usePermission } from '@/providers/permission-provider';
 
 export default function CustomersScreen() {
   const { t } = useTranslation();
+  const access = usePermission(Permission.customerManagement);
 
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
@@ -62,6 +66,10 @@ export default function CustomersScreen() {
       `${loans} ${t(loans === 1 ? 'customers.loan' : 'customers.loans')}`,
     ].join(' ');
   };
+
+  if (!access.allowed) {
+    return <LockedScreen title={t('customers.title')} code={Permission.customerManagement} />;
+  }
 
   return (
     <View className="flex-1 bg-background">

@@ -4,7 +4,9 @@ import { FlatList, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { customerAccountsQuery } from '@/api/customers';
+import { Permission } from '@/api/permissions';
 import { AppHeader } from '@/components/layout/app-header';
+import { LockedScreen } from '@/components/layout/locked-screen';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { ListCard } from '@/components/ui/list-card';
@@ -12,10 +14,12 @@ import { SkeletonCard } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/format';
 import { navigateTo } from '@/lib/navigate';
 import { ACCOUNT_STATUS_TONE } from '@/lib/status';
+import { usePermission } from '@/providers/permission-provider';
 
 /** Step 2 of 4 — which of the customer's accounts receives it. */
 export default function DepositAccountScreen() {
   const { t } = useTranslation();
+  const access = usePermission(Permission.deposit);
   const { customerCode, customerName } = useLocalSearchParams();
 
   const code = String(customerCode ?? '');
@@ -24,6 +28,10 @@ export default function DepositAccountScreen() {
   );
 
   const accounts = data ?? [];
+
+  if (!access.allowed) {
+    return <LockedScreen showBack title={t('deposit.account.title')} code={Permission.deposit} />;
+  }
 
   return (
     <View className="flex-1 bg-background">

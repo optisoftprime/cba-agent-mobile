@@ -4,9 +4,11 @@ import { useState } from 'react';
 import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { Permission } from '@/api/permissions';
 import { createTicket, ticketCategoriesQuery, TICKET_PRIORITIES } from '@/api/support';
 import { AppHeader } from '@/components/layout/app-header';
 import { KeyboardView } from '@/components/layout/keyboard-view';
+import { LockedScreen } from '@/components/layout/locked-screen';
 import { Button } from '@/components/ui/button';
 import { FilterChips } from '@/components/ui/filter-chips';
 import { SelectField } from '@/components/ui/select-field';
@@ -15,10 +17,12 @@ import { TextField } from '@/components/ui/text-field';
 import { pickImageFromLibrary, takePhoto } from '@/lib/image-picker';
 import { navigateBack, navigateReplace } from '@/lib/navigate';
 import { toast } from '@/lib/toast';
+import { usePermission } from '@/providers/permission-provider';
 import { useTheme } from '@/theme/theme-provider';
 
 export default function CreateTicketScreen() {
   const { t } = useTranslation();
+  const access = usePermission(Permission.supportTickets);
   const { colors } = useTheme();
   const queryClient = useQueryClient();
 
@@ -68,6 +72,10 @@ export default function CreateTicketScreen() {
       image,
     });
   };
+
+  if (!access.allowed) {
+    return <LockedScreen showBack title={t('support.create.title')} code={Permission.supportTickets} />;
+  }
 
   return (
     <View className="flex-1 bg-background">

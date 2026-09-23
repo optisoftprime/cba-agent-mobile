@@ -8,6 +8,7 @@ import { ajoPlanQuery, recordAjoContribution } from '@/api/ajo';
 import { Permission } from '@/api/permissions';
 import { AppHeader } from '@/components/layout/app-header';
 import { KeyboardView } from '@/components/layout/keyboard-view';
+import { LockedScreen } from '@/components/layout/locked-screen';
 import { AmountField } from '@/components/ui/amount-field';
 import { BalancePanel } from '@/components/ui/balance-panel';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,7 @@ import { SuccessModal } from '@/components/ui/success-modal';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { AJO_STATUS_TONE } from '@/lib/status';
-import { usePermissions } from '@/providers/permission-provider';
+import { usePermission, usePermissions } from '@/providers/permission-provider';
 import { toast } from '@/lib/toast';
 
 /**
@@ -32,6 +33,7 @@ import { toast } from '@/lib/toast';
  */
 export default function AjoPlanScreen() {
   const { t } = useTranslation();
+  const access = usePermission(Permission.ajo);
   const { can, guard } = usePermissions();
   const queryClient = useQueryClient();
   const { reference: routeReference } = useLocalSearchParams();
@@ -128,6 +130,10 @@ export default function AjoPlanScreen() {
         },
       ].filter(Boolean)
     : [];
+
+  if (!access.allowed) {
+    return <LockedScreen showBack title={t('ajo.title')} code={Permission.ajo} />;
+  }
 
   return (
     <View className="flex-1 bg-background">

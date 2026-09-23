@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 
 import { LOAN_FILTERS, loansQuery } from '@/api/loans';
 import { itemsOf, totalOf } from '@/api/pagination';
+import { Permission } from '@/api/permissions';
 import { AppHeader } from '@/components/layout/app-header';
+import { LockedScreen } from '@/components/layout/locked-screen';
 import { LoanCard } from '@/components/loans/loan-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -15,9 +17,11 @@ import { SearchInput } from '@/components/ui/search-input';
 import { SkeletonCard } from '@/components/ui/skeleton';
 import { navigateTo } from '@/lib/navigate';
 import { useDebounced } from '@/lib/use-debounced';
+import { usePermission } from '@/providers/permission-provider';
 
 export default function LoansScreen() {
   const { t } = useTranslation();
+  const access = usePermission(Permission.loanCollection);
 
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
@@ -44,6 +48,10 @@ export default function LoansScreen() {
     value,
     label: t(`loans.filters.${value}`),
   }));
+
+  if (!access.allowed) {
+    return <LockedScreen title={t('loans.title')} code={Permission.loanCollection} />;
+  }
 
   return (
     <View className="flex-1 bg-background">

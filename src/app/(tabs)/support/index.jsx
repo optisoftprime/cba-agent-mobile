@@ -4,8 +4,10 @@ import { FlatList, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { itemsOf } from '@/api/pagination';
+import { Permission } from '@/api/permissions';
 import { ticketsQuery } from '@/api/support';
 import { AppHeader } from '@/components/layout/app-header';
+import { LockedScreen } from '@/components/layout/locked-screen';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -16,13 +18,14 @@ import { Skeleton, SkeletonCard } from '@/components/ui/skeleton';
 import { StatCard } from '@/components/ui/stat-card';
 import { formatDate } from '@/lib/format';
 import { navigateTo } from '@/lib/navigate';
-import { useRefreshWithPermissions } from '@/providers/permission-provider';
+import { usePermission, useRefreshWithPermissions } from '@/providers/permission-provider';
 import { TICKET_STATUS_TONE } from '@/lib/status';
 
 const TILE = 'bg-card border border-line';
 
 export default function SupportScreen() {
   const { t } = useTranslation();
+  const access = usePermission(Permission.supportTickets);
 
   const {
     data,
@@ -87,6 +90,10 @@ export default function SupportScreen() {
       <SectionHeading title={t('support.myTickets')} />
     </View>
   );
+
+  if (!access.allowed) {
+    return <LockedScreen title={t('support.title')} code={Permission.supportTickets} />;
+  }
 
   return (
     <View className="flex-1 bg-background">

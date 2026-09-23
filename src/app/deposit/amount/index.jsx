@@ -3,14 +3,17 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { Permission } from '@/api/permissions';
 import { AppHeader } from '@/components/layout/app-header';
 import { KeyboardView } from '@/components/layout/keyboard-view';
+import { LockedScreen } from '@/components/layout/locked-screen';
 import { AmountField } from '@/components/ui/amount-field';
 import { Button } from '@/components/ui/button';
 import { DetailRows } from '@/components/ui/detail-rows';
 import { TextField } from '@/components/ui/text-field';
 import { formatCurrencyPrecise } from '@/lib/format';
 import { navigateTo } from '@/lib/navigate';
+import { usePermission } from '@/providers/permission-provider';
 
 /** The server rejects anything under this: "must be greater than or equal to 0.01". */
 const MIN_AMOUNT = 0.01;
@@ -27,6 +30,7 @@ const MIN_AMOUNT = 0.01;
  */
 export default function DepositAmountScreen() {
   const { t } = useTranslation();
+  const access = usePermission(Permission.deposit);
   const { customerCode, customerName, accountNumber, accountName } = useLocalSearchParams();
 
   const [amount, setAmount] = useState('');
@@ -54,6 +58,10 @@ export default function DepositAmountScreen() {
       narration: narration.trim(),
     });
   };
+
+  if (!access.allowed) {
+    return <LockedScreen showBack title={t('deposit.amount.title')} code={Permission.deposit} />;
+  }
 
   return (
     <View className="flex-1 bg-background">

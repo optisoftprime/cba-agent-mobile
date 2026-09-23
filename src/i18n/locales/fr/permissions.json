@@ -13,5 +13,8 @@
     "LOAN_COLLECTION": "Recouvrement de prêt",
     "SUPPORT_TICKETS": "Tickets de support",
     "WITHDRAWAL": "Retrait"
+  },
+  "locked": {
+    "title": "Ceci ne vous est pas accessible"
   }
 }

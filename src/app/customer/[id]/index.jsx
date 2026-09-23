@@ -11,7 +11,9 @@ import {
   customerOverviewQuery,
   customerQuery,
 } from '@/api/customers';
+import { Permission } from '@/api/permissions';
 import { AppHeader } from '@/components/layout/app-header';
+import { LockedScreen } from '@/components/layout/locked-screen';
 import { ActivityList } from '@/components/ui/activity-list';
 import { Avatar } from '@/components/ui/avatar';
 import { DetailRows } from '@/components/ui/detail-rows';
@@ -24,6 +26,7 @@ import { StatCard } from '@/components/ui/stat-card';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { navigateTo } from '@/lib/navigate';
 import { ACCOUNT_STATUS_TONE, CUSTOMER_STATUS_TONE, LOAN_STATUS_TONE } from '@/lib/status';
+import { usePermission } from '@/providers/permission-provider';
 
 const TABS = ['overview', 'account', 'loans', 'activity'];
 
@@ -32,6 +35,7 @@ const toneFor = (map, status) => map[String(status ?? '').toLowerCase()] ?? 'neu
 
 export default function CustomerDetailScreen() {
   const { t } = useTranslation();
+  const access = usePermission(Permission.customerManagement);
   const { id } = useLocalSearchParams();
   const [tab, setTab] = useState('overview');
 
@@ -42,6 +46,10 @@ export default function CustomerDetailScreen() {
     value,
     label: t(`customers.detail.tabs.${value}`),
   }));
+
+  if (!access.allowed) {
+    return <LockedScreen showBack title={t('customers.title')} code={Permission.customerManagement} />;
+  }
 
   return (
     <View className="flex-1 bg-background">

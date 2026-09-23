@@ -37,9 +37,10 @@ const EMDASH = '—';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
-  // Only codes the server enforces are gated — see Permission in api/permissions.
+  const customers = usePermission(Permission.customerManagement);
   const deposit = usePermission(Permission.deposit);
   const ajo = usePermission(Permission.ajo);
+  const loans = usePermission(Permission.loanCollection);
   const agent = agentView(useAuth().user);
 
   const { data, isPending, isError, error, refetch, isRefetching } = useQuery(dashboardQuery);
@@ -188,7 +189,8 @@ export default function HomeScreen() {
                 <QuickAction
                   label={t('dashboard.quickActions.customers')}
                   icon="people-outline"
-                  onPress={() => navigateTo('/(tabs)/customers')}
+                  className={customers.lockedClass}
+                  onPress={customers.press(() => navigateTo('/(tabs)/customers'))}
                 />
                 <QuickAction
                   label={t('dashboard.quickActions.deposit')}
@@ -205,7 +207,8 @@ export default function HomeScreen() {
                 <QuickAction
                   label={t('dashboard.quickActions.loan')}
                   icon="cash-outline"
-                  onPress={() => navigateTo('/(tabs)/loans')}
+                  className={loans.lockedClass}
+                  onPress={loans.press(() => navigateTo('/(tabs)/loans'))}
                 />
               </View>
             </View>
@@ -218,7 +221,7 @@ export default function HomeScreen() {
                     ? t('dashboard.tasks.seeAllCount', { count: data.todaysTasks.length })
                     : undefined
                 }
-                onPressAction={() => navigateTo('/(tabs)/loans')}
+                onPressAction={loans.press(() => navigateTo('/(tabs)/loans'))}
               />
 
               {data.todaysTasks?.length ? (
@@ -233,7 +236,7 @@ export default function HomeScreen() {
                       dueDate: task.dueDate,
                       status: task.dueStatus,
                     }}
-                    onPressView={() => navigateTo(`/loan/${task.loanCode}`)}
+                    onPressView={loans.press(() => navigateTo(`/loan/${task.loanCode}`))}
                   />
                 ))
               ) : (

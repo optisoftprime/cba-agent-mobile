@@ -13,5 +13,8 @@
     "LOAN_COLLECTION": "Loan Collection",
     "SUPPORT_TICKETS": "Support Tickets",
     "WITHDRAWAL": "Withdrawal"
+  },
+  "locked": {
+    "title": "This is not available to you"
   }
 }

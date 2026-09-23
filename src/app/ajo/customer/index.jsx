@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 
 import { CUSTOMER_FILTERS, customersQuery } from '@/api/customers';
 import { itemsOf } from '@/api/pagination';
+import { Permission } from '@/api/permissions';
 import { AppHeader } from '@/components/layout/app-header';
+import { LockedScreen } from '@/components/layout/locked-screen';
 import { Avatar } from '@/components/ui/avatar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -15,6 +17,7 @@ import { SearchInput } from '@/components/ui/search-input';
 import { SkeletonCard } from '@/components/ui/skeleton';
 import { navigateTo } from '@/lib/navigate';
 import { useDebounced } from '@/lib/use-debounced';
+import { usePermission } from '@/providers/permission-provider';
 
 /**
  * Step 1 of 2 — who the Ajo plan is for.
@@ -28,6 +31,7 @@ import { useDebounced } from '@/lib/use-debounced';
  */
 export default function AjoCustomerScreen() {
   const { t } = useTranslation();
+  const access = usePermission(Permission.ajo);
 
   const [query, setQuery] = useState('');
   const search = useDebounced(query.trim());
@@ -45,6 +49,10 @@ export default function AjoCustomerScreen() {
   } = useInfiniteQuery(customersQuery({ search, filter: CUSTOMER_FILTERS.all }));
 
   const customers = useMemo(() => itemsOf(data, 'customers'), [data]);
+
+  if (!access.allowed) {
+    return <LockedScreen showBack title={t('ajo.customer.title')} code={Permission.ajo} />;
+  }
 
   return (
     <View className="flex-1 bg-background">

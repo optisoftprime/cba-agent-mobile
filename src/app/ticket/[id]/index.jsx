@@ -3,8 +3,10 @@ import { useLocalSearchParams } from 'expo-router';
 import { ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { Permission } from '@/api/permissions';
 import { ticketQuery } from '@/api/support';
 import { AppHeader } from '@/components/layout/app-header';
+import { LockedScreen } from '@/components/layout/locked-screen';
 import { DetailRows } from '@/components/ui/detail-rows';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -13,6 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { StatusPill } from '@/components/ui/status-pill';
 import { formatDateTime } from '@/lib/format';
 import { TICKET_PRIORITY_TONE, TICKET_STATUS_TONE } from '@/lib/status';
+import { usePermission } from '@/providers/permission-provider';
 
 /** "IN_PROGRESS" / "In Progress" both need to reach the same key. */
 const toneKey = (value) => String(value ?? '').toLowerCase().replace(/\s+/g, '_');
@@ -26,6 +29,7 @@ const toneKey = (value) => String(value ?? '').toLowerCase().replace(/\s+/g, '_'
  */
 export default function TicketDetailScreen() {
   const { t } = useTranslation();
+  const access = usePermission(Permission.supportTickets);
   const { id } = useLocalSearchParams();
 
   const ticketNumber = String(id ?? '');
@@ -70,6 +74,10 @@ export default function TicketDetailScreen() {
           : []),
       ]
     : [];
+
+  if (!access.allowed) {
+    return <LockedScreen showBack title={t('support.title')} code={Permission.supportTickets} />;
+  }
 
   return (
     <View className="flex-1 bg-background">

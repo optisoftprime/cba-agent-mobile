@@ -5,8 +5,10 @@ import { ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AJO_FREQUENCIES, createAjoPlan } from '@/api/ajo';
+import { Permission } from '@/api/permissions';
 import { AppHeader } from '@/components/layout/app-header';
 import { KeyboardView } from '@/components/layout/keyboard-view';
+import { LockedScreen } from '@/components/layout/locked-screen';
 import { AmountField } from '@/components/ui/amount-field';
 import { Button } from '@/components/ui/button';
 import { DateField } from '@/components/ui/date-field';
@@ -17,6 +19,7 @@ import { TextField } from '@/components/ui/text-field';
 import { formatCurrency, formatDate, todayIso } from '@/lib/format';
 import { navigateBack, navigateReplace } from '@/lib/navigate';
 import { toast } from '@/lib/toast';
+import { usePermission } from '@/providers/permission-provider';
 
 /**
  * Step 2 of 2 — the plan itself.
@@ -26,6 +29,7 @@ import { toast } from '@/lib/toast';
  */
 export default function AjoCreateScreen() {
   const { t } = useTranslation();
+  const access = usePermission(Permission.ajo);
   const queryClient = useQueryClient();
   const { customerCode, customerName } = useLocalSearchParams();
 
@@ -85,6 +89,10 @@ export default function AjoCreateScreen() {
       startDate,
     });
   };
+
+  if (!access.allowed) {
+    return <LockedScreen showBack title={t('ajo.create.title')} code={Permission.ajo} />;
+  }
 
   return (
     <View className="flex-1 bg-background">

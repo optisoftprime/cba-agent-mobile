@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 
 import { CUSTOMER_FILTERS, customersQuery } from '@/api/customers';
 import { itemsOf } from '@/api/pagination';
+import { Permission } from '@/api/permissions';
 import { AppHeader } from '@/components/layout/app-header';
+import { LockedScreen } from '@/components/layout/locked-screen';
 import { Avatar } from '@/components/ui/avatar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -16,10 +18,12 @@ import { SectionHeading } from '@/components/ui/section-heading';
 import { SkeletonCard } from '@/components/ui/skeleton';
 import { navigateTo } from '@/lib/navigate';
 import { useDebounced } from '@/lib/use-debounced';
+import { usePermission } from '@/providers/permission-provider';
 
 /** Step 1 of 4 — who the deposit is for. */
 export default function DepositCustomerScreen() {
   const { t } = useTranslation();
+  const access = usePermission(Permission.deposit);
 
   const [query, setQuery] = useState('');
   const search = useDebounced(query.trim());
@@ -47,6 +51,10 @@ export default function DepositCustomerScreen() {
       `${loans} ${t(loans === 1 ? 'customers.loan' : 'customers.loans')}`,
     ].join(' ');
   };
+
+  if (!access.allowed) {
+    return <LockedScreen showBack title={t('deposit.customer.title')} code={Permission.deposit} />;
+  }
 
   return (
     <View className="flex-1 bg-background">
