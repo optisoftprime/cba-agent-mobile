@@ -62,7 +62,8 @@ const brand = {
    * `dark` (the same lockup with a white wordmark). An opaque logo shows as a
    * white box on a dark-mode screen, and a transparent one with a dark
    * wordmark vanishes into it — so the theme picks the file. The native launch
-   * splash (app.json) keeps `splashLogo.png`; its background is always white.
+   * launch splash (app.json) uses the same two files, on `card` in each theme,
+   * so the handover into `src/app/index.jsx` shows no colour or logo change.
    */
   logo: loadLogo(),
   // Drives formatNaira()/formatCurrencyCompact() in src/lib/format.js.

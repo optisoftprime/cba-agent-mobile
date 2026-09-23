@@ -85,9 +85,9 @@ export default function SplashScreen() {
   const retry = useCallback(() => setAttempt((n) => n + 1), []);
 
   return (
-    // White, not the brand blue: the logo lockup's wordmark is dark navy and
-    // disappeared against it. It also matches the native splash this screen
-    // hands over from, so there is no colour flash between the two.
+    // `card`, not the brand blue: the lockup's wordmark disappeared against it.
+    // The native launch splash is set to `card` in BOTH themes (app.json), so
+    // handing over to this screen shows no colour flash and no logo change.
     <View className="flex-1 items-center justify-center bg-card px-8">
       <BrandLogo size={64} />
 

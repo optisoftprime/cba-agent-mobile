@@ -54,10 +54,15 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splashLogo.png",
+          "image": "./assets/images/receiptLogo.png",
           "backgroundColor": "#ffffff",
           "resizeMode": "contain",
-          "enableFullScreenImage_legacy": true
+          "enableFullScreenImage_legacy": true,
+          "dark": {
+            "image": "./assets/images/receiptLogoDark.png",
+            "backgroundColor": "#151B23",
+            "resizeMode": "contain"
+          }
         }
       ],
       "expo-secure-store",
