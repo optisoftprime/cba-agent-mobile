@@ -7,7 +7,7 @@
   "agentId": "ID agent : {{code}}",
   "stats": {
     "customers": "Mes clients",
-    "accounts": "Mes comptes",
+    "accounts": "Comptes",
     "activeLoans": "Prêts actifs",
     "collections": "Recouvrements"
   },

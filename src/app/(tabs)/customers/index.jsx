@@ -45,6 +45,10 @@ export default function CustomersScreen() {
   const options = Object.keys(CUSTOMER_FILTERS).map((value) => ({
     value,
     label: t(`customers.filters.${value}`),
+    // SME is accepted by the server but has never returned a customer — the
+    // segment is not in use yet. Faded rather than removed, so the filter row
+    // still matches what the backend lists.
+    disabled: value === 'sme',
   }));
 
   /** "3 Accounts 1 loan" — the counts are data, the words are UI labels. */
