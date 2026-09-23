@@ -45,11 +45,13 @@ export default function CustomersScreen() {
   const options = Object.keys(CUSTOMER_FILTERS).map((value) => ({
     value,
     label: t(`customers.filters.${value}`),
-    // SME is accepted by the server but has never returned a customer — the
-    // segment is not in use yet. Faded rather than removed, so the filter row
-    // still matches what the backend lists.
-    disabled: value === 'sme',
   }));
+
+  // SME customers are LISTED but not OPENABLE: the customer screen is built
+  // around an individual's accounts and loans, and an SME record does not fit
+  // it. A row with no `onPress` is not pressable and drops its chevron, so it
+  // reads as a plain entry rather than a tap that does nothing.
+  const canOpen = filter !== 'sme';
 
   /** "3 Accounts 1 loan" — the counts are data, the words are UI labels. */
   const summaryFor = (customer) => {
@@ -102,7 +104,12 @@ export default function CustomersScreen() {
                 label: item.status,
                 tone: CUSTOMER_STATUS_TONE[String(item.status).toLowerCase()] ?? 'neutral',
               }}
-              onPress={() => navigateTo(`/customer/${encodeURIComponent(item.customerCode)}`)}
+              trailing={canOpen ? 'chevron' : null}
+              onPress={
+                canOpen
+                  ? () => navigateTo(`/customer/${encodeURIComponent(item.customerCode)}`)
+                  : undefined
+              }
             />
           )}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}
