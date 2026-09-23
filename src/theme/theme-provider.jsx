@@ -107,7 +107,10 @@ export function ThemeProvider({ children }) {
 
   return (
     <ThemeContext.Provider value={value}>
-      <View style={[themeVars, { flex: 1 }]}>{children}</View>
+      {/* An explicit background: anything NOT covered by a screen (a
+          navigator's gap during a transition) would otherwise be bare white,
+          which flashes on every push in dark mode. */}
+      <View style={[themeVars, { flex: 1, backgroundColor: colors.background }]}>{children}</View>
     </ThemeContext.Provider>
   );
 }

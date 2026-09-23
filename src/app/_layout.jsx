@@ -7,6 +7,7 @@ import { AppState, Platform } from 'react-native';
 
 import '@/global.css';
 import { AppProviders } from '@/providers/app-providers';
+import { useTheme } from '@/theme/theme-provider';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -44,8 +45,27 @@ export default function RootLayout() {
       <StatusBar style="light" />
       <NavigationBar hidden />
 
-      <Stack screenOptions={{ headerShown: false }} />
+      <RootStack />
     </AppProviders>
+  );
+}
+
+/**
+ * React Navigation's own screen background is WHITE by default, whatever the
+ * app's theme — so a push in dark mode flashes white behind the incoming
+ * screen. `contentStyle` puts the theme's colour there instead. Separate
+ * component because `useTheme()` only works inside AppProviders.
+ */
+function RootStack() {
+  const { colors } = useTheme();
+
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: colors.background },
+      }}
+    />
   );
 }
 

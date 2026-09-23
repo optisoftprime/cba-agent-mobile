@@ -3,6 +3,7 @@ import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
+import { useTheme } from '@/theme/theme-provider';
 
 /** Filled when the tab is active, outline when it isn't. */
 function tabIcon(name) {
@@ -19,9 +20,14 @@ function tabIcon(name) {
  */
 export default function TabsLayout() {
   const { t } = useTranslation();
+  const { colors } = useTheme();
 
   return (
-    <Tabs screenOptions={{ headerShown: false }} tabBar={(props) => <BottomNavBar {...props} />}>
+    <Tabs
+      // The scene behind a tab is white by default — see RootStack in
+      // src/app/_layout.jsx.
+      screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: colors.background } }}
+      tabBar={(props) => <BottomNavBar {...props} />}>
       <Tabs.Screen name="index" options={{ title: t('tabs.home'), tabBarIcon: tabIcon('home') }} />
       <Tabs.Screen
         name="customers/index"
