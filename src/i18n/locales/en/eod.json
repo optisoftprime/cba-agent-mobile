@@ -49,11 +49,18 @@
     "short": "{{amount}} short"
   },
   "history": {
-    "title": "Past days",
-    "subtitle": "Your end-of-day submissions",
-    "open": "View past days",
-    "expected": "Expected {{amount}}",
-    "emptyTitle": "No past days yet",
-    "emptyMessage": "Each day you close will appear here."
+    "title": "End of day reports",
+    "subtitle": "Every day you have submitted",
+    "open": "View end of day reports",
+    "countedLine": "Counted {{amount}}",
+    "expectedLine": "Expected {{amount}}",
+    "emptyTitle": "No reports yet",
+    "emptyMessage": "Each day you submit a cash count, the report appears here."
+  },
+  "report": {
+    "title": "End of day report",
+    "businessDate": "Business date",
+    "submittedBy": "Submitted by",
+    "resolvedBy": "Resolved by"
   }
 }

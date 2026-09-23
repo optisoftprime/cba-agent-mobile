@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -7,21 +7,25 @@ import { eodHistoryQuery } from '@/api/eod';
 import { itemsOf } from '@/api/pagination';
 import { VarianceText } from '@/components/eod/variance-text';
 import { AppHeader } from '@/components/layout/app-header';
+import { DetailsModal } from '@/components/ui/details-modal';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { ListCard } from '@/components/ui/list-card';
 import { LoadingMore } from '@/components/ui/loading-more';
 import { SkeletonCard } from '@/components/ui/skeleton';
-import { formatCurrencyPrecise, formatDate } from '@/lib/format';
+import { StatusPill } from '@/components/ui/status-pill';
+import { formatCurrencyPrecise, formatDate, formatDateTime } from '@/lib/format';
 import { EOD_STATUS_TONE } from '@/lib/status';
 import { useRefreshWithPermissions } from '@/providers/permission-provider';
 
 /**
- * Past end-of-day submissions, newest first.
+ * Every end-of-day report this agent has submitted, newest first.
  *
- * Each row reads: the day, what was counted against what was expected, and
- * the difference — the same wording and colours as the EOD screen, because
- * both go through `VarianceText`.
+ * A card carries the four figures worth scanning — date, counted, expected,
+ * difference — and tapping it opens the full report, because the server sends
+ * ten fields and a card that quietly drops six invites the agent to wonder
+ * what it is hiding. The wording is the same as the End of day screen, so a
+ * figure means the same thing in both places.
  */
 export default function EodHistoryScreen() {
   const { t } = useTranslation();
@@ -41,6 +45,46 @@ export default function EodHistoryScreen() {
   const onRefresh = useRefreshWithPermissions(refetch);
 
   const days = useMemo(() => itemsOf(data, 'items'), [data]);
+  const [openReport, setOpenReport] = useState(null);
+
+  const statusTone = (status) => EOD_STATUS_TONE[String(status ?? '').toLowerCase()] ?? 'neutral';
+
+  /** The whole record, in the order it is read: what was expected, then what was found. */
+  const reportRows = (day) =>
+    [
+      { key: 'date', label: t('eod.report.businessDate'), value: formatDate(day.businessDate) },
+      {
+        key: 'status',
+        label: t('eod.position.status'),
+        value: <StatusPill label={day.status} tone={statusTone(day.status)} />,
+      },
+      { key: 'settled', label: t('eod.position.settled'), value: money(day.settledCash) },
+      { key: 'in', label: t('eod.position.pendingIn'), value: money(day.pendingIn) },
+      { key: 'out', label: t('eod.position.pendingOut'), value: money(day.pendingOut) },
+      { key: 'expected', label: t('eod.position.expected'), value: money(day.expectedCash) },
+      { key: 'counted', label: t('eod.position.counted'), value: money(day.countedCash) },
+      {
+        key: 'variance',
+        label: t('eod.position.variance'),
+        value: <VarianceText variance={day.variance} />,
+      },
+      day.submittedAt
+        ? {
+            key: 'submittedAt',
+            label: t('eod.position.submittedAt'),
+            value: formatDateTime(day.submittedAt),
+          }
+        : null,
+      day.submittedBy
+        ? { key: 'submittedBy', label: t('eod.report.submittedBy'), value: day.submittedBy }
+        : null,
+      day.resolvedBy
+        ? { key: 'resolvedBy', label: t('eod.report.resolvedBy'), value: day.resolvedBy }
+        : null,
+      day.resolutionNote
+        ? { key: 'note', label: t('eod.position.resolution'), value: day.resolutionNote }
+        : null,
+    ].filter(Boolean);
 
   return (
     <View className="flex-1 bg-background">
@@ -55,18 +99,12 @@ export default function EodHistoryScreen() {
           renderItem={({ item }) => (
             <ListCard
               overline={formatDate(item.businessDate)}
-              title={formatCurrencyPrecise(item.countedCash ?? 0)}
+              title={t('eod.history.countedLine', { amount: money(item.countedCash) })}
               titleTone="primary"
-              subtitle={t('eod.history.expected', {
-                amount: formatCurrencyPrecise(item.expectedCash ?? 0),
-              })}
-              meta={item.resolutionNote || null}
+              subtitle={t('eod.history.expectedLine', { amount: money(item.expectedCash) })}
               footer={<VarianceText variance={item.variance} />}
-              status={{
-                label: item.status,
-                tone: EOD_STATUS_TONE[String(item.status ?? '').toLowerCase()] ?? 'neutral',
-              }}
-              trailing={null}
+              status={{ label: item.status, tone: statusTone(item.status) }}
+              onPress={() => setOpenReport(item)}
             />
           )}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}
@@ -95,6 +133,19 @@ export default function EodHistoryScreen() {
           }
         />
       )}
+
+      <DetailsModal
+        visible={openReport !== null}
+        title={t('eod.report.title')}
+        subtitle={openReport ? formatDate(openReport.businessDate) : undefined}
+        rows={openReport ? reportRows(openReport) : []}
+        onClose={() => setOpenReport(null)}
+      />
     </View>
   );
+}
+
+/** A missing figure is not zero naira, so it reads as a dash. */
+function money(amount) {
+  return amount == null ? '—' : formatCurrencyPrecise(amount);
 }

@@ -49,11 +49,18 @@
     "short": "{{amount}} manquant"
   },
   "history": {
-    "title": "Jours précédents",
-    "subtitle": "Vos soumissions de fin de journée",
-    "open": "Voir les jours précédents",
-    "expected": "Attendu {{amount}}",
-    "emptyTitle": "Aucun jour précédent",
-    "emptyMessage": "Chaque journée clôturée apparaîtra ici."
+    "title": "Rapports de fin de journée",
+    "subtitle": "Chaque journée que vous avez soumise",
+    "open": "Voir les rapports de fin de journée",
+    "countedLine": "Compté {{amount}}",
+    "expectedLine": "Attendu {{amount}}",
+    "emptyTitle": "Aucun rapport",
+    "emptyMessage": "Chaque comptage de caisse soumis apparaîtra ici sous forme de rapport."
+  },
+  "report": {
+    "title": "Rapport de fin de journée",
+    "businessDate": "Date comptable",
+    "submittedBy": "Soumis par",
+    "resolvedBy": "Résolu par"
   }
 }
