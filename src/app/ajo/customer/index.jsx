@@ -17,7 +17,7 @@ import { SearchInput } from '@/components/ui/search-input';
 import { SkeletonCard } from '@/components/ui/skeleton';
 import { navigateTo } from '@/lib/navigate';
 import { useDebounced } from '@/lib/use-debounced';
-import { usePermission } from '@/providers/permission-provider';
+import { usePermission, useRefreshWithPermissions } from '@/providers/permission-provider';
 
 /**
  * Step 1 of 2 — who the Ajo plan is for.
@@ -47,6 +47,8 @@ export default function AjoCustomerScreen() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery(customersQuery({ search, filter: CUSTOMER_FILTERS.all }));
+
+  const onRefresh = useRefreshWithPermissions(refetch);
 
   const customers = useMemo(() => itemsOf(data, 'customers'), [data]);
 
@@ -99,7 +101,7 @@ export default function AjoCustomerScreen() {
           keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}
           refreshing={isRefetching && !isFetchingNextPage}
-          onRefresh={refetch}
+          onRefresh={onRefresh}
           onEndReachedThreshold={0.4}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) fetchNextPage();

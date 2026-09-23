@@ -17,7 +17,7 @@ import { SearchInput } from '@/components/ui/search-input';
 import { SkeletonCard } from '@/components/ui/skeleton';
 import { navigateTo } from '@/lib/navigate';
 import { useDebounced } from '@/lib/use-debounced';
-import { usePermission } from '@/providers/permission-provider';
+import { usePermission, useRefreshWithPermissions } from '@/providers/permission-provider';
 
 export default function LoansScreen() {
   const { t } = useTranslation();
@@ -40,6 +40,8 @@ export default function LoansScreen() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery(loansQuery({ search, filter: LOAN_FILTERS[filter] }));
+
+  const onRefresh = useRefreshWithPermissions(refetch);
 
   const loans = useMemo(() => itemsOf(data, 'loans'), [data]);
   const total = totalOf(data);
@@ -102,7 +104,7 @@ export default function LoansScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           refreshing={isRefetching && !isFetchingNextPage}
-          onRefresh={refetch}
+          onRefresh={onRefresh}
           onEndReachedThreshold={0.4}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) fetchNextPage();

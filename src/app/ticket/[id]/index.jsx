@@ -15,7 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { StatusPill } from '@/components/ui/status-pill';
 import { formatDateTime } from '@/lib/format';
 import { TICKET_PRIORITY_TONE, TICKET_STATUS_TONE } from '@/lib/status';
-import { usePermission } from '@/providers/permission-provider';
+import { usePermission, useRefreshWithPermissions } from '@/providers/permission-provider';
 
 /** "IN_PROGRESS" / "In Progress" both need to reach the same key. */
 const toneKey = (value) => String(value ?? '').toLowerCase().replace(/\s+/g, '_');
@@ -36,6 +36,8 @@ export default function TicketDetailScreen() {
   const { data, isPending, isError, error, refetch, isRefetching } = useQuery(
     ticketQuery(ticketNumber),
   );
+
+  const onRefresh = useRefreshWithPermissions(refetch);
 
   const rows = data
     ? [
@@ -91,7 +93,7 @@ export default function TicketDetailScreen() {
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
         refreshing={isRefetching}
-        onRefresh={refetch}>
+        onRefresh={onRefresh}>
         {isPending ? (
           <View className="overflow-hidden rounded-2xl border border-line bg-card">
             {[0, 1, 2, 3].map((i) => (

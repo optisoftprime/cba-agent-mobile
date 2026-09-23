@@ -14,6 +14,7 @@ import { LoadingMore } from '@/components/ui/loading-more';
 import { SkeletonCard } from '@/components/ui/skeleton';
 import { formatCurrencyPrecise, formatDate } from '@/lib/format';
 import { EOD_STATUS_TONE } from '@/lib/status';
+import { useRefreshWithPermissions } from '@/providers/permission-provider';
 
 /**
  * Past end-of-day submissions, newest first.
@@ -36,6 +37,8 @@ export default function EodHistoryScreen() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery(eodHistoryQuery);
+
+  const onRefresh = useRefreshWithPermissions(refetch);
 
   const days = useMemo(() => itemsOf(data, 'items'), [data]);
 
@@ -69,7 +72,7 @@ export default function EodHistoryScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}
           showsVerticalScrollIndicator={false}
           refreshing={isRefetching && !isFetchingNextPage}
-          onRefresh={refetch}
+          onRefresh={onRefresh}
           onEndReachedThreshold={0.4}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) fetchNextPage();

@@ -24,6 +24,7 @@ import { navigateTo } from '@/lib/navigate';
 import { notificationIcon, notificationRoute } from '@/lib/notifications';
 import { toast } from '@/lib/toast';
 import { useTheme } from '@/theme/theme-provider';
+import { useRefreshWithPermissions } from '@/providers/permission-provider';
 
 export default function NotificationsScreen() {
   const { t } = useTranslation();
@@ -48,6 +49,8 @@ export default function NotificationsScreen() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery(notificationsQuery({ unreadOnly }));
+
+  const onRefresh = useRefreshWithPermissions(refetch);
 
   const notifications = useMemo(() => itemsOf(data, 'notifications'), [data]);
   const unreadCount = unreadCountOf(data);
@@ -163,7 +166,7 @@ export default function NotificationsScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
           showsVerticalScrollIndicator={false}
           refreshing={isRefetching && !isFetchingNextPage}
-          onRefresh={refetch}
+          onRefresh={onRefresh}
           onEndReachedThreshold={0.4}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) fetchNextPage();

@@ -39,7 +39,7 @@ const PermissionContext = createContext(null);
 
 export function PermissionProvider({ children }) {
   const { t } = useTranslation();
-  const { data, isPending, refetch } = useQuery(permissionsQuery);
+  const { data, isSuccess, refetch } = useQuery(permissionsQuery);
 
   // The code the agent just tried to use. `null` = nothing refused; a code
   // names the feature; `''` means the SERVER refused and `serverMessage` has
@@ -56,17 +56,20 @@ export function PermissionProvider({ children }) {
   const refresh = useCallback(() => refetch(), [refetch]);
 
   /**
-   * While the list is still loading we answer TRUE. Blocking an agent because
-   * a request has not come back yet would punish a slow connection, and the
-   * server is still the thing that actually enforces this.
+   * Until the list has actually ARRIVED we answer TRUE — not merely while it is
+   * in flight. A phone out of coverage never gets an answer, and an agent whose
+   * whole app locked itself because one request failed would be stranded in the
+   * field with no way back. `isSuccess` stays true once a list has loaded, so a
+   * later refresh that fails keeps the last known answer rather than reverting
+   * to "allow everything".
    */
   const can = useCallback(
     (code) => {
       if (!code) return true;
-      if (isPending) return true;
+      if (!isSuccess) return true;
       return granted.has(code);
     },
-    [granted, isPending],
+    [granted, isSuccess],
   );
 
   const guard = useCallback(
@@ -106,10 +109,7 @@ export function PermissionProvider({ children }) {
     setServerMessage(null);
   }, []);
 
-  const value = useMemo(
-    () => ({ can, guard, refresh, isPending }),
-    [can, guard, refresh, isPending],
-  );
+  const value = useMemo(() => ({ can, guard, refresh }), [can, guard, refresh]);
 
   return (
     <PermissionContext.Provider value={value}>

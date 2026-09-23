@@ -21,7 +21,7 @@ import { SuccessModal } from '@/components/ui/success-modal';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { AJO_STATUS_TONE } from '@/lib/status';
-import { usePermission, usePermissions } from '@/providers/permission-provider';
+import { usePermission, usePermissions, useRefreshWithPermissions } from '@/providers/permission-provider';
 import { toast } from '@/lib/toast';
 
 /**
@@ -42,6 +42,8 @@ export default function AjoPlanScreen() {
   const { data, isPending, isError, error, refetch, isRefetching } = useQuery(
     ajoPlanQuery(reference),
   );
+
+  const onRefresh = useRefreshWithPermissions(refetch);
 
   const [amount, setAmount] = useState('');
   const [amountError, setAmountError] = useState(undefined);
@@ -148,7 +150,7 @@ export default function AjoPlanScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32 }}
           showsVerticalScrollIndicator={false}
           refreshing={isRefetching}
-          onRefresh={refetch}
+          onRefresh={onRefresh}
           keyboardShouldPersistTaps="handled">
           {isPending ? (
             <View>

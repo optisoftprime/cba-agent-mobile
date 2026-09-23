@@ -19,6 +19,7 @@ import { StatusPill } from '@/components/ui/status-pill';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { navigateTo } from '@/lib/navigate';
 import { COLLECTION_STATUS_TONE } from '@/lib/status';
+import { useRefreshWithPermissions } from '@/providers/permission-provider';
 
 const TILE = 'bg-card border border-line';
 
@@ -41,6 +42,8 @@ export default function CollectionsScreen() {
   } = useInfiniteQuery(
     collectionsQuery({ type: COLLECTION_TYPES[type], period: COLLECTION_PERIODS[period] }),
   );
+
+  const onRefresh = useRefreshWithPermissions(refetch);
 
   const collections = useMemo(() => itemsOf(data, 'collections'), [data]);
   // The tiles ride along on every page; page 0 is as good as any.
@@ -150,7 +153,7 @@ export default function CollectionsScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
           showsVerticalScrollIndicator={false}
           refreshing={isRefetching && !isFetchingNextPage}
-          onRefresh={refetch}
+          onRefresh={onRefresh}
           onEndReachedThreshold={0.4}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) fetchNextPage();

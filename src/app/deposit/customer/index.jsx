@@ -18,7 +18,7 @@ import { SectionHeading } from '@/components/ui/section-heading';
 import { SkeletonCard } from '@/components/ui/skeleton';
 import { navigateTo } from '@/lib/navigate';
 import { useDebounced } from '@/lib/use-debounced';
-import { usePermission } from '@/providers/permission-provider';
+import { usePermission, useRefreshWithPermissions } from '@/providers/permission-provider';
 
 /** Step 1 of 4 — who the deposit is for. */
 export default function DepositCustomerScreen() {
@@ -39,6 +39,8 @@ export default function DepositCustomerScreen() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery(customersQuery({ search, filter: CUSTOMER_FILTERS.all }));
+
+  const onRefresh = useRefreshWithPermissions(refetch);
 
   const customers = useMemo(() => itemsOf(data, 'customers'), [data]);
 
@@ -96,7 +98,7 @@ export default function DepositCustomerScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           refreshing={isRefetching && !isFetchingNextPage}
-          onRefresh={refetch}
+          onRefresh={onRefresh}
           onEndReachedThreshold={0.4}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) fetchNextPage();

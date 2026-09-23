@@ -14,7 +14,7 @@ import { SkeletonCard } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/format';
 import { navigateTo } from '@/lib/navigate';
 import { ACCOUNT_STATUS_TONE } from '@/lib/status';
-import { usePermission } from '@/providers/permission-provider';
+import { usePermission, useRefreshWithPermissions } from '@/providers/permission-provider';
 
 /** Step 2 of 4 — which of the customer's accounts receives it. */
 export default function DepositAccountScreen() {
@@ -26,6 +26,8 @@ export default function DepositAccountScreen() {
   const { data, isPending, isError, error, refetch, isRefetching } = useQuery(
     customerAccountsQuery(code),
   );
+
+  const onRefresh = useRefreshWithPermissions(refetch);
 
   const accounts = data ?? [];
 
@@ -80,7 +82,7 @@ export default function DepositAccountScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}
           showsVerticalScrollIndicator={false}
           refreshing={isRefetching}
-          onRefresh={refetch}
+          onRefresh={onRefresh}
           ListEmptyComponent={
             isPending ? (
               <View>

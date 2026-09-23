@@ -19,7 +19,7 @@ import { SkeletonCard } from '@/components/ui/skeleton';
 import { navigateTo } from '@/lib/navigate';
 import { CUSTOMER_STATUS_TONE } from '@/lib/status';
 import { useDebounced } from '@/lib/use-debounced';
-import { usePermission } from '@/providers/permission-provider';
+import { usePermission, useRefreshWithPermissions } from '@/providers/permission-provider';
 
 export default function CustomersScreen() {
   const { t } = useTranslation();
@@ -42,6 +42,8 @@ export default function CustomersScreen() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery(customersQuery({ search, filter: CUSTOMER_FILTERS[filter] }));
+
+  const onRefresh = useRefreshWithPermissions(refetch);
 
   const customers = useMemo(() => itemsOf(data, 'customers'), [data]);
   const total = totalOf(data);
@@ -124,7 +126,7 @@ export default function CustomersScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           refreshing={isRefetching && !isFetchingNextPage}
-          onRefresh={refetch}
+          onRefresh={onRefresh}
           // Infinite scroll: the next page is fetched before the agent reaches
           // the bottom, so the list doesn't visibly stall.
           onEndReachedThreshold={0.4}
