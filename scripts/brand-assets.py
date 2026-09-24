@@ -273,12 +273,13 @@ def main():
         print(f"\nfor the Play Console listing, in {args.store}:")
 
         # Its own upload, shown beside the app name — the launcher artwork at
-        # the size Google asks for.
-        save(
-            centred_on(STORE_ICON, mark, background=args.icon_background).convert("RGB"),
-            "playStoreIcon.png",
-            folder=args.store,
-        )
+        # the size Google asks for. Saved as 32-bit RGBA, fully opaque: the
+        # Console's spec for the listing icon is "32-bit PNG", and it rejects a
+        # 24-bit one. The FEATURE graphic below is the opposite — 24-bit, no
+        # alpha — so the two cannot share a save path.
+        listing = centred_on(STORE_ICON, mark, background=args.icon_background)
+        listing.putalpha(255)
+        save(listing, "playStoreIcon.png", folder=args.store)
 
         # 1024x500 exactly, or the Console refuses it. The lockup sits on the
         # brand colour, so the wordmark takes the dark-mode treatment.
