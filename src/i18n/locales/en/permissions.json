@@ -15,6 +15,7 @@
     "WITHDRAWAL": "Withdrawal"
   },
   "locked": {
-    "title": "This is not available to you"
+    "title": "This is not available to you",
+    "retry": "Check again"
   }
 }

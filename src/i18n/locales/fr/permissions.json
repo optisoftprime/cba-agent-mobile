@@ -15,6 +15,7 @@
     "WITHDRAWAL": "Retrait"
   },
   "locked": {
-    "title": "Ceci ne vous est pas accessible"
+    "title": "Ceci ne vous est pas accessible",
+    "retry": "Vérifier à nouveau"
   }
 }
