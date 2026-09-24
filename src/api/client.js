@@ -305,21 +305,30 @@ function createClient({ authenticated }) {
       const status = error.response?.status;
       const body = error.response?.data;
 
-      // A permission refusal is NOT a dead session — the agent stays signed in
-      // and is told what they cannot do.
-      // Never from the permissions endpoint itself: the handler re-fetches
-      // permissions, which would refuse again — a tight request loop behind a
-      // modal the agent cannot dismiss.
+      // Never treat a refusal FROM the permissions endpoint as a permission
+      // refusal: the handler re-fetches permissions, which would refuse again —
+      // a tight request loop behind a modal the agent cannot dismiss.
       const isPermissionsCall = error.config?.url === endpoints.agent.permissions;
+      const deniedPermission = authenticated && !isPermissionsCall && isPermissionRefusal(status, body);
 
-      if (authenticated && !isPermissionsCall && isPermissionRefusal(status, body)) {
-        onPermissionDenied?.(body?.message ?? null);
-        return Promise.reject(error);
-      }
-
+      // A money call asks the SERVER first, before anything is read into the
+      // message. Ordering matters: finman words a hold as "Deposits are not
+      // allowed while…", which the refusal pattern matches — so checking the
+      // message first would answer a reconciliation hold with "speak to your
+      // administrator" and hide the real reason. Once the probe says the
+      // session is alive, a refusal that really is about permissions still
+      // opens the modal.
       if (authenticated && endsSession(status) && error.config?.confirmSession) {
         const { ended, reason } = await confirmSessionAfterRefusal(client);
         if (ended) await handleUnauthorized(tokenFrom(error.config), reason);
+        else if (deniedPermission) onPermissionDenied?.(body?.message ?? null);
+        return Promise.reject(error);
+      }
+
+      // A permission refusal is NOT a dead session — the agent stays signed in
+      // and is told what they cannot do.
+      if (deniedPermission) {
+        onPermissionDenied?.(body?.message ?? null);
         return Promise.reject(error);
       }
 

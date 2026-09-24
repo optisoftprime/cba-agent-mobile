@@ -9,8 +9,13 @@ import { useTheme } from '@/theme/theme-provider';
  *
  * A list card shows the few fields worth scanning; this shows the rest, so the
  * agent never has to take the card's summary on trust. `rows` is
- * [{ key, label, value }] — a string or a node, like `ui/detail-rows` — and
- * anything null/undefined is dropped by the caller, not padded with dashes.
+ * [{ key, label, value, tone }] — a string or a node, like `ui/detail-rows` —
+ * and anything null/undefined is dropped by the caller, not padded with dashes.
+ *
+ * `tone` ('success' | 'warning' | 'danger' | 'muted') colours a STRING value
+ * from the palette. That is the point of it: a Modal is its own host tree, so
+ * a caller cannot just pass a class-coloured node in here and expect it to
+ * render — the tone travels as data and the colour is resolved in here.
  *
  * Read-only by design: it has one button, and it closes. Anything that ACTS on
  * what it shows belongs on a screen, not in here.
@@ -19,6 +24,13 @@ import { useTheme } from '@/theme/theme-provider';
  * which the theme's CSS variables do not reach (same rule as
  * `ui/success-modal` and `ui/confirm-dialog`).
  */
+const TONES = {
+  success: 'success',
+  warning: 'warning',
+  danger: 'danger',
+  muted: 'inkMuted',
+};
+
 export function DetailsModal({ visible, title, subtitle, rows = [], onClose, closeLabel }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
@@ -86,8 +98,8 @@ export function DetailsModal({ visible, title, subtitle, rows = [], onClose, clo
                   <Text
                     style={{
                       fontSize: 14,
-                      fontWeight: '500',
-                      color: colors.ink,
+                      fontWeight: row.tone ? '600' : '500',
+                      color: colors[TONES[row.tone]] ?? colors.ink,
                       flexShrink: 1,
                       textAlign: 'right',
                     }}>

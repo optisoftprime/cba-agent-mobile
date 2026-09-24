@@ -25,8 +25,26 @@ export function VarianceText({ variance, className = '' }) {
 /** The same wording as a plain string, for places that cannot take a node. */
 export function useVarianceLabel(variance) {
   const { t } = useTranslation();
-  const { kind, amount } = describeVariance(variance);
-  return kind === 'balanced'
-    ? t('eod.variance.balanced')
-    : t(`eod.variance.${kind}`, { amount: formatCurrencyPrecise(amount) });
+  return varianceLabel(t, variance);
 }
+
+/**
+ * The string form, for a caller that already has `t` and cannot call a hook —
+ * a row built inside a `.map()`, say. A Modal's own subtree is the usual
+ * reason: colour classes are not safe in there, so the wording goes in as text
+ * and the colour comes from a tone.
+ */
+export function varianceLabel(t, variance) {
+  const { kind, amount } = describeVariance(variance);
+  if (kind === 'unknown') return t('eod.variance.unknown');
+  if (kind === 'balanced') return t('eod.variance.balanced');
+  return t(`eod.variance.${kind}`, { amount: formatCurrencyPrecise(amount) });
+}
+
+/** How a variance is coloured where classes do not reach — see `ui/details-modal`. */
+export const VARIANCE_TONE = {
+  unknown: 'muted',
+  balanced: 'success',
+  over: 'warning',
+  short: 'danger',
+};

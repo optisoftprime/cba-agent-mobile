@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { eodHistoryQuery } from '@/api/eod';
 import { itemsOf } from '@/api/pagination';
-import { VarianceText } from '@/components/eod/variance-text';
+import { VARIANCE_TONE, VarianceText, varianceLabel } from '@/components/eod/variance-text';
 import { AppHeader } from '@/components/layout/app-header';
 import { DetailsModal } from '@/components/ui/details-modal';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -13,10 +13,19 @@ import { ErrorState } from '@/components/ui/error-state';
 import { ListCard } from '@/components/ui/list-card';
 import { LoadingMore } from '@/components/ui/loading-more';
 import { SkeletonCard } from '@/components/ui/skeleton';
-import { StatusPill } from '@/components/ui/status-pill';
-import { formatCurrencyPrecise, formatDate, formatDateTime } from '@/lib/format';
+import { formatCurrencyPrecise, formatDate, formatDateTime, NO_FIGURE } from '@/lib/format';
 import { EOD_STATUS_TONE } from '@/lib/status';
+import { describeVariance } from '@/lib/variance';
 import { useRefreshWithPermissions } from '@/providers/permission-provider';
+
+/** A status pill's tone, as `ui/details-modal` names its colours. */
+const MODAL_TONE = {
+  success: 'success',
+  warning: 'warning',
+  danger: 'danger',
+  info: 'muted',
+  neutral: 'muted',
+};
 
 /**
  * Every end-of-day report this agent has submitted, newest first.
@@ -53,10 +62,13 @@ export default function EodHistoryScreen() {
   const reportRows = (day) =>
     [
       { key: 'date', label: t('eod.report.businessDate'), value: formatDate(day.businessDate) },
+      // Inside a Modal the value is TEXT plus a tone, never a class-styled
+      // pill — the theme's classes do not reach into a Modal's host tree.
       {
         key: 'status',
         label: t('eod.position.status'),
-        value: <StatusPill label={day.status} tone={statusTone(day.status)} />,
+        value: day.status ?? t('eod.state.open'),
+        tone: MODAL_TONE[statusTone(day.status)],
       },
       { key: 'settled', label: t('eod.position.settled'), value: money(day.settledCash) },
       { key: 'in', label: t('eod.position.pendingIn'), value: money(day.pendingIn) },
@@ -66,7 +78,8 @@ export default function EodHistoryScreen() {
       {
         key: 'variance',
         label: t('eod.position.variance'),
-        value: <VarianceText variance={day.variance} />,
+        value: varianceLabel(t, day.variance),
+        tone: VARIANCE_TONE[describeVariance(day.variance).kind],
       },
       day.submittedAt
         ? {
@@ -95,7 +108,7 @@ export default function EodHistoryScreen() {
       ) : (
         <FlatList
           data={isPending ? [] : days}
-          keyExtractor={(day) => day.uuid ?? day.businessDate}
+          keyExtractor={(day, index) => day.uuid ?? day.businessDate ?? String(index)}
           renderItem={({ item }) => (
             <ListCard
               overline={formatDate(item.businessDate)}
@@ -145,7 +158,10 @@ export default function EodHistoryScreen() {
   );
 }
 
-/** A missing figure is not zero naira, so it reads as a dash. */
+/**
+ * A missing figure is not zero naira. `formatCurrencyPrecise` reads a null as
+ * 0 (JavaScript does), so the check has to happen here.
+ */
 function money(amount) {
-  return amount == null ? '—' : formatCurrencyPrecise(amount);
+  return amount == null ? NO_FIGURE : formatCurrencyPrecise(amount);
 }

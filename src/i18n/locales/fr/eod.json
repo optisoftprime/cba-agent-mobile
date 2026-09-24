@@ -41,12 +41,15 @@
     "balancedMessage": "Votre caisse est équilibrée. À demain.",
     "varianceTitle": "Comptage soumis",
     "varianceMessage": "Votre comptage ne correspond pas au montant attendu. Votre superviseur va l'examiner.",
-    "ok": "Terminé"
+    "ok": "Terminé",
+    "submittedTitle": "Comptage soumis",
+    "submittedMessage": "Votre comptage a été soumis. Tirez pour actualiser et voir le résultat."
   },
   "variance": {
     "balanced": "Équilibré",
     "over": "{{amount}} en trop",
-    "short": "{{amount}} manquant"
+    "short": "{{amount}} manquant",
+    "unknown": "Non compté"
   },
   "history": {
     "title": "Rapports de fin de journée",

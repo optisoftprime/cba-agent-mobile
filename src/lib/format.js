@@ -2,9 +2,21 @@ import { brand } from '@/theme/brand';
 
 const { symbol, locale } = brand.currency;
 
+/**
+ * What a missing figure reads as. NOT ₦0.00 — the server sending nothing and
+ * the agent holding nothing are different facts, and printing one as the other
+ * is how a screen states something untrue.
+ */
+export const NO_FIGURE = '—';
+
+/** null / undefined / '' — the server sent nothing. A real 0 is not missing. */
+const isMissing = (amount) => amount === null || amount === undefined || amount === '';
+
 /** ₦42,850 — full amount with thousand separators, in the brand's currency. */
 export function formatCurrency(amount) {
+  if (isMissing(amount)) return NO_FIGURE;
   const value = Number(amount);
+  if (!Number.isFinite(value)) return NO_FIGURE;
   const sign = value < 0 ? '-' : '';
   return `${sign}${symbol}${Math.abs(value).toLocaleString(locale, { maximumFractionDigits: 2 })}`;
 }
@@ -14,7 +26,9 @@ export function formatCurrency(amount) {
  * receipted, where a bare "₦50,000" reads as an estimate.
  */
 export function formatCurrencyPrecise(amount) {
+  if (isMissing(amount)) return NO_FIGURE;
   const value = Number(amount);
+  if (!Number.isFinite(value)) return NO_FIGURE;
   // The sign leads: cash in hand can go negative (the till has gone positive,
   // which is an invalid state the agent has to SEE), and "₦-6,000" reads as a
   // typo where "-₦6,000" reads as a figure.
@@ -34,7 +48,9 @@ export function maskAccount(number, visible = 4) {
 
 /** ₦4.5M — compact, for summary tiles where space is tight. */
 export function formatCurrencyCompact(amount) {
+  if (isMissing(amount)) return NO_FIGURE;
   const value = Number(amount);
+  if (!Number.isFinite(value)) return NO_FIGURE;
   const size = Math.abs(value);
   // Sign first, as in formatCurrencyPrecise.
   const sign = value < 0 ? '-' : '';

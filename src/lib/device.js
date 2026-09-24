@@ -63,8 +63,26 @@ async function platformId() {
  * The id the bank binds this phone to. Read once, then kept in SecureStore so
  * it never changes under the backend — even on iOS, where the vendor id can
  * reset while the keychain entry survives.
+ *
+ * The in-flight promise is cached at module scope, and that is not an
+ * optimisation. Every authenticated request asks for this (the client sends
+ * `X-Agent-Device-Id` on all of them), so a screen firing three queries at
+ * once would otherwise run three first-time resolutions in parallel — and when
+ * the platform has no stable id to give (`expo-application` missing, iOS before
+ * the first unlock after a reboot) each one invents a DIFFERENT random id.
+ * Three requests would go out under three identities and the last write would
+ * win, leaving the bank bound to an id the phone no longer sends: 403 "This
+ * device is not the one registered to your account". Caching also spares every
+ * request a second Keystore read.
  */
-export async function getDeviceId() {
+let deviceIdPromise = null;
+
+export function getDeviceId() {
+  deviceIdPromise ??= resolveDeviceId();
+  return deviceIdPromise;
+}
+
+async function resolveDeviceId() {
   const saved = await load(StorageKeys.deviceId);
   if (saved) return String(saved);
 

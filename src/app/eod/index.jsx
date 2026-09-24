@@ -53,7 +53,8 @@ export default function EodScreen() {
   // Empty is "not entered yet", which is different from a count of zero.
   const countedValue = counted.trim() === '' ? null : Number(counted);
   const preview = countedValue == null ? null : countedValue - expected;
-  const resultVarianceLabel = useVarianceLabel(result?.variance);
+  const resultRecord = result === 'submitted' ? null : result;
+  const resultVarianceLabel = useVarianceLabel(resultRecord?.variance);
 
   const { mutate, isPending: submitting } = useMutation({
     mutationFn: submitEod,
@@ -62,7 +63,11 @@ export default function EodScreen() {
       queryClient.invalidateQueries({ queryKey: EOD_KEY });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       setCounted('');
-      setResult(record ?? {});
+      // `?? {}` would be read by eodState() as an un-submitted day and shown as
+      // a variance with ₦0.00 figures — a wrong outcome for a submit that
+      // worked. `submitted` is the "it landed, the server told us nothing"
+      // case; the screen refetches and shows the real position underneath.
+      setResult(record ?? 'submitted');
     },
     onError: (submitError) => toast.error(submitError.message),
   });
@@ -262,20 +267,40 @@ export default function EodScreen() {
           did not match — the day is NOT closed, so it gets the amber clock. */}
       <SuccessModal
         visible={result !== null}
-        tone={eodState(result) === 'closed' ? 'success' : 'pending'}
+        tone={eodState(resultRecord) === 'closed' ? 'success' : 'pending'}
         title={
-          eodState(result) === 'closed' ? t('eod.done.balancedTitle') : t('eod.done.varianceTitle')
+          !resultRecord
+            ? t('eod.done.submittedTitle')
+            : eodState(resultRecord) === 'closed'
+              ? t('eod.done.balancedTitle')
+              : t('eod.done.varianceTitle')
         }
         message={
-          eodState(result) === 'closed'
-            ? t('eod.done.balancedMessage')
-            : t('eod.done.varianceMessage')
+          !resultRecord
+            ? t('eod.done.submittedMessage')
+            : eodState(resultRecord) === 'closed'
+              ? t('eod.done.balancedMessage')
+              : t('eod.done.varianceMessage')
         }
-        details={[
-          { key: 'expected', label: t('eod.position.expected'), value: formatCurrencyPrecise(result?.expectedCash ?? 0) },
-          { key: 'counted', label: t('eod.position.counted'), value: formatCurrencyPrecise(result?.countedCash ?? 0) },
-          { key: 'variance', label: t('eod.position.variance'), value: resultVarianceLabel },
-        ]}
+        // No rows at all when the server returned no record: better to say
+        // nothing than to print ₦0.00 as though it had been counted.
+        details={
+          resultRecord
+            ? [
+                {
+                  key: 'expected',
+                  label: t('eod.position.expected'),
+                  value: formatCurrencyPrecise(resultRecord.expectedCash),
+                },
+                {
+                  key: 'counted',
+                  label: t('eod.position.counted'),
+                  value: formatCurrencyPrecise(resultRecord.countedCash),
+                },
+                { key: 'variance', label: t('eod.position.variance'), value: resultVarianceLabel },
+              ]
+            : []
+        }
         primaryLabel={t('eod.done.ok')}
         onPrimary={() => setResult(null)}
       />

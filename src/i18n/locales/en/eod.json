@@ -41,12 +41,15 @@
     "balancedMessage": "Your cash balanced. See you tomorrow.",
     "varianceTitle": "Count submitted",
     "varianceMessage": "Your count does not match what was expected. Your supervisor will review it.",
-    "ok": "Done"
+    "ok": "Done",
+    "submittedTitle": "Count submitted",
+    "submittedMessage": "Your cash count was submitted. Pull to refresh to see the result."
   },
   "variance": {
     "balanced": "Balanced",
     "over": "{{amount}} over",
-    "short": "{{amount}} short"
+    "short": "{{amount}} short",
+    "unknown": "Not counted"
   },
   "history": {
     "title": "End of day reports",
