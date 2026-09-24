@@ -307,7 +307,12 @@ function createClient({ authenticated }) {
 
       // A permission refusal is NOT a dead session — the agent stays signed in
       // and is told what they cannot do.
-      if (authenticated && isPermissionRefusal(status, body)) {
+      // Never from the permissions endpoint itself: the handler re-fetches
+      // permissions, which would refuse again — a tight request loop behind a
+      // modal the agent cannot dismiss.
+      const isPermissionsCall = error.config?.url === endpoints.agent.permissions;
+
+      if (authenticated && !isPermissionsCall && isPermissionRefusal(status, body)) {
         onPermissionDenied?.(body?.message ?? null);
         return Promise.reject(error);
       }

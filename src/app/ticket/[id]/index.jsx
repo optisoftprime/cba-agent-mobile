@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
-import { ScrollView, Text, View } from 'react-native';
+import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { Permission } from '@/api/permissions';
@@ -92,8 +92,7 @@ export default function TicketDetailScreen() {
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
-        refreshing={isRefetching}
-        onRefresh={onRefresh}>
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}>
         {isPending ? (
           <View className="overflow-hidden rounded-2xl border border-line bg-card">
             {[0, 1, 2, 3].map((i) => (

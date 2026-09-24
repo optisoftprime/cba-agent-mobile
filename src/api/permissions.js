@@ -61,7 +61,10 @@ export const PERMISSIONS_KEY = ['permissions'];
 
 export const permissionsQuery = {
   queryKey: PERMISSIONS_KEY,
-  queryFn: () => send(api.get(endpoints.agent.permissions)),
+  // `skipSessionExpiry`: the agent did not ask for this check, so a rejected
+  // token must not raise "session expired" here. The calls they DID make, and
+  // the startup check, decide the session's fate.
+  queryFn: () => send(api.get(endpoints.agent.permissions, { skipSessionExpiry: true })),
   // No staleTime. An administrator can revoke a permission mid-shift, and the
   // agent should not keep a button that stopped working minutes ago. Refreshes
   // are driven explicitly — pull-to-refresh, returning to the foreground, and

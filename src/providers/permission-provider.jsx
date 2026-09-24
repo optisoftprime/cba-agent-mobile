@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { setPermissionDeniedHandler } from '@/api/client';
 import { permissionsQuery } from '@/api/permissions';
+import { useAuth } from '@/providers/auth-provider';
 import { PermissionDeniedModal } from '@/components/ui/permission-denied-modal';
 
 /**
@@ -39,7 +40,16 @@ const PermissionContext = createContext(null);
 
 export function PermissionProvider({ children }) {
   const { t } = useTranslation();
-  const { data, isSuccess, refetch } = useQuery(permissionsQuery);
+  // This provider sits above the whole router, so without a gate it would ask
+  // on the LOGIN screen too — on a launch, on every foreground, and again the
+  // moment sign-out clears the cache. With a revoked token that stray 401
+  // raised "session expired" over the splash, a toast for a check the agent
+  // never asked for, racing the splash's own routing.
+  const { user } = useAuth();
+  const { data, isSuccess, refetch } = useQuery({
+    ...permissionsQuery,
+    enabled: Boolean(user),
+  });
 
   // The code the agent just tried to use. `null` = nothing refused; a code
   // names the feature; `''` means the SERVER refused and `serverMessage` has

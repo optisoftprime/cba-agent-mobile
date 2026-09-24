@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { ajoPlanQuery, recordAjoContribution } from '@/api/ajo';
@@ -149,8 +149,7 @@ export default function AjoPlanScreen() {
         <ScrollView
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32 }}
           showsVerticalScrollIndicator={false}
-          refreshing={isRefetching}
-          onRefresh={onRefresh}
+          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
           keyboardShouldPersistTaps="handled">
           {isPending ? (
             <View>
