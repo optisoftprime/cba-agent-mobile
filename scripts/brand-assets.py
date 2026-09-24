@@ -235,7 +235,7 @@ def main():
     )
     parser.add_argument(
         "--feature-background",
-        default="#000000",
+        default="#FFFFFF",
         help="behind the Play Console feature graphic. NOT the icon's background: the graphic "
         "carries the full lockup, so its background has to suit the WORDMARK's colour.",
     )
@@ -293,10 +293,10 @@ def main():
 
         # 1024x500 exactly, or the Console refuses it.
         #
-        # The LIGHT lockup (the blue wordmark) on a dark background, which is
-        # how the artwork was delivered and how it reads best. Tying this to
-        # the icon's background was a bug: with a white icon background the
-        # white-wordmark lockup went onto white and "ZONE" vanished.
+        # The LIGHT lockup — the BLUE wordmark — on white, matching the app
+        # icon and the listing around it. Tying this to the icon's background
+        # was a bug: with a white icon background the white-wordmark lockup
+        # went onto white and "ZONE" vanished.
         feature = Image.new("RGBA", FEATURE, args.feature_background)
         art = lockup
         room = (round(FEATURE[0] * 0.62), round(FEATURE[1] * 0.42))
