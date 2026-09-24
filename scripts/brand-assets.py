@@ -30,8 +30,10 @@ The rules this encodes, each of which has cost us a release before:
   * A dark wordmark vanishes on a dark screen, so the dark variant repaints
     NEUTRAL (grey/black) pixels white and leaves coloured ones alone.
 
-Needs Pillow (`pip install pillow`). An SVG source needs `pip install cairosvg`
-as well, since Pillow cannot read SVG. A dev tool, not part of the app bundle.
+Needs Pillow (`pip install pillow`); an SVG source also needs PyMuPDF
+(`pip install pymupdf`), which rasterises SVG by itself. Not cairosvg and not
+svglib+reportlab: on Windows both end up wanting a native Cairo DLL that pip
+does not install. A dev tool, not part of the app bundle.
 
 Keep the SOURCE artwork in `assets/brand/` and commit it: every image below is
 generated, so without the source a future rebrand starts from a screenshot.
@@ -61,6 +63,31 @@ FEATURE = (1024, 500)  # Play Console feature graphic, fixed by Google
 SAFE_AREA = 0.66  # Android crops the adaptive icon to roughly this
 NEUTRAL_RANGE = 70  # max channel spread still counted as grey/black, not colour
 WHITE_FLOOR = 8  # alpha below this is background, not a faint edge
+
+
+def open_source(path, render_width=2048):
+    """
+    Open a PNG/JPG, or render an SVG at a size big enough for the icon.
+
+    SVG is the source to ask for: it is resolution-free, so the icon and the
+    splash are both sharp whatever the designer exported at.
+    """
+    if not path.lower().endswith(".svg"):
+        return Image.open(path)
+
+    try:
+        import pymupdf
+    except ImportError:
+        sys.exit("An SVG source needs: pip install pymupdf")
+
+    from io import BytesIO
+
+    page = pymupdf.open(path)[0]
+    # Rasterise AT the size we need. Rendering small and enlarging afterwards
+    # throws away the one advantage an SVG has.
+    zoom = max(1, render_width / max(page.rect.width, page.rect.height))
+    pixels = page.get_pixmap(matrix=pymupdf.Matrix(zoom, zoom), alpha=True)
+    return Image.open(BytesIO(pixels.tobytes("png")))
 
 
 def cut_out_background(image):
@@ -153,8 +180,8 @@ def main():
     )
     args = parser.parse_args()
 
-    lockup = trim(cut_out_background(Image.open(args.source)))
-    mark = trim(cut_out_background(Image.open(args.mark))) if args.mark else lockup
+    lockup = trim(cut_out_background(open_source(args.source)))
+    mark = trim(cut_out_background(open_source(args.mark))) if args.mark else lockup
 
     if lockup.height < LOCKUP_HEIGHT or mark.height < ICON * SAFE_AREA:
         print(
