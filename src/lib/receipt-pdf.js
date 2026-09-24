@@ -31,6 +31,7 @@ import { brand, light as palette } from '@/theme/brand';
  */
 export function buildReceiptHtml({
   posted,
+  logo,
   documentTitle,
   subtitle,
   amountLabel,
@@ -62,8 +63,12 @@ export function buildReceiptHtml({
       <table style="width:100%;border-collapse:collapse;">
         <tr>
           <td>
-            <div style="font-size:17px;font-weight:700;color:${palette.primary};">${escape(brand.appName)}</div>
-            <div style="margin-top:3px;font-size:12px;color:${palette.inkMuted};">${escape(subtitle)}</div>
+            ${
+              logo
+                ? `<img src="${logo}" style="height:34px;" alt="${escape(brand.appName)}" />`
+                : `<div style="font-size:17px;font-weight:700;color:${palette.primary};">${escape(brand.appName)}</div>`
+            }
+            <div style="margin-top:6px;font-size:12px;color:${palette.inkMuted};">${escape(subtitle)}</div>
           </td>
           <td style="text-align:right;font-size:12px;color:${palette.inkMuted};">${escape(documentTitle)}</td>
         </tr>
@@ -89,6 +94,31 @@ export function buildReceiptHtml({
     </div>
   </body>
 </html>`;
+}
+
+/**
+ * The logo as a `data:` URI, for the PDF's letterhead.
+ *
+ * The HTML is rendered in a WebView that cannot reach the app's bundled
+ * assets, so the image has to travel inside the document. Best effort: a
+ * receipt with the name typed out is worth far more than no receipt, so every
+ * failure here falls back to text rather than throwing.
+ */
+export async function logoDataUri() {
+  try {
+    const { Asset } = require('expo-asset');
+    const FileSystem = require('expo-file-system/legacy');
+
+    // The LIGHT lockup: a receipt is on white paper, whatever the phone's theme.
+    const asset = Asset.fromModule(brand.logo.light);
+    await asset.downloadAsync();
+    if (!asset.localUri) return null;
+
+    const base64 = await FileSystem.readAsStringAsync(asset.localUri, { encoding: 'base64' });
+    return `data:image/png;base64,${base64}`;
+  } catch {
+    return null;
+  }
 }
 
 /** A customer's name is data, not markup. */

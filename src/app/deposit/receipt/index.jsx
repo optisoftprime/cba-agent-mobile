@@ -11,7 +11,7 @@ import { DetailRows } from '@/components/ui/detail-rows';
 import { ScallopedEdge } from '@/components/ui/scalloped-edge';
 import { formatCurrencyPrecise, formatDateTime, maskAccount } from '@/lib/format';
 import { agentView } from '@/lib/agent';
-import { buildReceiptHtml, shareReceiptPdf } from '@/lib/receipt-pdf';
+import { buildReceiptHtml, logoDataUri, shareReceiptPdf } from '@/lib/receipt-pdf';
 import { toast } from '@/lib/toast';
 import { useAuth } from '@/providers/auth-provider';
 import { brand } from '@/theme/brand';
@@ -92,6 +92,8 @@ export default function DepositReceiptScreen() {
       const shared = await shareReceiptPdf({
         html: buildReceiptHtml({
           posted,
+          // The letterhead. Null falls back to the app's name in text.
+          logo: await logoDataUri(),
           documentTitle: t('deposit.receipt.title'),
           subtitle: t('deposit.receipt.subtitle'),
           amountLabel: t('deposit.receipt.amount'),

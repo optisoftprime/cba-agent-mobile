@@ -56,13 +56,26 @@ except ImportError:  # pragma: no cover - a dev machine without Pillow
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IMAGES = os.path.join(ROOT, "assets", "images")
 
-LOCKUP_HEIGHT = 240  # what the splash and receipt draw from
+# What the splash and the receipt draw from. Tall on purpose: the Android
+# launch splash draws this image across the FULL screen width (the legacy
+# full-screen mode we use to dodge Android 12's circle crop), so on a 1440p
+# handset a 240px-tall lockup is upscaled and reads as blurry — which is what
+# it did. At 480 the widest phone still downscales rather than stretches.
+LOCKUP_HEIGHT = 480
 ICON = 1024
 STORE_ICON = 512  # Play Console listing icon
 FEATURE = (1024, 500)  # Play Console feature graphic, fixed by Google
 SAFE_AREA = 0.66  # Android crops the adaptive icon to roughly this
 NEUTRAL_RANGE = 70  # max channel spread still counted as grey/black, not colour
 WHITE_FLOOR = 8  # alpha below this is background, not a faint edge
+# Much higher than WHITE_FLOOR, and deliberately so: a WhatsApp JPEG's black is
+# not quite black, and the ringing around a bright edge survives as a grey halo
+# that is invisible on a dark screen and obvious on a white one. The darkest
+# real colour in the artwork (the deep purple) is far above this.
+BLACK_FLOOR = 48
+# How far above the floor counts as the anti-aliased edge. Narrow on purpose:
+# wider eats into dark artwork, narrower leaves a hard, jagged outline.
+BLACK_EDGE = 70
 
 
 def open_source(path, render_width=2048):
@@ -91,16 +104,52 @@ def open_source(path, render_width=2048):
 
 
 def cut_out_background(image):
-    """Drop a baked-in white background and recover the colours underneath."""
+    """
+    Drop a baked-in flat background and recover the colours underneath.
+
+    Works for a WHITE or a BLACK background — a designer's export is usually
+    one or the other, and the delivered eZONE artwork is on black. Which one it
+    is, is read from the corners rather than assumed, and the alpha is derived
+    from the distance to that background so the anti-aliased edge survives
+    instead of turning into a halo.
+
+    White cannot simply be treated as "background" here: the eZONE mark has
+    white INSIDE it, so on a black source the white swirl is artwork and the
+    black is background. Getting this backwards erases half the logo.
+    """
     image = image.convert("RGBA")
     if any(pixel[3] < 255 for pixel in image.getdata()):
         return image  # already transparent, nothing to un-mix
 
+    width, height = image.size
+    corners = [
+        image.getpixel((0, 0)),
+        image.getpixel((width - 1, 0)),
+        image.getpixel((0, height - 1)),
+        image.getpixel((width - 1, height - 1)),
+    ]
+    on_black = sum(max(pixel[:3]) for pixel in corners) / len(corners) < 128
+
     out = Image.new("RGBA", image.size)
     source, target = image.load(), out.load()
-    for y in range(image.height):
-        for x in range(image.width):
+    for y in range(height):
+        for x in range(width):
             r, g, b, _ = source[x, y]
+
+            if on_black:
+                # The artwork is OPAQUE on black, not composited onto it, so
+                # brightness is not coverage: the eZONE mark's deep purple is a
+                # deep purple, and "un-mixing" it against black turns it into
+                # lavender. Only a narrow band just above the floor is treated
+                # as a soft edge; the colour itself is never touched.
+                level = max(r, g, b)
+                if level < BLACK_FLOOR:
+                    target[x, y] = (0, 0, 0, 0)
+                    continue
+                edge = min(255, round(((level - BLACK_FLOOR) / BLACK_EDGE) * 255))
+                target[x, y] = (r, g, b, edge)
+                continue
+
             alpha = 255 - min(r, g, b)
             if alpha < WHITE_FLOOR:
                 target[x, y] = (0, 0, 0, 0)
@@ -170,6 +219,11 @@ def main():
     # Same names, same sizes, same place — the app and app.json need no edit.
     parser.add_argument("--mark", help="the mark on its own, for the icons; defaults to the source")
     parser.add_argument(
+        "--dark",
+        help="the lockup as drawn for DARK backgrounds (a white wordmark, usually). Without it the "
+        "dark variant is derived by whitening the neutral pixels, which is a guess.",
+    )
+    parser.add_argument(
         "--icon-background", default="#FFFFFF", help="behind the iOS icon, which cannot be transparent"
     )
     parser.add_argument(
@@ -197,7 +251,8 @@ def main():
 
     print("writing:")
     save(scaled_to_height(lockup, LOCKUP_HEIGHT), "receiptLogo.png")
-    save(scaled_to_height(whiten_neutrals(lockup), LOCKUP_HEIGHT), "receiptLogoDark.png")
+    dark = trim(cut_out_background(open_source(args.dark))) if args.dark else whiten_neutrals(lockup)
+    save(scaled_to_height(dark, LOCKUP_HEIGHT), "receiptLogoDark.png")
 
     if args.logo_only:
         print("\n--logo-only: icons left as they are.")
@@ -227,8 +282,8 @@ def main():
 
         # 1024x500 exactly, or the Console refuses it. The lockup sits on the
         # brand colour, so the wordmark takes the dark-mode treatment.
-        feature = Image.new("RGBA", FEATURE, brand_primary())
-        art = whiten_neutrals(lockup)
+        feature = Image.new("RGBA", FEATURE, args.icon_background)
+        art = dark
         room = (round(FEATURE[0] * 0.62), round(FEATURE[1] * 0.42))
         ratio = min(room[0] / art.width, room[1] / art.height)
         art = art.resize(

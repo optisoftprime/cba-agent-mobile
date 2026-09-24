@@ -74,7 +74,8 @@
     "doctor": "npx expo-doctor",
     "check:theme": "node scripts/check-theme.js",
     "check:locales": "node scripts/check-locales.js",
-    "check": "npm run check:theme && npm run check:locales && npm run lint"
+    "check": "npm run check:theme && npm run check:locales && npm run check:images && npm run lint",
+    "check:images": "node scripts/check-images.js"
   },
   "private": true
 }
