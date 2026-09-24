@@ -20,7 +20,7 @@
     "loan": "Prêt"
   },
   "tasks": {
-    "title": "Tâches du jour",
+    "title": "Remboursements de prêt dus",
     "seeAll": "Tout voir",
     "view": "Voir",
     "loanRepayment": "Remboursement de prêt",
@@ -31,8 +31,8 @@
     },
     "due": "Échéance {{date}}",
     "seeAllCount": "Tout voir ({{count}})",
-    "empty": "Aucune tâche aujourd’hui",
-    "emptyMessage": "Les tâches qui requièrent votre attention aujourd’hui apparaîtront ici."
+    "empty": "Aucun remboursement dû",
+    "emptyMessage": "Les remboursements dus sur les prêts de vos clients apparaîtront ici."
   },
   "activity": {
     "title": "Activité récente",

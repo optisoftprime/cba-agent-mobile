@@ -20,7 +20,7 @@
     "loan": "Loan"
   },
   "tasks": {
-    "title": "Today's tasks",
+    "title": "Loan repayments due",
     "seeAll": "See All",
     "view": "View",
     "loanRepayment": "Loan repayment",
@@ -31,8 +31,8 @@
     },
     "due": "Due {{date}}",
     "seeAllCount": "See all ({{count}})",
-    "empty": "No tasks due today",
-    "emptyMessage": "Tasks that need your attention today will appear here."
+    "empty": "No repayments due",
+    "emptyMessage": "Repayments due on your customers’ loans will appear here."
   },
   "activity": {
     "title": "Recent activity",

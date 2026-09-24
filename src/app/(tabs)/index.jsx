@@ -29,7 +29,7 @@ import { navigateTo } from '@/lib/navigate';
 import { usePermission, useRefreshWithPermissions } from '@/providers/permission-provider';
 import { useAuth } from '@/providers/auth-provider';
 
-/** Home shows a preview of the task list; the rest lives behind "See all". */
+/** Home shows a preview of the repayment list; the rest lives behind "See all". */
 const TASK_PREVIEW = 3;
 
 const DOT = '·';
@@ -224,6 +224,11 @@ export default function HomeScreen() {
                 onPressAction={loans.press(() => navigateTo('/(tabs)/loans'))}
               />
 
+              {/* `todaysTasks` is the server's name, but every entry is a loan
+                  repayment — { loanCode, customerName, amount, dueDate,
+                  dueStatus } and nothing else — and on live data they are
+                  mostly OVERDUE, from months back. "Today's tasks" promised
+                  something this list is not. */}
               {data.todaysTasks?.length ? (
                 data.todaysTasks.slice(0, TASK_PREVIEW).map((task) => (
                   // loanCode repeats across due dates, so it can't key a row alone.
