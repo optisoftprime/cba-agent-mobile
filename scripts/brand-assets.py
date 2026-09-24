@@ -234,6 +234,12 @@ def main():
         help="only the in-app lockup; leave the icons alone (for a logo we have but no icon artwork yet)",
     )
     parser.add_argument(
+        "--feature-background",
+        default="#000000",
+        help="behind the Play Console feature graphic. NOT the icon's background: the graphic "
+        "carries the full lockup, so its background has to suit the WORDMARK's colour.",
+    )
+    parser.add_argument(
         "--store",
         nargs="?",
         const=os.path.join(os.path.expanduser("~"), "Downloads"),
@@ -285,10 +291,14 @@ def main():
         listing.putalpha(255)
         save(listing, "playStoreIcon.png", folder=args.store)
 
-        # 1024x500 exactly, or the Console refuses it. The lockup sits on the
-        # brand colour, so the wordmark takes the dark-mode treatment.
-        feature = Image.new("RGBA", FEATURE, args.icon_background)
-        art = dark
+        # 1024x500 exactly, or the Console refuses it.
+        #
+        # The LIGHT lockup (the blue wordmark) on a dark background, which is
+        # how the artwork was delivered and how it reads best. Tying this to
+        # the icon's background was a bug: with a white icon background the
+        # white-wordmark lockup went onto white and "ZONE" vanished.
+        feature = Image.new("RGBA", FEATURE, args.feature_background)
+        art = lockup
         room = (round(FEATURE[0] * 0.62), round(FEATURE[1] * 0.42))
         ratio = min(room[0] / art.width, room[1] / art.height)
         art = art.resize(
