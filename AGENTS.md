@@ -129,7 +129,9 @@ The nav bar reappearing transiently on a swipe is Android's behaviour, not a bug
 
 `python scripts/brand-assets.py <lockup.png> --mark <mark.png>` rebuilds all five images into `assets/images/` under the names both files already use, so a rebrand is: run it, `npm run check`, build. It encodes the rules that have cost releases before — **iOS rejects an icon with an alpha channel** (so the icon is flattened onto a background), **Android crops the adaptive icon to a circle** (so the mark is drawn at 66%), a **baked-in white background becomes a white box in dark mode** (so near-white is cut out and the colours un-mixed), and a **dark wordmark vanishes on a dark screen** (so the dark variant whitens neutral pixels only).
 
-Ask the designer for the LOCKUP and the MARK separately, as SVG or ≥1024px: without a separate mark the icon is the whole wide lockup shrunk into a square, which reads as nothing at launcher size.
+Ask the designer for the LOCKUP and the MARK separately, as SVG or ≥1024px: without a separate mark the icon is the whole wide lockup shrunk into a square, which reads as nothing at launcher size. Keep what they send in `assets/brand/` and commit it — everything else is generated, so without the source the next rebrand starts from a screenshot.
+
+`--store` also writes the two Play Console listing images (512×512 icon, 1024×500 feature graphic) to your Downloads folder. They are uploaded by hand and are NOT in the app bundle. Generated sizes never change (240px lockup, 1024 icons), so a new logo swaps in without touching a layout — the lockup's WIDTH follows its own aspect ratio, because `ui/brand-logo` scales by height.
 
 ## Theming — one file
 `src/theme/brand.js` is the ONLY place a colour is written down. Change it and the whole app follows.

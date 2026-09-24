@@ -14,6 +14,12 @@ in dark mode. This does the lot:
                                                safe circle Android masks to
     assets/images/adaptiveIconMonochrome.png   Android themed icons, silhouette
 
+and, with --store <dir>, the two images the Play Console listing asks for —
+they are NOT in the app bundle and must be uploaded by hand:
+
+    playStoreIcon.png       512x512, opaque
+    featureGraphic.png      1024x500, opaque, the lockup on the brand colour
+
 The rules this encodes, each of which has cost us a release before:
   * iOS icons must have NO alpha channel, so the icon is flattened onto white.
   * Android masks the adaptive icon to a circle and crops ~25% off each edge,
@@ -24,7 +30,11 @@ The rules this encodes, each of which has cost us a release before:
   * A dark wordmark vanishes on a dark screen, so the dark variant repaints
     NEUTRAL (grey/black) pixels white and leaves coloured ones alone.
 
-Needs Pillow (`pip install pillow`). A dev tool, not part of the app bundle.
+Needs Pillow (`pip install pillow`). An SVG source needs `pip install cairosvg`
+as well, since Pillow cannot read SVG. A dev tool, not part of the app bundle.
+
+Keep the SOURCE artwork in `assets/brand/` and commit it: every image below is
+generated, so without the source a future rebrand starts from a screenshot.
 
 The source should be the biggest available: an export at 1024px or more, or a
 PNG rendered from the SVG. Anything smaller is upscaled and will look soft —
@@ -45,6 +55,8 @@ IMAGES = os.path.join(ROOT, "assets", "images")
 
 LOCKUP_HEIGHT = 240  # what the splash and receipt draw from
 ICON = 1024
+STORE_ICON = 512  # Play Console listing icon
+FEATURE = (1024, 500)  # Play Console feature graphic, fixed by Google
 SAFE_AREA = 0.66  # Android crops the adaptive icon to roughly this
 NEUTRAL_RANGE = 70  # max channel spread still counted as grey/black, not colour
 WHITE_FLOOR = 8  # alpha below this is background, not a faint edge
@@ -108,8 +120,18 @@ def centred_on(canvas_size, image, background=None):
     return canvas
 
 
-def save(image, name):
-    path = os.path.join(IMAGES, name)
+def brand_primary(default="#023C69"):
+    """The one place a colour is written down is brand.js — read it, don't guess."""
+    try:
+        source = open(os.path.join(ROOT, "src", "theme", "brand.js"), encoding="utf-8").read()
+        match = re.search(r"primary:\s*'(#[0-9a-fA-F]{6})'", source)
+        return match.group(1) if match else default
+    except OSError:
+        return default
+
+
+def save(image, name, folder=None):
+    path = os.path.join(folder or IMAGES, name)
     image.save(path, optimize=True)
     print(f"  {name:<32} {image.size[0]}x{image.size[1]}  {os.path.getsize(path) // 1024}KB")
 
@@ -117,9 +139,16 @@ def save(image, name):
 def main():
     parser = argparse.ArgumentParser(description="Build the app's branded images from one logo.")
     parser.add_argument("source", help="the full lockup (mark + wordmark), as big as you have")
+    # Same names, same sizes, same place — the app and app.json need no edit.
     parser.add_argument("--mark", help="the mark on its own, for the icons; defaults to the source")
     parser.add_argument(
         "--icon-background", default="#FFFFFF", help="behind the iOS icon, which cannot be transparent"
+    )
+    parser.add_argument(
+        "--store",
+        nargs="?",
+        const=os.path.join(os.path.expanduser("~"), "Downloads"),
+        help="also write the Play Console listing images here (default: your Downloads folder)",
     )
     args = parser.parse_args()
 
@@ -146,6 +175,30 @@ def main():
     silhouette = Image.new("RGBA", mark.size)
     silhouette.putdata([(255, 255, 255, a) for (*_, a) in mark.convert("RGBA").getdata()])
     save(centred_on(ICON, silhouette), "adaptiveIconMonochrome.png")
+
+    if args.store:
+        os.makedirs(args.store, exist_ok=True)
+        print(f"\nfor the Play Console listing, in {args.store}:")
+
+        # Its own upload, shown beside the app name — the launcher artwork at
+        # the size Google asks for.
+        save(
+            centred_on(STORE_ICON, mark, background=args.icon_background).convert("RGB"),
+            "playStoreIcon.png",
+            folder=args.store,
+        )
+
+        # 1024x500 exactly, or the Console refuses it. The lockup sits on the
+        # brand colour, so the wordmark takes the dark-mode treatment.
+        feature = Image.new("RGBA", FEATURE, brand_primary())
+        art = whiten_neutrals(lockup)
+        room = (round(FEATURE[0] * 0.62), round(FEATURE[1] * 0.42))
+        ratio = min(room[0] / art.width, room[1] / art.height)
+        art = art.resize(
+            (max(1, round(art.width * ratio)), max(1, round(art.height * ratio))), Image.LANCZOS
+        )
+        feature.paste(art, ((FEATURE[0] - art.width) // 2, (FEATURE[1] - art.height) // 2), art)
+        save(feature.convert("RGB"), "featureGraphic.png", folder=args.store)
 
     print("\nNothing else to change: src/theme/brand.js and app.json already point at these names.")
     print("Then: npm run check && npx expo export --platform android, and build.")
