@@ -43,6 +43,7 @@ the script says so rather than quietly shipping a blurry icon.
 
 import argparse
 import os
+import re
 import sys
 
 try:
