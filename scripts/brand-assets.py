@@ -173,6 +173,11 @@ def main():
         "--icon-background", default="#FFFFFF", help="behind the iOS icon, which cannot be transparent"
     )
     parser.add_argument(
+        "--logo-only",
+        action="store_true",
+        help="only the in-app lockup; leave the icons alone (for a logo we have but no icon artwork yet)",
+    )
+    parser.add_argument(
         "--store",
         nargs="?",
         const=os.path.join(os.path.expanduser("~"), "Downloads"),
@@ -193,6 +198,10 @@ def main():
     print("writing:")
     save(scaled_to_height(lockup, LOCKUP_HEIGHT), "receiptLogo.png")
     save(scaled_to_height(whiten_neutrals(lockup), LOCKUP_HEIGHT), "receiptLogoDark.png")
+
+    if args.logo_only:
+        print("\n--logo-only: icons left as they are.")
+        return
 
     # iOS refuses an icon with an alpha channel, so this one is flattened.
     icon = centred_on(ICON, mark, background=args.icon_background)
