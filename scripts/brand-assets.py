@@ -13,6 +13,7 @@ in dark mode. This does the lot:
     assets/images/adaptiveIconForeground.png   Android, transparent, inside the
                                                safe circle Android masks to
     assets/images/adaptiveIconMonochrome.png   Android themed icons, silhouette
+    assets/images/favicon.png              the web build's tab icon
 
 and, with --store <dir>, the two images the Play Console listing asks for —
 they are NOT in the app bundle and must be uploaded by hand:
@@ -64,6 +65,7 @@ IMAGES = os.path.join(ROOT, "assets", "images")
 LOCKUP_HEIGHT = 480
 ICON = 1024
 STORE_ICON = 512  # Play Console listing icon
+FAVICON = 196  # the web build's browser-tab icon
 FEATURE = (1024, 500)  # Play Console feature graphic, fixed by Google
 SAFE_AREA = 0.66  # Android crops the adaptive icon to roughly this
 NEUTRAL_RANGE = 70  # max channel spread still counted as grey/black, not colour
@@ -263,6 +265,8 @@ def main():
     save(icon.convert("RGB"), "appIcon.png")
 
     save(centred_on(ICON, mark), "adaptiveIconForeground.png")
+
+    save(centred_on(FAVICON, mark, background=args.icon_background).convert("RGB"), "favicon.png")
 
     silhouette = Image.new("RGBA", mark.size)
     silhouette.putdata([(255, 255, 255, a) for (*_, a) in mark.convert("RGBA").getdata()])

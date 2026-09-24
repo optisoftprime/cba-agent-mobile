@@ -29,7 +29,16 @@ const MUST_BE_TRANSPARENT = [
   'adaptiveIconForeground.png',
   'adaptiveIconMonochrome.png',
 ];
-const MUST_BE_OPAQUE = ['appIcon.png'];
+const MUST_BE_OPAQUE = ['appIcon.png', 'favicon.png'];
+
+/**
+ * Everything `scripts/brand-assets.py` writes, and nothing else. A branded
+ * image that is not on this list is a LEFTOVER — the previous brand's logo
+ * sitting in the folder waiting to be picked up by the next person who needs
+ * "a logo". That is how a CBA lockup and a template tab icon survived two
+ * rebrands here, one of them 780KB in the repo, referenced by nothing.
+ */
+const EXPECTED = new Set([...MUST_BE_TRANSPARENT, ...MUST_BE_OPAQUE]);
 
 /** Minimal PNG reader: enough to get at the pixels' alpha channel. */
 function readPng(file) {
@@ -123,6 +132,17 @@ function paeth(left, up, upLeft) {
 }
 
 const problems = [];
+
+for (const entry of fs.readdirSync(IMAGES, { withFileTypes: true })) {
+  if (entry.isDirectory()) {
+    problems.push(`assets/images/${entry.name}/ — a folder of images nothing generates; delete it`);
+  } else if (!EXPECTED.has(entry.name)) {
+    problems.push(
+      `${entry.name} is not one of the generated brand images — a leftover from an older ` +
+        'brand. Delete it, or add it to scripts/brand-assets.py if it is meant to exist.',
+    );
+  }
+}
 
 for (const name of MUST_BE_TRANSPARENT) {
   const file = path.join(IMAGES, name);
