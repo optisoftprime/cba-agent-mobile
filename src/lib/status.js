@@ -42,7 +42,15 @@ export const SCHEDULE_STATUS_TONE = {
   missed: 'danger',
 };
 
-/** Collection movements. Values come from core banking, so look them up lowercased. */
+/**
+ * Collection movements. Values come from core banking, so look them up
+ * lowercased.
+ *
+ * A movement's status is its status NOW, not what it was when captured:
+ * Pending → Posted or Declined once the Request Center decides, and Posted →
+ * Reversed if it is unwound. `declined` and `reversed` both read as failures
+ * because in both cases the money is not where the agent last saw it.
+ */
 export const COLLECTION_STATUS_TONE = {
   successful: 'success',
   success: 'success',
@@ -50,6 +58,7 @@ export const COLLECTION_STATUS_TONE = {
   completed: 'success',
   pending: 'warning',
   failed: 'danger',
+  declined: 'danger',
   reversed: 'danger',
 };
 

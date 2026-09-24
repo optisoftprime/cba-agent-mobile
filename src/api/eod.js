@@ -38,6 +38,10 @@ export const EOD_KEY = ['eod'];
 export const eodCurrentQuery = {
   queryKey: [...EOD_KEY, 'current'],
   queryFn: () => send(api.get(endpoints.eod.current)),
+  // The server recomputes this on every read: an escalation approved (or
+  // declined, or reversed) after a count changes the variance and the status.
+  // A cached position would tell the agent they are short when they are not.
+  staleTime: 0,
 };
 
 /** Past days as an infinite list. Note the items live under `items`. */

@@ -4,7 +4,9 @@ const { symbol, locale } = brand.currency;
 
 /** ₦42,850 — full amount with thousand separators, in the brand's currency. */
 export function formatCurrency(amount) {
-  return `${symbol}${Number(amount).toLocaleString(locale, { maximumFractionDigits: 2 })}`;
+  const value = Number(amount);
+  const sign = value < 0 ? '-' : '';
+  return `${sign}${symbol}${Math.abs(value).toLocaleString(locale, { maximumFractionDigits: 2 })}`;
 }
 
 /**
@@ -12,7 +14,12 @@ export function formatCurrency(amount) {
  * receipted, where a bare "₦50,000" reads as an estimate.
  */
 export function formatCurrencyPrecise(amount) {
-  return `${symbol}${Number(amount).toLocaleString(locale, {
+  const value = Number(amount);
+  // The sign leads: cash in hand can go negative (the till has gone positive,
+  // which is an invalid state the agent has to SEE), and "₦-6,000" reads as a
+  // typo where "-₦6,000" reads as a figure.
+  const sign = value < 0 ? '-' : '';
+  return `${sign}${symbol}${Math.abs(value).toLocaleString(locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
@@ -28,9 +35,12 @@ export function maskAccount(number, visible = 4) {
 /** ₦4.5M — compact, for summary tiles where space is tight. */
 export function formatCurrencyCompact(amount) {
   const value = Number(amount);
-  if (Math.abs(value) >= 1_000_000_000) return `${symbol}${trim(value / 1_000_000_000)}B`;
-  if (Math.abs(value) >= 1_000_000) return `${symbol}${trim(value / 1_000_000)}M`;
-  if (Math.abs(value) >= 1_000) return `${symbol}${trim(value / 1_000)}K`;
+  const size = Math.abs(value);
+  // Sign first, as in formatCurrencyPrecise.
+  const sign = value < 0 ? '-' : '';
+  if (size >= 1_000_000_000) return `${sign}${symbol}${trim(size / 1_000_000_000)}B`;
+  if (size >= 1_000_000) return `${sign}${symbol}${trim(size / 1_000_000)}M`;
+  if (size >= 1_000) return `${sign}${symbol}${trim(size / 1_000)}K`;
   return formatCurrency(value);
 }
 
