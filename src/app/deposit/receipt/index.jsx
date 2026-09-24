@@ -1,6 +1,7 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useLocalSearchParams } from 'expo-router';
-import { ScrollView, Share, Text, View } from 'react-native';
+import { useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
@@ -9,6 +10,10 @@ import { Button } from '@/components/ui/button';
 import { DetailRows } from '@/components/ui/detail-rows';
 import { ScallopedEdge } from '@/components/ui/scalloped-edge';
 import { formatCurrencyPrecise, formatDateTime, maskAccount } from '@/lib/format';
+import { agentView } from '@/lib/agent';
+import { buildReceiptHtml, shareReceiptPdf } from '@/lib/receipt-pdf';
+import { toast } from '@/lib/toast';
+import { useAuth } from '@/providers/auth-provider';
 import { brand } from '@/theme/brand';
 import { useTheme } from '@/theme/theme-provider';
 
@@ -22,6 +27,7 @@ import { useTheme } from '@/theme/theme-provider';
 export default function DepositReceiptScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const agent = agentView(useAuth().user);
   const {
     customerName,
     accountNumber,
@@ -52,21 +58,64 @@ export default function DepositReceiptScreen() {
       : []),
     { key: 'txn', label: t('deposit.receipt.transactionId'), value: String(transactionId ?? '') },
     { key: 'when', label: t('deposit.receipt.dateTime'), value: when },
+    // Who took the cash. A customer holding a receipt for money handed to a
+    // person needs that person named on it, not just an account number.
+    ...(agent?.name
+      ? [
+          {
+            key: 'agent',
+            label: t('deposit.receipt.receivedBy'),
+            value: [agent.name, agent.code].filter(Boolean).join(' · '),
+          },
+        ]
+      : []),
     // The server's own word, not a hardcoded "Successful" — a Pending deposit
     // must not print a receipt that says the money is in.
     { key: 'status', label: t('deposit.receipt.statusLabel'), value: String(status ?? '') },
   ];
 
-  const onShare = () => {
-    Share.share({
-      message: t('deposit.receipt.shareMessage', {
-        appName: brand.appName,
-        amount: depositedAmount,
-        account: maskedAccount,
-        transactionId: String(transactionId ?? ''),
-        dateTime: when,
-      }),
-    });
+  const [sharing, setSharing] = useState(false);
+
+  /**
+   * Shares the receipt as a PDF FILE, not as a line of text — a customer's
+   * proof of payment has to be a document they can keep, print or forward, and
+   * a typed message is proof of nothing.
+   *
+   * The PDF prints the same rows on screen, from the same server values, so
+   * the paper and the screen can never disagree.
+   */
+  const onShare = async () => {
+    if (sharing) return;
+    setSharing(true);
+
+    try {
+      const shared = await shareReceiptPdf({
+        html: buildReceiptHtml({
+          posted,
+          documentTitle: t('deposit.receipt.title'),
+          subtitle: t('deposit.receipt.subtitle'),
+          amountLabel: t('deposit.receipt.amount'),
+          amount: depositedAmount,
+          status: String(status ?? ''),
+          // A pending deposit says so on the paper too, or the customer walks
+          // away with a receipt for money that has not arrived.
+          note: posted ? null : t('deposit.receipt.pendingNote'),
+          rows,
+          footer: t('deposit.receipt.footer', { appName: brand.appName }),
+        }),
+        // What the customer sees the file called.
+        fileName: t('deposit.receipt.fileName', {
+          reference: String(transactionId ?? '').replace(/[^\w-]/g, '') || 'receipt',
+        }),
+        dialogTitle: t('deposit.receipt.title'),
+      });
+
+      if (!shared) toast.info(t('deposit.receipt.shareUnavailable'));
+    } catch (error) {
+      toast.error(error?.message ?? t('common.errors.generic'));
+    } finally {
+      setSharing(false);
+    }
   };
 
   return (
@@ -101,7 +150,9 @@ export default function DepositReceiptScreen() {
           <Button
             variant="outline"
             size="lg"
+            icon="share-outline"
             label={t('deposit.receipt.share')}
+            loading={sharing}
             onPress={onShare}
           />
         </View>

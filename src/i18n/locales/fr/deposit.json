@@ -75,7 +75,12 @@
     "dateTime": "Date et heure",
     "statusLabel": "Statut",
     "share": "Partager le reçu",
-    "shareMessage": "Reçu de dépôt {{appName}}\n{{amount}} vers {{account}}\nTransaction {{transactionId}} le {{dateTime}}",
-    "newBalance": "Nouveau solde"
+    "newBalance": "Nouveau solde",
+    "subtitle": "Reçu de dépôt",
+    "pendingNote": "Ce dépôt est en attente d'approbation. L'argent n'a pas encore atteint le compte.",
+    "footer": "Généré par {{appName}}. Conservez ce reçu comme preuve de paiement.",
+    "fileName": "recu-{{reference}}.pdf",
+    "shareUnavailable": "Ce téléphone n'a aucune application pour partager le reçu.",
+    "receivedBy": "Reçu par"
   }
 }
