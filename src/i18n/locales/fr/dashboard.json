@@ -37,7 +37,15 @@
   "activity": {
     "title": "Activité récente",
     "empty": "Aucune activité",
-    "emptyMessage": "Les dépôts et remboursements enregistrés apparaîtront ici."
+    "emptyMessage": "Les dépôts et remboursements enregistrés apparaîtront ici.",
+    "movement": "Détails du mouvement",
+    "amount": "Montant",
+    "status": "Statut",
+    "customer": "Client",
+    "account": "Compte",
+    "narration": "Libellé",
+    "transactionId": "ID de transaction",
+    "dateTime": "Date et heure"
   },
   "today": {
     "collected": "Encaissé aujourd'hui",

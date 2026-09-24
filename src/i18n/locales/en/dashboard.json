@@ -37,7 +37,15 @@
   "activity": {
     "title": "Recent activity",
     "empty": "No activity yet",
-    "emptyMessage": "Deposits and repayments you record will appear here."
+    "emptyMessage": "Deposits and repayments you record will appear here.",
+    "movement": "Movement details",
+    "amount": "Amount",
+    "status": "Status",
+    "customer": "Customer",
+    "account": "Account",
+    "narration": "Narration",
+    "transactionId": "Transaction ID",
+    "dateTime": "Date & time"
   },
   "today": {
     "collected": "Collected today",

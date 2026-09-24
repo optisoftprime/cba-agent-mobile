@@ -58,7 +58,13 @@ export default function EodHistoryScreen() {
 
   const statusTone = (status) => EOD_STATUS_TONE[String(status ?? '').toLowerCase()] ?? 'neutral';
 
-  /** The whole record, in the order it is read: what was expected, then what was found. */
+  /**
+   * EVERY field the server sends for a day, in the order it is read: what was
+   * expected, then what was found, then who touched it. Nothing is dropped for
+   * being empty — on a screen whose whole job is "show me the full report", a
+   * missing field is itself the answer to a question ("has anyone resolved
+   * this?"), so it reads as a dash rather than vanishing.
+   */
   const reportRows = (day) =>
     [
       { key: 'date', label: t('eod.report.businessDate'), value: formatDate(day.businessDate) },
@@ -81,23 +87,23 @@ export default function EodHistoryScreen() {
         value: varianceLabel(t, day.variance),
         tone: VARIANCE_TONE[describeVariance(day.variance).kind],
       },
-      day.submittedAt
-        ? {
-            key: 'submittedAt',
-            label: t('eod.position.submittedAt'),
-            value: formatDateTime(day.submittedAt),
-          }
-        : null,
-      day.submittedBy
-        ? { key: 'submittedBy', label: t('eod.report.submittedBy'), value: day.submittedBy }
-        : null,
-      day.resolvedBy
-        ? { key: 'resolvedBy', label: t('eod.report.resolvedBy'), value: day.resolvedBy }
-        : null,
-      day.resolutionNote
-        ? { key: 'note', label: t('eod.position.resolution'), value: day.resolutionNote }
-        : null,
-    ].filter(Boolean);
+      {
+        key: 'submittedAt',
+        label: t('eod.position.submittedAt'),
+        value: day.submittedAt ? formatDateTime(day.submittedAt) : NO_FIGURE,
+      },
+      { key: 'submittedBy', label: t('eod.report.submittedBy'), value: day.submittedBy || NO_FIGURE },
+      { key: 'resolvedBy', label: t('eod.report.resolvedBy'), value: day.resolvedBy || NO_FIGURE },
+      {
+        key: 'note',
+        label: t('eod.position.resolution'),
+        value: day.resolutionNote || NO_FIGURE,
+      },
+      { key: 'agent', label: t('eod.report.agentCode'), value: day.agentCode || NO_FIGURE },
+      // The record's own id, last: an agent quoting a day to support needs
+      // something the back office can look up.
+      { key: 'uuid', label: t('eod.report.reference'), value: day.uuid || NO_FIGURE },
+    ];
 
   return (
     <View className="flex-1 bg-background">

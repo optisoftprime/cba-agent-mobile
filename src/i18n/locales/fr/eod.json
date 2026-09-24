@@ -64,6 +64,8 @@
     "title": "Rapport de fin de journée",
     "businessDate": "Date comptable",
     "submittedBy": "Soumis par",
-    "resolvedBy": "Résolu par"
+    "resolvedBy": "Résolu par",
+    "agentCode": "Code de l'agent",
+    "reference": "Référence de l'enregistrement"
   }
 }

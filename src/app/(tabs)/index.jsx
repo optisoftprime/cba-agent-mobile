@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -12,6 +13,7 @@ import { ActivityList } from '@/components/ui/activity-list';
 import { AlertBanner } from '@/components/ui/alert-banner';
 import { BalancePanel } from '@/components/ui/balance-panel';
 import { Button } from '@/components/ui/button';
+import { DetailsModal } from '@/components/ui/details-modal';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { MetricPanel } from '@/components/ui/metric-panel';
@@ -33,6 +35,17 @@ import { useAuth } from '@/providers/auth-provider';
 const TASK_PREVIEW = 3;
 
 const DOT = '·';
+
+/** Movement status -> a `ui/details-modal` tone. Declined and Reversed are failures. */
+const MOVEMENT_TONE = {
+  posted: 'success',
+  successful: 'success',
+  completed: 'success',
+  pending: 'warning',
+  declined: 'danger',
+  reversed: 'danger',
+  failed: 'danger',
+};
 const EMDASH = '—';
 
 export default function HomeScreen() {
@@ -42,6 +55,8 @@ export default function HomeScreen() {
   const ajo = usePermission(Permission.ajo);
   const loans = usePermission(Permission.loanCollection);
   const agent = agentView(useAuth().user);
+  // A movement carries seven fields; a row shows three lines of them.
+  const [openMovement, setOpenMovement] = useState(null);
 
   const { data, isPending, isError, error, refetch, isRefetching } = useQuery(dashboardQuery);
 
@@ -266,6 +281,7 @@ export default function HomeScreen() {
                       .filter(Boolean)
                       .join(` ${DOT} `),
                     timestamp: formatDateTime(entry.capturedAt),
+                    onPress: () => setOpenMovement(entry),
                   }))}
                 />
               ) : (
@@ -280,6 +296,54 @@ export default function HomeScreen() {
           </>
         ) : null}
       </ScrollView>
+
+      {/* The whole movement: the reference an agent reads out to support, and
+          the status, which the row shows only when there is no narration. */}
+      <DetailsModal
+        visible={openMovement !== null}
+        title={t('dashboard.activity.movement')}
+        subtitle={openMovement?.capturedAt ? formatDateTime(openMovement.capturedAt) : undefined}
+        rows={openMovement ? movementRows(t, openMovement) : []}
+        onClose={() => setOpenMovement(null)}
+      />
     </View>
   );
+}
+
+/** Every field the server sends for a movement; a missing one reads as a dash. */
+function movementRows(t, movement) {
+  return [
+    { key: 'amount', label: t('dashboard.activity.amount'), value: formatCurrency(movement.amount) },
+    {
+      key: 'status',
+      label: t('dashboard.activity.status'),
+      value: movement.status || EMDASH,
+      tone: MOVEMENT_TONE[String(movement.status ?? '').toLowerCase()],
+    },
+    {
+      key: 'customer',
+      label: t('dashboard.activity.customer'),
+      value: movement.customerName || EMDASH,
+    },
+    {
+      key: 'account',
+      label: t('dashboard.activity.account'),
+      value: movement.accountNumber || EMDASH,
+    },
+    {
+      key: 'narration',
+      label: t('dashboard.activity.narration'),
+      value: movement.narration || EMDASH,
+    },
+    {
+      key: 'txn',
+      label: t('dashboard.activity.transactionId'),
+      value: movement.transactionId || EMDASH,
+    },
+    {
+      key: 'when',
+      label: t('dashboard.activity.dateTime'),
+      value: movement.capturedAt ? formatDateTime(movement.capturedAt) : EMDASH,
+    },
+  ];
 }

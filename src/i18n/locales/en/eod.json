@@ -64,6 +64,8 @@
     "title": "End of day report",
     "businessDate": "Business date",
     "submittedBy": "Submitted by",
-    "resolvedBy": "Resolved by"
+    "resolvedBy": "Resolved by",
+    "agentCode": "Agent code",
+    "reference": "Record reference"
   }
 }
