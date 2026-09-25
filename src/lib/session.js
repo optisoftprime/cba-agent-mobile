@@ -56,6 +56,16 @@ export async function saveSession(loginData) {
       ? save(StorageKeys.refreshToken, refreshToken)
       : remove(StorageKeys.refreshToken),
     save(StorageKeys.user, { ...details, expiresAt: expiresAtFrom(details.expiresIn) }),
+    // The backend is the authority on whether this handset is registered. If it
+    // says activation is NOT required, the device is activated — even when the
+    // agent never ran the in-app OTP flow on this install (they logged into an
+    // account whose device was already registered). Recording it here, not only
+    // in completeActivation(), is what stops the login screen offering "Activate
+    // device" after such an agent signs out — the flag survives logout, the
+    // session does not.
+    details.deviceActivationRequired === false
+      ? save(StorageKeys.deviceActivated, true)
+      : Promise.resolve(),
   ]);
 
   return getUser();

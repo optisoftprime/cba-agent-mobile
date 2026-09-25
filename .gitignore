@@ -52,3 +52,7 @@ debug.log
 # one-off API reports for the backend team, not part of the app
 api-report.md
 api-gaps.md
+
+# Signing credentials: the keystore AND the passwords that open it.
+credentials.json
+*.keystore
