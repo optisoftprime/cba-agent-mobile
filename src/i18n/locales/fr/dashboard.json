@@ -60,6 +60,6 @@
   "hold": {
     "title": "Blocage de réconciliation",
     "message": "Les opérations sont suspendues jusqu’à la réconciliation de votre agence. Contactez votre superviseur.",
-    "action": "Ouvrir la fin de journée"
+    "action": "Reverser l'argent à l'agence"
   }
 }

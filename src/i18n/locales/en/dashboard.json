@@ -60,6 +60,6 @@
   "hold": {
     "title": "Reconciliation hold",
     "message": "Posting is on hold until your branch reconciles. Contact your supervisor.",
-    "action": "Open end of day"
+    "action": "Remit cash to branch"
   }
 }

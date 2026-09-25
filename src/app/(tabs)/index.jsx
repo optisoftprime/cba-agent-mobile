@@ -102,14 +102,17 @@ export default function HomeScreen() {
         {data ? (
           <>
             {/* A work-blocking condition stays on screen, unlike a toast. It opens
-                End of day because a Balanced count is what lifts the hold. */}
+                Remit cash: a hold means the agent is holding cash they need to
+                hand back to the branch before the day can reconcile, and that is
+                the action they came to the banner to take. End of day is still
+                one tap away under "Today's money" for the balanced-count case. */}
             {data.reconciliationHold ? (
               <View className="-mt-8 px-4 pb-4">
                 <AlertBanner
                   title={t('dashboard.hold.title')}
                   message={data.holdReason ?? t('dashboard.hold.message')}
                   actionLabel={t('dashboard.hold.action')}
-                  onPress={() => navigateTo('/eod')}
+                  onPress={() => navigateTo('/remittance')}
                 />
               </View>
             ) : null}
