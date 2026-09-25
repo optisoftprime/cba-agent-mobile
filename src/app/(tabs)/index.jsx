@@ -22,7 +22,6 @@ import { StatCard } from '@/components/ui/stat-card';
 import { agentView } from '@/lib/agent';
 import {
   formatCurrency,
-  formatCurrencyCompact,
   formatDate,
   formatDateTime,
   greetingKey,
@@ -138,7 +137,7 @@ export default function HomeScreen() {
                 />
                 <StatCard
                   label={t('dashboard.stats.collections')}
-                  value={formatCurrencyCompact(data.collectionsTotal ?? 0)}
+                  value={formatCurrency(data.collectionsTotal ?? 0)}
                   tone="bg-tile-4"
                 />
               </View>

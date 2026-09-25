@@ -22,13 +22,27 @@ export function BalancePanel({ label, value, footerLeft, footerRight, className 
       style={{ borderRadius: 16 }}
       className={className}>
       <View className="px-5 py-4">
-        <Text className="text-[13px] text-on-panel/75">{label}</Text>
-        <Text className="mt-1.5 text-[28px] font-bold text-on-panel">{value}</Text>
+        <Text className="text-[13px] text-on-panel/75" numberOfLines={1}>
+          {label}
+        </Text>
+        {/* The headline figure shrinks to fit rather than overflow: a large
+            balance must stay whole and on one line. */}
+        <Text
+          className="mt-1.5 text-[28px] font-bold text-on-panel"
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.5}>
+          {value}
+        </Text>
 
         {footerLeft || footerRight ? (
           <View className="mt-2 flex-row items-center justify-between gap-3">
-            <Text className="text-[13px] text-on-panel/75">{footerLeft}</Text>
-            <Text className="text-[13px] text-on-panel/75">{footerRight}</Text>
+            <Text className="shrink text-[13px] text-on-panel/75" numberOfLines={1}>
+              {footerLeft}
+            </Text>
+            <Text className="shrink text-[13px] text-on-panel/75" numberOfLines={1}>
+              {footerRight}
+            </Text>
           </View>
         ) : null}
       </View>

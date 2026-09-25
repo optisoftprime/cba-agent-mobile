@@ -28,12 +28,17 @@ export function DetailRows({ rows, tone = 'card', className = '' }) {
           className={`flex-row items-center justify-between gap-4 px-4 py-4 ${
             index < rows.length - 1 ? `border-b ${style.divider}` : ''
           }`}>
-          <Text className={`text-[14px] ${style.label}`}>{row.label}</Text>
+          {/* The label keeps its width; the value takes the rest and shrinks
+              into it. Without shrink, a long value (a reference UUID) rendered
+              at its full content width and ran back over the label. */}
+          <Text className={`shrink-0 text-[14px] ${style.label}`} numberOfLines={1}>
+            {row.label}
+          </Text>
           {typeof row.value === 'string' || typeof row.value === 'number' ? (
             (() => {
               const text = (
                 <Text
-                  className={`text-[14px] font-medium ${
+                  className={`shrink text-[14px] font-medium ${
                     row.tone === 'link' ? 'text-primary' : style.value
                   }`}
                   numberOfLines={1}>
@@ -42,13 +47,13 @@ export function DetailRows({ rows, tone = 'card', className = '' }) {
               );
 
               return row.copyable ? (
-                <View className="flex-1 items-end">
-                  <Copyable value={row.value} label={row.label}>
+                <View className="flex-1 flex-row items-center justify-end">
+                  <Copyable value={row.value} label={row.label} className="shrink">
                     {text}
                   </Copyable>
                 </View>
               ) : (
-                <View className="flex-1 items-end">{text}</View>
+                <View className="flex-1 flex-row justify-end">{text}</View>
               );
             })()
           ) : (

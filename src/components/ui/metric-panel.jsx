@@ -13,7 +13,13 @@ export function MetricPanel({ items, className = '' }) {
           <Text className="text-[11px] text-ink-muted" numberOfLines={1}>
             {item.label}
           </Text>
-          <Text className="mt-1 text-[15px] font-bold text-ink" numberOfLines={1}>
+          {/* Shrink rather than truncate: a chopped "₦1,000,00" is a wrong
+              figure, a smaller "₦10,000,000" is still right. */}
+          <Text
+            className="mt-1 text-[15px] font-bold text-ink"
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}>
             {item.value}
           </Text>
         </View>
