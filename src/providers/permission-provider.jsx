@@ -4,7 +4,7 @@ import { AppState } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { setPermissionDeniedHandler } from '@/api/client';
-import { permissionsQuery } from '@/api/permissions';
+import { isFeatureDisabled, permissionsQuery } from '@/api/permissions';
 import { useAuth } from '@/providers/auth-provider';
 import { PermissionDeniedModal } from '@/components/ui/permission-denied-modal';
 
@@ -51,11 +51,11 @@ export function PermissionProvider({ children }) {
     enabled: Boolean(user),
   });
 
-  // The code the agent just tried to use. `null` = nothing refused; a code
-  // names the feature; `''` means the SERVER refused and `serverMessage` has
-  // the wording.
-  const [deniedCode, setDeniedCode] = useState(null);
-  const [serverMessage, setServerMessage] = useState(null);
+  // What to say in the modal, or null when nothing is refused. `reason` picks
+  // the wording: 'permission' (ask your administrator), 'disabled' (the feature
+  // is off server-side), or 'server' (the server refused a call, and `message`
+  // carries its own words). `code` names the feature for the permission case.
+  const [denied, setDenied] = useState(null);
 
   const granted = useMemo(
     () => new Set((data ?? []).map((entry) => entry?.code).filter(Boolean)),
@@ -84,8 +84,14 @@ export function PermissionProvider({ children }) {
 
   const guard = useCallback(
     (code, action) => {
+      // A disabled feature is refused whatever the agent's permissions — the
+      // backend has taken it down, so the permission list is beside the point.
+      if (isFeatureDisabled(code)) {
+        setDenied({ reason: 'disabled', code });
+        return undefined;
+      }
       if (can(code)) return action?.();
-      setDeniedCode(code);
+      setDenied({ reason: 'permission', code });
       return undefined;
     },
     [can],
@@ -97,8 +103,7 @@ export function PermissionProvider({ children }) {
   // in src/api/client.js.
   useEffect(() => {
     setPermissionDeniedHandler((message) => {
-      setServerMessage(message ?? null);
-      setDeniedCode('');
+      setDenied({ reason: 'server', message: message ?? null });
       // Our copy was demonstrably wrong — pull the real one so the rest of the
       // app stops offering whatever was just refused.
       refresh();
@@ -114,10 +119,7 @@ export function PermissionProvider({ children }) {
     return () => subscription.remove();
   }, [refresh]);
 
-  const close = useCallback(() => {
-    setDeniedCode(null);
-    setServerMessage(null);
-  }, []);
+  const close = useCallback(() => setDenied(null), []);
 
   const value = useMemo(() => ({ can, guard, refresh }), [can, guard, refresh]);
 
@@ -126,16 +128,20 @@ export function PermissionProvider({ children }) {
       {children}
 
       <PermissionDeniedModal
-        visible={deniedCode !== null}
+        visible={denied !== null}
+        reason={denied?.reason}
         // The API only returns labels for permissions the agent HAS, so a
         // denied one has no label to borrow — it comes from the locale files.
         // When the SERVER refused the call we have its words instead, which
         // are more specific than anything we could name locally.
         feature={
-          serverMessage ||
-          (deniedCode ? t(`permissions.codes.${deniedCode}`, { defaultValue: '' }) : '')
+          denied?.reason === 'server'
+            ? denied.message
+            : denied?.code
+              ? t(`permissions.codes.${denied.code}`, { defaultValue: '' })
+              : ''
         }
-        rawMessage={Boolean(serverMessage)}
+        rawMessage={denied?.reason === 'server'}
         onClose={close}
       />
     </PermissionContext.Provider>
@@ -161,18 +167,22 @@ export function usePermissions() {
  */
 export function usePermission(code) {
   const { can, guard } = usePermissions();
-  const allowed = can(code);
+  // A disabled feature is never "allowed", whatever the permission says, so the
+  // control fades and the tap opens the "temporarily unavailable" modal.
+  const disabled = isFeatureDisabled(code);
+  const allowed = !disabled && can(code);
 
   const press = useCallback((action) => () => guard(code, action), [guard, code]);
 
   return useMemo(
     () => ({
       allowed,
+      disabled,
       // Muted enough to read as unavailable, not so faint it looks broken.
       lockedClass: allowed ? '' : 'opacity-50',
       press,
     }),
-    [allowed, press],
+    [allowed, disabled, press],
   );
 }
 

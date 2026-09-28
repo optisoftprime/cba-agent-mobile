@@ -69,6 +69,18 @@
     "description": "Description",
     "thread": "Messages",
     "noMessages": "No replies yet",
-    "noMessagesMessage": "Support replies will appear here."
+    "noMessagesMessage": "Support replies will appear here.",
+    "send": "Send reply",
+    "close": "Close ticket",
+    "replyLabel": "Add a reply",
+    "replyPlaceholder": "Type your message",
+    "closedNote": "This ticket is closed.",
+    "closedTitle": "Ticket closed",
+    "closedMessage": "This ticket has been closed.",
+    "closeConfirm": {
+      "title": "Close this ticket?",
+      "message": "You can still view it, but you will not be able to reply once it is closed.",
+      "confirm": "Close ticket"
+    }
   }
 }

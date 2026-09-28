@@ -1,24 +1,33 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { Permission } from '@/api/permissions';
-import { ticketQuery } from '@/api/support';
+import { closeTicket, replyToTicket, ticketQuery } from '@/api/support';
 import { AppHeader } from '@/components/layout/app-header';
+import { KeyboardView } from '@/components/layout/keyboard-view';
 import { LockedScreen } from '@/components/layout/locked-screen';
+import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { DetailRows } from '@/components/ui/detail-rows';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatusPill } from '@/components/ui/status-pill';
+import { TextField } from '@/components/ui/text-field';
 import { formatDateTime } from '@/lib/format';
 import { TICKET_PRIORITY_TONE, TICKET_STATUS_TONE } from '@/lib/status';
+import { toast } from '@/lib/toast';
 import { usePermission, useRefreshWithPermissions } from '@/providers/permission-provider';
 
 /** "IN_PROGRESS" / "In Progress" both need to reach the same key. */
 const toneKey = (value) => String(value ?? '').toLowerCase().replace(/\s+/g, '_');
+
+/** A closed ticket takes no more replies; a resolved one can be reopened by one. */
+const isClosed = (status) => String(status ?? '').toUpperCase() === 'CLOSED';
 
 /**
  * One ticket and its thread.
@@ -38,6 +47,36 @@ export default function TicketDetailScreen() {
   );
 
   const onRefresh = useRefreshWithPermissions(refetch);
+  const queryClient = useQueryClient();
+
+  const [reply, setReply] = useState('');
+  const [confirmingClose, setConfirmingClose] = useState(false);
+
+  // Reply and close both answer with the whole ticket and its thread, so the
+  // screen updates from the response — no refetch — and the list's counts,
+  // which the ticket screen does not show, are invalidated to catch up.
+  const applyTicket = (ticket) => {
+    if (ticket) queryClient.setQueryData(['ticket', ticketNumber], ticket);
+    queryClient.invalidateQueries({ queryKey: ['tickets'] });
+  };
+
+  const sendReply = useMutation({
+    mutationFn: () => replyToTicket({ ticketNumber, message: reply.trim() }),
+    onSuccess: (ticket) => {
+      applyTicket(ticket);
+      setReply('');
+    },
+    onError: (replyError) => toast.error(replyError.message),
+  });
+
+  const close = useMutation({
+    mutationFn: () => closeTicket(ticketNumber),
+    onSuccess: (ticket) => {
+      applyTicket(ticket);
+      toast.success(t('support.detail.closedTitle'), t('support.detail.closedMessage'));
+    },
+    onError: (closeError) => toast.error(closeError.message),
+  });
 
   const rows = data
     ? [
@@ -89,9 +128,11 @@ export default function TicketDetailScreen() {
         subtitle={data?.ticketNumber ?? ticketNumber}
       />
 
+      <KeyboardView>
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}>
         {isPending ? (
           <View className="overflow-hidden rounded-2xl border border-line bg-card">
@@ -163,9 +204,57 @@ export default function TicketDetailScreen() {
                 message={t('support.detail.noMessagesMessage')}
               />
             )}
+
+            {/* A closed ticket takes no reply and cannot be closed again. */}
+            {isClosed(data.status) ? (
+              <View className="mt-4 rounded-2xl border border-line bg-card-muted p-4">
+                <Text className="text-center text-[13px] text-ink-muted">
+                  {t('support.detail.closedNote')}
+                </Text>
+              </View>
+            ) : (
+              <View className="mt-6 gap-3">
+                <TextField
+                  label={t('support.detail.replyLabel')}
+                  placeholder={t('support.detail.replyPlaceholder')}
+                  value={reply}
+                  onChangeText={setReply}
+                  multiline
+                  editable={!sendReply.isPending}
+                />
+                <Button
+                  label={t('support.detail.send')}
+                  icon="send"
+                  loading={sendReply.isPending}
+                  disabled={!reply.trim()}
+                  onPress={() => sendReply.mutate()}
+                />
+                <Button
+                  variant="outline"
+                  label={t('support.detail.close')}
+                  loading={close.isPending}
+                  onPress={() => setConfirmingClose(true)}
+                />
+              </View>
+            )}
           </>
         )}
       </ScrollView>
+      </KeyboardView>
+
+      <ConfirmDialog
+        visible={confirmingClose}
+        icon="checkmark-done-outline"
+        title={t('support.detail.closeConfirm.title')}
+        message={t('support.detail.closeConfirm.message')}
+        confirmLabel={t('support.detail.closeConfirm.confirm')}
+        cancelLabel={t('common.cancel')}
+        onCancel={() => setConfirmingClose(false)}
+        onConfirm={() => {
+          setConfirmingClose(false);
+          close.mutate();
+        }}
+      />
     </View>
   );
 }

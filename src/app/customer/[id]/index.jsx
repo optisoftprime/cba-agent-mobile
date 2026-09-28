@@ -12,6 +12,7 @@ import {
   customerQuery,
 } from '@/api/customers';
 import { Permission } from '@/api/permissions';
+import { PndNotice } from '@/components/customers/pnd-notice';
 import { AppHeader } from '@/components/layout/app-header';
 import { LockedScreen } from '@/components/layout/locked-screen';
 import { ActivityList } from '@/components/ui/activity-list';
@@ -223,6 +224,7 @@ function AccountsTab({ code }) {
               label: account.status,
               tone: toneFor(ACCOUNT_STATUS_TONE, account.status),
             }}
+            footer={<PndNotice account={account} />}
             trailing={null}
           />
         ))}

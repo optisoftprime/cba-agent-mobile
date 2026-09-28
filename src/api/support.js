@@ -83,3 +83,37 @@ export function createTicket({ subject, description, categoryId, priority, image
     }),
   );
 }
+
+/**
+ * Reply on a ticket. Resolves with the ticket and its full thread, so the
+ * screen re-renders from the response rather than refetching.
+ *
+ * A plain message goes as JSON; a message WITH an image goes multipart (the
+ * server reads `message` and `image` from the form). Image upload is not
+ * configured on the current environment yet — it 400s with a readable message,
+ * the same as creating a ticket with an attachment — so the agent can drop the
+ * image and resend text only.
+ */
+export function replyToTicket({ ticketNumber, message, image }) {
+  if (image?.uri) {
+    const form = new FormData();
+    form.append('message', message ?? '');
+    form.append('image', {
+      uri: image.uri,
+      name: image.name || 'attachment.jpg',
+      type: image.type || 'image/jpeg',
+    });
+    return send(
+      api.post(endpoints.support.ticketReply(ticketNumber), form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }),
+    );
+  }
+
+  return send(api.post(endpoints.support.ticketReply(ticketNumber), { message, imageUrl: null }));
+}
+
+/** Close a ticket. No body; resolves with the ticket and its thread. */
+export function closeTicket(ticketNumber) {
+  return send(api.put(endpoints.support.ticketClose(ticketNumber)));
+}

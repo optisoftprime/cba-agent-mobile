@@ -68,6 +68,13 @@
     "noOverview": "Aucun détail disponible",
     "noAccountsMessage": "Ce client n'a aucun compte que vous gérez.",
     "noLoansMessage": "Ce client n'a aucun prêt sur les comptes que vous gérez.",
-    "noActivityMessage": "Les remboursements et événements apparaîtront ici."
+    "noActivityMessage": "Les remboursements et événements apparaîtront ici.",
+    "pnd": {
+      "blocked": "Aucun débit autorisé",
+      "reasonTierBreach": "le solde dépasse la limite du niveau KYC",
+      "reasonManual": "placé par la banque",
+      "upgradeClears": "Une mise à niveau KYC le lève.",
+      "branchOnly": "Seule l'agence peut le lever."
+    }
   }
 }

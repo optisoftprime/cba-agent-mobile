@@ -17,5 +17,9 @@
   "locked": {
     "title": "This is not available to you",
     "retry": "Check again"
+  },
+  "disabled": {
+    "title": "Temporarily unavailable",
+    "message": "This feature is turned off right now while we sort out an issue. Please check back later."
   }
 }

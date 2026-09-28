@@ -19,9 +19,14 @@ import { useTheme } from '@/theme/theme-provider';
  * Styled from `colors`, not classes: a Modal renders into its own host tree,
  * which the theme's CSS variables do not reach.
  */
-export function PermissionDeniedModal({ visible, feature, rawMessage = false, onClose }) {
+export function PermissionDeniedModal({ visible, feature, rawMessage = false, reason, onClose }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+
+  // A feature the backend has switched off reads differently from one this
+  // agent lacks permission for: no administrator can grant back something that
+  // is broken, so it says "temporarily unavailable", not "ask your admin".
+  const isDisabled = reason === 'disabled';
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -55,7 +60,11 @@ export function PermissionDeniedModal({ visible, feature, rawMessage = false, on
               justifyContent: 'center',
               backgroundColor: colors.warningSoft,
             }}>
-            <Ionicons name="lock-closed-outline" size={40} color={colors.warning} />
+            <Ionicons
+              name={isDisabled ? 'construct-outline' : 'lock-closed-outline'}
+              size={40}
+              color={colors.warning}
+            />
           </View>
 
           <Text
@@ -66,7 +75,7 @@ export function PermissionDeniedModal({ visible, feature, rawMessage = false, on
               color: colors.ink,
               textAlign: 'center',
             }}>
-            {t('permissions.denied.title')}
+            {isDisabled ? t('permissions.disabled.title') : t('permissions.denied.title')}
           </Text>
 
           <Text
@@ -80,11 +89,13 @@ export function PermissionDeniedModal({ visible, feature, rawMessage = false, on
             {/* Name the thing they tried to do when we know it — "You do not
                 have permission to use Deposit" is actionable; a bare "you do
                 not have permission" leaves them guessing which tap caused it. */}
-            {!feature
-              ? t('permissions.denied.message')
-              : rawMessage
-                ? feature
-                : t('permissions.denied.messageNamed', { feature })}
+            {isDisabled
+              ? t('permissions.disabled.message')
+              : !feature
+                ? t('permissions.denied.message')
+                : rawMessage
+                  ? feature
+                  : t('permissions.denied.messageNamed', { feature })}
           </Text>
 
           <Pressable

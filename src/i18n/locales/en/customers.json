@@ -68,6 +68,13 @@
     "noOverview": "No details available",
     "noAccountsMessage": "This customer has no accounts you manage.",
     "noLoansMessage": "This customer has no loans on the accounts you manage.",
-    "noActivityMessage": "Repayments and account events will appear here."
+    "noActivityMessage": "Repayments and account events will appear here.",
+    "pnd": {
+      "blocked": "No debit allowed",
+      "reasonTierBreach": "the balance is over the KYC tier limit",
+      "reasonManual": "placed by the bank",
+      "upgradeClears": "A KYC upgrade lifts it.",
+      "branchOnly": "Only the branch can lift it."
+    }
   }
 }

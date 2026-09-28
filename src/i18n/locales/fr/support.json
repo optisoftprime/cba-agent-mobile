@@ -69,6 +69,18 @@
     "description": "Description",
     "thread": "Messages",
     "noMessages": "Aucune réponse",
-    "noMessagesMessage": "Les réponses de l'assistance apparaîtront ici."
+    "noMessagesMessage": "Les réponses de l'assistance apparaîtront ici.",
+    "send": "Envoyer la réponse",
+    "close": "Fermer le ticket",
+    "replyLabel": "Ajouter une réponse",
+    "replyPlaceholder": "Saisissez votre message",
+    "closedNote": "Ce ticket est fermé.",
+    "closedTitle": "Ticket fermé",
+    "closedMessage": "Ce ticket a été fermé.",
+    "closeConfirm": {
+      "title": "Fermer ce ticket ?",
+      "message": "Vous pourrez toujours le consulter, mais vous ne pourrez plus répondre une fois fermé.",
+      "confirm": "Fermer le ticket"
+    }
   }
 }

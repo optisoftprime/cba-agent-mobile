@@ -46,6 +46,24 @@ export const Permission = {
 };
 
 /**
+ * Features the app has switched OFF because the BACKEND has taken them down —
+ * not because this agent lacks a permission. The two look similar on screen (a
+ * faded control, a modal on tap) but they are different facts and read
+ * differently: a permission says "ask your administrator", a disabled feature
+ * says "temporarily unavailable", because no administrator can grant back
+ * something that is broken server-side.
+ *
+ * Ajo is here while finman fixes problems on it (2026-09). To bring it back,
+ * delete the entry — nothing else changes: the screens, the quick action and
+ * the modal all read this set.
+ */
+export const DISABLED_FEATURES = new Set([Permission.ajo]);
+
+export function isFeatureDisabled(code) {
+  return DISABLED_FEATURES.has(code);
+}
+
+/**
  * Which permission each tab needs. A tab with none is always available.
  * Keyed by the route name expo-router gives the screen — see
  * `src/app/(tabs)/_layout.jsx`.

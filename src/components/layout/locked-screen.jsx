@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { isFeatureDisabled } from '@/api/permissions';
 import { AppHeader } from '@/components/layout/app-header';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -27,6 +28,11 @@ export function LockedScreen({ title, subtitle, code, showBack = false }) {
   const { t } = useTranslation();
   const { refresh } = usePermissions();
 
+  // A feature the backend turned off is not a permission the agent can be
+  // granted, so this screen drops the "check again" retry and says it is
+  // temporarily unavailable — refreshing permissions would change nothing.
+  const disabled = isFeatureDisabled(code);
+
   const [checking, setChecking] = useState(false);
 
   const check = useCallback(async () => {
@@ -39,11 +45,12 @@ export function LockedScreen({ title, subtitle, code, showBack = false }) {
   }, [refresh]);
 
   // Coming back to this screen is itself a reason to re-ask: the agent may have
-  // just been granted access on the other side of a phone call.
+  // just been granted access on the other side of a phone call. Pointless for a
+  // disabled feature, so skip it there.
   useFocusEffect(
     useCallback(() => {
-      refresh();
-    }, [refresh]),
+      if (!disabled) refresh();
+    }, [refresh, disabled]),
   );
 
   const feature = code ? t(`permissions.codes.${code}`, { defaultValue: '' }) : '';
@@ -54,26 +61,32 @@ export function LockedScreen({ title, subtitle, code, showBack = false }) {
 
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
-        refreshControl={<RefreshControl refreshing={checking} onRefresh={check} />}>
+        refreshControl={
+          disabled ? undefined : <RefreshControl refreshing={checking} onRefresh={check} />
+        }>
         <EmptyState
-          icon="lock-closed-outline"
-          title={t('permissions.locked.title')}
+          icon={disabled ? 'construct-outline' : 'lock-closed-outline'}
+          title={disabled ? t('permissions.disabled.title') : t('permissions.locked.title')}
           message={
-            feature
-              ? t('permissions.denied.messageNamed', { feature })
-              : t('permissions.denied.message')
+            disabled
+              ? t('permissions.disabled.message')
+              : feature
+                ? t('permissions.denied.messageNamed', { feature })
+                : t('permissions.denied.message')
           }
         />
 
-        <View className="items-center px-8">
-          <Button
-            variant="outline"
-            icon="refresh-outline"
-            label={t('permissions.locked.retry')}
-            loading={checking}
-            onPress={check}
-          />
-        </View>
+        {disabled ? null : (
+          <View className="items-center px-8">
+            <Button
+              variant="outline"
+              icon="refresh-outline"
+              label={t('permissions.locked.retry')}
+              loading={checking}
+              onPress={check}
+            />
+          </View>
+        )}
       </ScrollView>
     </View>
   );

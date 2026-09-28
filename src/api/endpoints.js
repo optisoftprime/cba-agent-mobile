@@ -71,6 +71,11 @@ export const endpoints = {
   support: {
     tickets: '/api/v1/agent/support/tickets',
     ticket: (number) => `/api/v1/agent/support/tickets/${encodeURIComponent(number)}`,
+    // Tickets now live in core banking, so an agent can follow one, not only
+    // raise it: reply adds a message to the thread, close ends it. Both answer
+    // with the whole ticket and its thread.
+    ticketReply: (number) => `/api/v1/agent/support/tickets/${encodeURIComponent(number)}/reply`,
+    ticketClose: (number) => `/api/v1/agent/support/tickets/${encodeURIComponent(number)}/close`,
     categories: '/api/v1/agent/support/categories',
   },
 

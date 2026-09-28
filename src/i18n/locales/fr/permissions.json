@@ -17,5 +17,9 @@
   "locked": {
     "title": "Ceci ne vous est pas accessible",
     "retry": "Vérifier à nouveau"
+  },
+  "disabled": {
+    "title": "Temporairement indisponible",
+    "message": "Cette fonctionnalité est désactivée pour le moment, le temps de résoudre un problème. Veuillez réessayer plus tard."
   }
 }
