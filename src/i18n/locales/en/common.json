@@ -34,5 +34,7 @@
     "infoDetail": "Nothing to report."
   },
   "done": "Done",
-  "close": "Close"
+  "close": "Close",
+  "yes": "Yes",
+  "no": "No"
 }

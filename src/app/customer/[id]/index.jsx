@@ -12,9 +12,10 @@ import {
   customerQuery,
 } from '@/api/customers';
 import { Permission } from '@/api/permissions';
-import { PndNotice } from '@/components/customers/pnd-notice';
+import { PndBadge } from '@/components/customers/pnd-notice';
 import { AppHeader } from '@/components/layout/app-header';
 import { LockedScreen } from '@/components/layout/locked-screen';
+import { DetailsModal } from '@/components/ui/details-modal';
 import { ActivityList } from '@/components/ui/activity-list';
 import { Avatar } from '@/components/ui/avatar';
 import { DetailRows } from '@/components/ui/detail-rows';
@@ -33,6 +34,58 @@ const TABS = ['overview', 'account', 'loans', 'activity'];
 
 /** Server statuses arrive in mixed case ("ACTIVE", "Active", "Completed"). */
 const toneFor = (map, status) => map[String(status ?? '').toLowerCase()] ?? 'neutral';
+
+/** Labels for the account fields the server returns, in the order they read. */
+const ACCOUNT_FIELD_LABELS = {
+  accountName: 'name',
+  accountNumber: 'number',
+  currentBalance: 'balance',
+  status: 'status',
+  pndStatus: 'pndStatus',
+  pndReason: 'pndReason',
+  kycTier: 'kycTier',
+  tierUpgradeClearsPnd: 'tierUpgrade',
+};
+const ACCOUNT_FIELD_ORDER = Object.keys(ACCOUNT_FIELD_LABELS);
+const PND_REASON_LABEL = { MANUAL: 'reasonManual', TIER_BREACH: 'reasonTierBreach' };
+
+/** camelCase → "Camel case", so a field the server adds later still reads. */
+const humanize = (key) =>
+  key.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase());
+
+/**
+ * EVERY field the accounts endpoint returns for one account, as modal rows —
+ * known fields in a sensible order with real labels and formatting, then any
+ * the server adds later, so nothing is ever hidden. A blank field is dropped
+ * (the modal shows only what is set).
+ */
+function accountRows(t, account) {
+  const keys = [
+    ...ACCOUNT_FIELD_ORDER.filter((key) => key in account),
+    ...Object.keys(account).filter((key) => !(key in ACCOUNT_FIELD_LABELS)),
+  ];
+
+  return keys
+    .filter((key) => account[key] !== null && account[key] !== undefined && account[key] !== '')
+    .map((key) => {
+      const value = account[key];
+      const labelKey = ACCOUNT_FIELD_LABELS[key];
+      const label = labelKey ? t(`customers.detail.accountModal.${labelKey}`) : humanize(key);
+
+      let display;
+      if (key === 'currentBalance') display = formatCurrency(value);
+      else if (key === 'pndReason' && PND_REASON_LABEL[value])
+        display = t(`customers.detail.pnd.${PND_REASON_LABEL[value]}`);
+      else if (typeof value === 'boolean') display = value ? t('common.yes') : t('common.no');
+      else display = String(value);
+
+      // The one field worth colouring: an account that cannot be debited.
+      const tone =
+        key === 'pndStatus' && String(value).toLowerCase() === 'yes' ? 'danger' : undefined;
+
+      return { key, label, value: display, tone };
+    });
+}
 
 export default function CustomerDetailScreen() {
   const { t } = useTranslation();
@@ -199,6 +252,8 @@ function OverviewTab({ code }) {
 function AccountsTab({ code }) {
   const { t } = useTranslation();
   const query = useQuery(customerAccountsQuery(code));
+  // Tapping an account opens everything the server returns for it.
+  const [openAccount, setOpenAccount] = useState(null);
 
   return (
     <TabState
@@ -224,11 +279,19 @@ function AccountsTab({ code }) {
               label: account.status,
               tone: toneFor(ACCOUNT_STATUS_TONE, account.status),
             }}
-            footer={<PndNotice account={account} />}
-            trailing={null}
+            footer={<PndBadge account={account} />}
+            onPress={() => setOpenAccount(account)}
           />
         ))}
       </View>
+
+      <DetailsModal
+        visible={openAccount !== null}
+        title={openAccount?.accountName ?? t('customers.detail.accountModal.title')}
+        subtitle={openAccount?.accountNumber}
+        rows={openAccount ? accountRows(t, openAccount) : []}
+        onClose={() => setOpenAccount(null)}
+      />
     </TabState>
   );
 }

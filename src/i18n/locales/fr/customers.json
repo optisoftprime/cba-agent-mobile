@@ -70,11 +70,19 @@
     "noLoansMessage": "Ce client n'a aucun prêt sur les comptes que vous gérez.",
     "noActivityMessage": "Les remboursements et événements apparaîtront ici.",
     "pnd": {
-      "blocked": "Aucun débit autorisé",
-      "reasonTierBreach": "le solde dépasse la limite du niveau KYC",
-      "reasonManual": "placé par la banque",
-      "upgradeClears": "Une mise à niveau KYC le lève.",
-      "branchOnly": "Seule l'agence peut le lever."
+      "reasonManual": "La banque a placé un blocage sur ce compte.",
+      "reasonTierBreach": "Le solde dépasse la limite du niveau KYC de ce compte."
+    },
+    "accountModal": {
+      "title": "Compte",
+      "name": "Nom du compte",
+      "number": "Numéro de compte",
+      "balance": "Solde",
+      "status": "Statut",
+      "pndStatus": "Aucun débit (PND)",
+      "pndReason": "Motif de la restriction",
+      "kycTier": "Niveau KYC",
+      "tierUpgrade": "La mise à niveau KYC le lève"
     }
   }
 }

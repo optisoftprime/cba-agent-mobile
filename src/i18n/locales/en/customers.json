@@ -70,11 +70,19 @@
     "noLoansMessage": "This customer has no loans on the accounts you manage.",
     "noActivityMessage": "Repayments and account events will appear here.",
     "pnd": {
-      "blocked": "No debit allowed",
-      "reasonTierBreach": "the balance is over the KYC tier limit",
-      "reasonManual": "placed by the bank",
-      "upgradeClears": "A KYC upgrade lifts it.",
-      "branchOnly": "Only the branch can lift it."
+      "reasonManual": "The bank has placed a hold on this account.",
+      "reasonTierBreach": "The balance is over this account's KYC tier limit."
+    },
+    "accountModal": {
+      "title": "Account",
+      "name": "Account name",
+      "number": "Account number",
+      "balance": "Balance",
+      "status": "Status",
+      "pndStatus": "No debit (PND)",
+      "pndReason": "Restriction reason",
+      "kycTier": "KYC tier",
+      "tierUpgrade": "KYC upgrade lifts it"
     }
   }
 }

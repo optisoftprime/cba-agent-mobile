@@ -34,5 +34,7 @@
     "infoDetail": "Rien à signaler."
   },
   "done": "Terminé",
-  "close": "Fermer"
+  "close": "Fermer",
+  "yes": "Oui",
+  "no": "Non"
 }
