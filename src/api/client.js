@@ -264,6 +264,22 @@ function createClient({ authenticated }) {
       const deviceId = await getDeviceId();
       if (deviceId) config.headers['X-Agent-Device-Id'] = deviceId;
     }
+    // A FormData body must set its OWN Content-Type, because that header carries
+    // the multipart boundary. The client's default is `application/json`, and a
+    // hardcoded `multipart/form-data` has no boundary either — both make the
+    // server answer 500 "Failed to parse multipart servlet request", which the
+    // app then shows as a network error ("no internet"). Removing the header
+    // lets React Native set `multipart/form-data; boundary=…` itself. This is
+    // the ONE reliable place to do it — every multipart call passes through here.
+    const isFormData = typeof FormData !== 'undefined' && config.data instanceof FormData;
+    if (isFormData && config.headers) {
+      if (typeof config.headers.delete === 'function') config.headers.delete('Content-Type');
+      else {
+        delete config.headers['Content-Type'];
+        delete config.headers['content-type'];
+      }
+    }
+
     // Trimmed before logging, so the log shows exactly what went on the wire.
     if (config.data !== undefined) config.data = trimDeep(config.data);
 

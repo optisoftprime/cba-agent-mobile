@@ -73,13 +73,16 @@ export function createTicket({ subject, description, categoryId, priority, image
 
   return send(
     api.post(endpoints.support.tickets, form, {
+      // The text fields are QUERY params; the body is the multipart FormData.
+      // The client interceptor strips Content-Type off a FormData body so RN
+      // sets `multipart/form-data` WITH its boundary — a hardcoded type has
+      // none and the server 500s parsing it.
       params: {
         subject,
         description: description || undefined,
         categoryId: categoryId ?? undefined,
         priority: priority || undefined,
       },
-      headers: { 'Content-Type': 'multipart/form-data' },
     }),
   );
 }
@@ -103,11 +106,9 @@ export function replyToTicket({ ticketNumber, message, image }) {
       name: image.name || 'attachment.jpg',
       type: image.type || 'image/jpeg',
     });
-    return send(
-      api.post(endpoints.support.ticketReply(ticketNumber), form, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      }),
-    );
+    // The interceptor strips Content-Type off the FormData so RN adds the
+    // multipart boundary — see createTicket.
+    return send(api.post(endpoints.support.ticketReply(ticketNumber), form));
   }
 
   return send(api.post(endpoints.support.ticketReply(ticketNumber), { message, imageUrl: null }));
