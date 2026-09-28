@@ -18,8 +18,8 @@
       "message": "Ce client n'a aucun compte pour un dépôt."
     },
     "pnd": {
-      "title": "Ce compte est en PND",
-      "message": "Ce compte est en Post-No-Debit — il est restreint. Voulez-vous continuer ?",
+      "title": "Compte en PND",
+      "restricted": "Ce compte est restreint pour les débits.",
       "confirm": "Continuer"
     }
   },

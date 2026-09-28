@@ -127,10 +127,9 @@ export default function DepositAccountScreen() {
         visible={pndAccount !== null}
         icon="lock-closed-outline"
         title={t('deposit.account.pnd.title')}
-        message={
-          t('deposit.account.pnd.message') +
-          (pndReasonKey ? `\n\n${t(pndReasonKey)}` : '')
-        }
+        // Title already says the account is on PND; the message just gives the
+        // reason (or a plain fallback), and the buttons ask the question.
+        message={pndReasonKey ? t(pndReasonKey) : t('deposit.account.pnd.restricted')}
         confirmLabel={t('deposit.account.pnd.confirm')}
         cancelLabel={t('common.cancel')}
         onCancel={() => setPndAccount(null)}
