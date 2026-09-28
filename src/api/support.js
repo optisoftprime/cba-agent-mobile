@@ -45,38 +45,45 @@ export const ticketCategoriesQuery = {
 };
 
 /**
- * Raise a ticket.
+ * Raise a ticket. The reporter comes from the token; only `subject` is required.
  *
- * The endpoint changed shape when image upload was added, and it is an unusual
- * one: the TEXT fields are QUERY PARAMETERS and the body is multipart carrying
- * only `image`. Sending the old JSON body silently loses the subject, because
- * the server no longer reads it from there.
+ * The endpoint takes the fields TWO different ways, and which one it reads
+ * depends on the body:
  *
- * `image` is `{ uri, name, type }` straight from the picker, or omitted. With
- * no image the body is an empty multipart envelope, which the server accepts —
- * sending NO body at all is a 500, so the FormData always goes.
+ * - **No image → JSON body** `{ subject, description, categoryId, priority }`.
+ *   This is the important case, and the one that used to fail: an EMPTY
+ *   FormData is sent by React Native WITHOUT a multipart boundary, and the
+ *   request then never completes — the app showed "no internet". Verified
+ *   against the live server: a plain JSON body is accepted (the fields are read
+ *   from it), so the no-image path avoids multipart entirely.
  *
- * The reporter comes from the token, so it is not sent. Only `subject` is
- * required. FormData is passed through the request interceptor untouched
- * (see `trimDeep`), so the multipart envelope is not mangled.
+ * - **With image → multipart**, fields as QUERY params and the image as the one
+ *   form part. The form is non-empty here, so RN sets the boundary correctly
+ *   (the interceptor strips the Content-Type so RN can). Image storage is off
+ *   on the current environment, so this still 400s "image could not be stored"
+ *   until the backend enables it — the agent can drop the image and send text.
  */
 export function createTicket({ subject, description, categoryId, priority, image }) {
-  const form = new FormData();
-
-  if (image?.uri) {
-    form.append('image', {
-      uri: image.uri,
-      name: image.name || 'attachment.jpg',
-      type: image.type || 'image/jpeg',
-    });
+  if (!image?.uri) {
+    return send(
+      api.post(endpoints.support.tickets, {
+        subject,
+        description: description || undefined,
+        categoryId: categoryId ?? undefined,
+        priority: priority || undefined,
+      }),
+    );
   }
+
+  const form = new FormData();
+  form.append('image', {
+    uri: image.uri,
+    name: image.name || 'attachment.jpg',
+    type: image.type || 'image/jpeg',
+  });
 
   return send(
     api.post(endpoints.support.tickets, form, {
-      // The text fields are QUERY params; the body is the multipart FormData.
-      // The client interceptor strips Content-Type off a FormData body so RN
-      // sets `multipart/form-data` WITH its boundary — a hardcoded type has
-      // none and the server 500s parsing it.
       params: {
         subject,
         description: description || undefined,
