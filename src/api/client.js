@@ -288,6 +288,11 @@ function createClient({ authenticated }) {
       apiAddress: addressOf(config),
       method: config.method?.toUpperCase(),
       authenticated,
+      // The device id sent with the request — useful for replicating a call in
+      // Swagger and for confirming which handset the server is checking against.
+      // Not a secret (the token IS, and stays redacted).
+      deviceId: config.headers?.['X-Agent-Device-Id'],
+      contentType: config.headers?.['Content-Type'] ?? '(set by RN)',
       apiPayload: asData(config.data),
     });
 

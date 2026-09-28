@@ -30,4 +30,9 @@ export const REQUEST_TIMEOUT_MS = 30_000;
  * one — everything else is shown in full so a payload can be checked against
  * the API docs.
  */
-export const LOG_API = __DEV__;
+// On in dev; off in a release build UNLESS a build sets EXPO_PUBLIC_LOG_API=true
+// (inlined at build time). That switch lets us ship a company-signed test build
+// that prints every request to logcat — the only way to read the real device
+// id and request shape off the registered phone, since release logging is
+// normally off and a debug build has a different signing key (so a different id).
+export const LOG_API = __DEV__ || process.env.EXPO_PUBLIC_LOG_API === 'true';
