@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
-import { FlatList, View } from 'react-native';
+import { FlatList, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { CUSTOMER_FILTERS, customersQuery } from '@/api/customers';
@@ -59,14 +59,34 @@ export default function CustomersScreen() {
   // reads as a plain entry rather than a tap that does nothing.
   const canOpen = filter !== 'sme';
 
-  /** "3 Accounts 1 loan" — the counts are data, the words are UI labels. */
+  /**
+   * "3 Accounts 1 loan", plus a red "2 PND" when any of the customer's accounts
+   * is restricted, so the agent sees it before opening the customer.
+   *
+   * The PND count is `pndAccounts` on the customer list row — a field the
+   * backend still has to add (the list returns only account/loan counts today).
+   * Until it does, `pndAccounts` is undefined and the red text simply does not
+   * render; it lights up on its own once the field arrives. No per-customer
+   * account fetch — that would be a request per row on a scrolling list.
+   */
   const summaryFor = (customer) => {
     const accounts = customer.accounts ?? 0;
     const loans = customer.loans ?? 0;
-    return [
+    const pnd = Number(customer.pndAccounts ?? 0);
+
+    const counts = [
       `${accounts} ${t(accounts === 1 ? 'customers.account' : 'customers.accounts')}`,
       `${loans} ${t(loans === 1 ? 'customers.loan' : 'customers.loans')}`,
     ].join(' ');
+
+    return (
+      <Text className="text-xs text-ink-muted">
+        {counts}
+        {pnd > 0 ? (
+          <Text className="font-semibold text-danger">{`   ${pnd} ${t('customers.pnd')}`}</Text>
+        ) : null}
+      </Text>
+    );
   };
 
   if (!access.allowed) {

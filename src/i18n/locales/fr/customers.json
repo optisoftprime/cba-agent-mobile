@@ -84,5 +84,6 @@
       "kycTier": "Niveau KYC",
       "tierUpgrade": "La mise à niveau KYC le lève"
     }
-  }
+  },
+  "pnd": "PND"
 }

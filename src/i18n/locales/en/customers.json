@@ -84,5 +84,6 @@
       "kycTier": "KYC tier",
       "tierUpgrade": "KYC upgrade lifts it"
     }
-  }
+  },
+  "pnd": "PND"
 }
