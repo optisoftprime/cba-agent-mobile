@@ -136,7 +136,9 @@ if (!gradle.includes('CBA_STORE_FILE')) {
 
 // ── 5. build ──────────────────────────────────────────────────────────────
 console.log(`\nBuilding release APK with JDK at:\n  ${jdk}\n`);
-const gradlew = isWin ? 'gradlew.bat' : './gradlew';
+// Absolute path: a bare "gradlew.bat" is not found on Windows (it is not on
+// PATH, and shell mode does not look in cwd), and "./gradlew" needs the dot.
+const gradlew = path.join(ANDROID, isWin ? 'gradlew.bat' : 'gradlew');
 const build = run(gradlew, ['assembleRelease'], { cwd: ANDROID });
 if (build.status !== 0) die('Gradle build failed (output above).');
 
