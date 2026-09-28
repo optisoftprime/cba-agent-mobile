@@ -16,6 +16,11 @@
     "empty": {
       "title": "No accounts",
       "message": "This customer has no accounts to deposit into."
+    },
+    "pnd": {
+      "title": "This account is on PND",
+      "message": "This account is on Post-No-Debit — it is restricted. Do you want to continue?",
+      "confirm": "Continue"
     }
   },
   "amount": {

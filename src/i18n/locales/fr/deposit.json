@@ -16,6 +16,11 @@
     "empty": {
       "title": "Aucun compte",
       "message": "Ce client n'a aucun compte pour un dépôt."
+    },
+    "pnd": {
+      "title": "Ce compte est en PND",
+      "message": "Ce compte est en Post-No-Debit — il est restreint. Voulez-vous continuer ?",
+      "confirm": "Continuer"
     }
   },
   "amount": {

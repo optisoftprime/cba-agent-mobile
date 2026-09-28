@@ -19,9 +19,9 @@ export function PndBadge({ account }) {
   if (String(account?.pndStatus ?? '').toLowerCase() !== 'yes') return null;
 
   return (
-    <View className="flex-row items-center gap-1 self-start rounded-full bg-danger-soft px-2.5 py-1">
-      <Ionicons name="lock-closed" size={12} color={colors.onDangerSoft} />
-      <Text className="text-[11px] font-bold tracking-wide text-on-danger-soft">PND</Text>
+    <View className="flex-row items-center gap-1.5 self-start rounded-full bg-danger-soft px-3.5 py-1">
+      <Ionicons name="lock-closed" size={13} color={colors.danger} />
+      <Text className="text-[11px] font-bold tracking-wide text-danger">PND</Text>
     </View>
   );
 }
