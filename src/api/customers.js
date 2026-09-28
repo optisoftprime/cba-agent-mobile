@@ -20,7 +20,10 @@ export const CUSTOMER_FILTERS = {
   all: 'ALL',
   active: 'ACTIVE',
   inactive: 'INACTIVE',
-  sme: 'SME',
+  // SME hidden from the filter bar for now (the segment is not in use). The
+  // server still accepts SME; uncomment to bring the chip back — the customers
+  // screen already treats SME rows as view-only (`canOpen`).
+  // sme: 'SME',
 };
 
 function fetchCustomers({ search = '', filter = 'ALL', page = 0, size = PAGE_SIZE }) {
