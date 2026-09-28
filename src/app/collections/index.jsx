@@ -4,6 +4,7 @@ import { FlatList, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { COLLECTION_PERIODS, COLLECTION_TYPES, collectionsQuery } from '@/api/collections';
+import { Permission } from '@/api/permissions';
 import { itemsOf } from '@/api/pagination';
 import { AppHeader } from '@/components/layout/app-header';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -19,15 +20,22 @@ import { StatusPill } from '@/components/ui/status-pill';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { navigateTo } from '@/lib/navigate';
 import { COLLECTION_STATUS_TONE } from '@/lib/status';
-import { useRefreshWithPermissions } from '@/providers/permission-provider';
+import { usePermissions, useRefreshWithPermissions } from '@/providers/permission-provider';
 
 const TILE = 'bg-card border border-line';
 
 export default function CollectionsScreen() {
   const { t } = useTranslation();
+  const { guard } = usePermissions();
 
   const [period, setPeriod] = useState('today');
   const [type, setType] = useState('all');
+
+  // Ajo is disabled, so filtering collections by Ajo opens the same
+  // "temporarily unavailable" modal rather than switching to it. `guard`
+  // refuses a disabled feature and shows the modal; the filter stays put.
+  const onChangeType = (value) =>
+    value === 'ajo' ? guard(Permission.ajo, () => setType('ajo')) : setType(value);
 
   const {
     data,
@@ -118,7 +126,7 @@ export default function CollectionsScreen() {
         }
       />
 
-      <FilterChips fill className="mb-4" value={type} onChange={setType} options={typeOptions} />
+      <FilterChips fill className="mb-4" value={type} onChange={onChangeType} options={typeOptions} />
     </View>
   );
 
