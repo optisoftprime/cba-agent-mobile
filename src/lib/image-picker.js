@@ -1,10 +1,14 @@
 /**
  * Picking an image to attach to a support ticket.
  *
- * Returns `{ uri, name, type }` — exactly the shape React Native's FormData
- * wants for a file part — or `null` when the agent backed out or refused
+ * Returns `{ uri, name, type, base64 }` — `uri` for the on-screen preview and
+ * `base64` for the upload — or `null` when the agent backed out or refused
  * permission. It never throws: an agent reporting a problem should not hit a
  * second problem trying to attach the screenshot of the first.
+ *
+ * The ticket endpoint takes the image as a base64 `imageUrl` data URI in the
+ * JSON body (not a multipart file part), so the picker is asked for `base64`
+ * up front — see src/api/support.js.
  *
  * Guarded require, like `lib/device.js` and `lib/location.js`: a dev client
  * built before expo-image-picker was added must still open the screen.
@@ -35,7 +39,7 @@ function toFilePart(asset) {
     asset.mimeType ||
     (extension === 'png' ? 'image/png' : extension === 'webp' ? 'image/webp' : 'image/jpeg');
 
-  return { uri: asset.uri, name, type };
+  return { uri: asset.uri, name, type, base64: asset.base64 ?? null };
 }
 
 /**
@@ -62,6 +66,7 @@ export async function pickImageFromLibrary() {
       mediaTypes: ['images'],
       quality: QUALITY,
       allowsMultipleSelection: false,
+      base64: true,
     });
 
     if (result.canceled) return null;
@@ -86,7 +91,7 @@ export async function takePhoto() {
     const permission = await Picker.requestCameraPermissionsAsync();
     if (!permission.granted) return null;
 
-    const result = await Picker.launchCameraAsync({ quality: QUALITY });
+    const result = await Picker.launchCameraAsync({ quality: QUALITY, base64: true });
 
     if (result.canceled) return null;
     return toFilePart(result.assets?.[0]);

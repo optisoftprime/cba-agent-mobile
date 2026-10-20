@@ -44,52 +44,33 @@ export const ticketCategoriesQuery = {
   staleTime: 30 * 60 * 1000,
 };
 
+/** The picker's base64 as the `imageUrl` data URI the ticket endpoints take. */
+function imageDataUri(image) {
+  if (!image?.base64) return undefined;
+  return `data:${image.type || 'image/jpeg'};base64,${image.base64}`;
+}
+
 /**
  * Raise a ticket. The reporter comes from the token; only `subject` is required.
  *
- * The endpoint takes the fields TWO different ways, and which one it reads
- * depends on the body:
+ * ONE JSON body, always: `{ subject, description, categoryId, priority, imageUrl }`.
+ * The server reads every field from this body and saves `description` exactly as
+ * received. An attached image rides along as `imageUrl` — a base64 data URI the
+ * picker produces (src/lib/image-picker) — not a multipart file part.
  *
- * - **No image → JSON body** `{ subject, description, categoryId, priority }`.
- *   This is the important case, and the one that used to fail: an EMPTY
- *   FormData is sent by React Native WITHOUT a multipart boundary, and the
- *   request then never completes — the app showed "no internet". Verified
- *   against the live server: a plain JSON body is accepted (the fields are read
- *   from it), so the no-image path avoids multipart entirely.
- *
- * - **With image → multipart**, fields as QUERY params and the image as the one
- *   form part. The form is non-empty here, so RN sets the boundary correctly
- *   (the interceptor strips the Content-Type so RN can). Image storage is off
- *   on the current environment, so this still 400s "image could not be stored"
- *   until the backend enables it — the agent can drop the image and send text.
+ * This replaced an earlier form that sent the fields as QUERY params with the
+ * image as a multipart part. Sending a field two ways is how `description`
+ * arrived DOUBLED ("text, text" — the server joins repeated params with ", ");
+ * one JSON string cannot double. (Reported & confirmed app-side, 2026-10-20.)
  */
 export function createTicket({ subject, description, categoryId, priority, image }) {
-  if (!image?.uri) {
-    return send(
-      api.post(endpoints.support.tickets, {
-        subject,
-        description: description || undefined,
-        categoryId: categoryId ?? undefined,
-        priority: priority || undefined,
-      }),
-    );
-  }
-
-  const form = new FormData();
-  form.append('image', {
-    uri: image.uri,
-    name: image.name || 'attachment.jpg',
-    type: image.type || 'image/jpeg',
-  });
-
   return send(
-    api.post(endpoints.support.tickets, form, {
-      params: {
-        subject,
-        description: description || undefined,
-        categoryId: categoryId ?? undefined,
-        priority: priority || undefined,
-      },
+    api.post(endpoints.support.tickets, {
+      subject,
+      description: description || undefined,
+      categoryId: categoryId ?? undefined,
+      priority: priority || undefined,
+      imageUrl: imageDataUri(image),
     }),
   );
 }
@@ -98,27 +79,16 @@ export function createTicket({ subject, description, categoryId, priority, image
  * Reply on a ticket. Resolves with the ticket and its full thread, so the
  * screen re-renders from the response rather than refetching.
  *
- * A plain message goes as JSON; a message WITH an image goes multipart (the
- * server reads `message` and `image` from the form). Image upload is not
- * configured on the current environment yet — it 400s with a readable message,
- * the same as creating a ticket with an attachment — so the agent can drop the
- * image and resend text only.
+ * JSON body `{ message, imageUrl }`, like createTicket — an image is the base64
+ * data URI, `null` when there is none.
  */
 export function replyToTicket({ ticketNumber, message, image }) {
-  if (image?.uri) {
-    const form = new FormData();
-    form.append('message', message ?? '');
-    form.append('image', {
-      uri: image.uri,
-      name: image.name || 'attachment.jpg',
-      type: image.type || 'image/jpeg',
-    });
-    // The interceptor strips Content-Type off the FormData so RN adds the
-    // multipart boundary — see createTicket.
-    return send(api.post(endpoints.support.ticketReply(ticketNumber), form));
-  }
-
-  return send(api.post(endpoints.support.ticketReply(ticketNumber), { message, imageUrl: null }));
+  return send(
+    api.post(endpoints.support.ticketReply(ticketNumber), {
+      message,
+      imageUrl: imageDataUri(image) ?? null,
+    }),
+  );
 }
 
 /** Close a ticket. No body; resolves with the ticket and its thread. */

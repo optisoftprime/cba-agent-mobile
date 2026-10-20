@@ -116,6 +116,19 @@ export default function TicketDetailScreen() {
       ]
     : [];
 
+  // The create endpoint saves the description a SECOND time as messages[0].body
+  // (by design — staff screens rely on it). That first message duplicates the
+  // Description block above, so drop it here; genuine replies stay.
+  const thread = data
+    ? (data.messages ?? []).filter(
+        (message, index) =>
+          !(
+            index === 0 &&
+            String(message.body ?? '').trim() === String(data.description ?? '').trim()
+          ),
+      )
+    : [];
+
   if (!access.allowed) {
     return <LockedScreen showBack title={t('support.title')} code={Permission.supportTickets} />;
   }
@@ -164,8 +177,8 @@ export default function TicketDetailScreen() {
 
             <SectionHeading className="mt-7" title={t('support.detail.thread')} />
 
-            {data.messages?.length ? (
-              data.messages.map((message, index) => {
+            {thread.length ? (
+              thread.map((message, index) => {
                 // The agent's own replies sit on the right, in brand colour.
                 const isAgent = String(message.senderType ?? '').toUpperCase() === 'AGENT';
 

@@ -52,6 +52,9 @@
     "pending": "En attente : {{amount}}",
     "transactions": "{{count}} transactions",
     "cashInHand": "Espèces en caisse",
+    "availableCash": "Espèces disponibles",
+    "ledger": "Solde comptable",
+    "awaitingShort": "En attente",
     "pendingShort": "En attente aujourd'hui",
     "transactionsShort": "Transactions",
     "endOfDay": "Fin de journée",
@@ -61,5 +64,10 @@
     "title": "Blocage de réconciliation",
     "message": "Les opérations sont suspendues jusqu’à la réconciliation de votre agence. Contactez votre superviseur.",
     "action": "Reverser l'argent à l'agence"
+  },
+  "amount": {
+    "exact": "Montant exact",
+    "subtitle": "Le montant en entier",
+    "press": "{{label}}, afficher le montant exact"
   }
 }

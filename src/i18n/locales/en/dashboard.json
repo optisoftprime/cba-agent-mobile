@@ -52,6 +52,9 @@
     "pending": "Pending: {{amount}}",
     "transactions": "{{count}} transactions",
     "cashInHand": "Cash in hand",
+    "availableCash": "Available cash",
+    "ledger": "Ledger balance",
+    "awaitingShort": "Awaiting",
     "pendingShort": "Pending today",
     "transactionsShort": "Transactions",
     "endOfDay": "End of day",
@@ -61,5 +64,10 @@
     "title": "Reconciliation hold",
     "message": "Posting is on hold until your branch reconciles. Contact your supervisor.",
     "action": "Remit cash to branch"
+  },
+  "amount": {
+    "exact": "Exact amount",
+    "subtitle": "The figure in full",
+    "press": "{{label}}, show the exact amount"
   }
 }

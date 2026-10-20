@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { EOD_KEY, eodCurrentQuery } from '@/api/eod';
@@ -11,10 +11,16 @@ import { AmountField } from '@/components/ui/amount-field';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { DetailRows } from '@/components/ui/detail-rows';
+import { DetailsModal } from '@/components/ui/details-modal';
 import { SuccessModal } from '@/components/ui/success-modal';
 import { TextField } from '@/components/ui/text-field';
 import { isPosted, newClientReference } from '@/lib/cash-movement';
-import { formatCurrencyPrecise, formatDateTime } from '@/lib/format';
+import {
+  formatCurrencyCompact,
+  formatCurrencyPrecise,
+  formatDateTime,
+  isCompactCurrency,
+} from '@/lib/format';
 import { navigateBack } from '@/lib/navigate';
 import { toast } from '@/lib/toast';
 
@@ -46,6 +52,11 @@ export default function RemittanceScreen() {
   const [error, setError] = useState(undefined);
   const [confirming, setConfirming] = useState(false);
   const [result, setResult] = useState(null);
+  // The expected-cash figure can run to billions (a huge till), so it is shown
+  // shortened and opens its exact value on tap — exactly like the dashboard.
+  const [showExpected, setShowExpected] = useState(false);
+  const expected = day?.expectedCash;
+  const expectedIsCompact = expected != null && isCompactCurrency(expected);
 
   const value = Number(amount);
   const valid = Number.isFinite(value) && value >= MIN_AMOUNT;
@@ -85,13 +96,29 @@ export default function RemittanceScreen() {
           keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}>
           <View className="gap-5">
-            {day?.expectedCash != null ? (
+            {expected != null ? (
               <DetailRows
                 rows={[
                   {
                     key: 'holding',
                     label: t('remittance.holding'),
-                    value: formatCurrencyPrecise(day.expectedCash),
+                    // Shortened + tappable when it is too long to read at a glance;
+                    // otherwise the plain precise figure, which needs no reveal.
+                    value: expectedIsCompact ? (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('dashboard.amount.press', {
+                          label: t('remittance.holding'),
+                        })}
+                        hitSlop={6}
+                        onPress={() => setShowExpected(true)}>
+                        <Text className="text-[14px] font-semibold text-primary">
+                          {formatCurrencyCompact(expected)}
+                        </Text>
+                      </Pressable>
+                    ) : (
+                      formatCurrencyPrecise(expected)
+                    ),
                   },
                 ]}
               />
@@ -192,6 +219,21 @@ export default function RemittanceScreen() {
           setResult(null);
           navigateBack('/(tabs)');
         }}
+      />
+
+      {/* The exact figure behind the shortened expected-cash amount. */}
+      <DetailsModal
+        visible={showExpected}
+        title={t('remittance.holding')}
+        subtitle={t('dashboard.amount.subtitle')}
+        rows={[
+          {
+            key: 'exact',
+            label: t('dashboard.amount.exact'),
+            value: formatCurrencyPrecise(expected ?? 0),
+          },
+        ]}
+        onClose={() => setShowExpected(false)}
       />
     </View>
   );

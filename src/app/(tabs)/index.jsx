@@ -22,9 +22,12 @@ import { StatCard } from '@/components/ui/stat-card';
 import { agentView } from '@/lib/agent';
 import {
   formatCurrency,
+  formatCurrencyCompact,
+  formatCurrencyPrecise,
   formatDate,
   formatDateTime,
   greetingKey,
+  isCompactCurrency,
 } from '@/lib/format';
 import { navigateTo } from '@/lib/navigate';
 import { usePermission, useRefreshWithPermissions } from '@/providers/permission-provider';
@@ -56,12 +59,39 @@ export default function HomeScreen() {
   const agent = agentView(useAuth().user);
   // A movement carries seven fields; a row shows three lines of them.
   const [openMovement, setOpenMovement] = useState(null);
+  // A figure too long for its tile is shown shortened ("₦499.90B"); this holds
+  // the one whose exact amount the agent asked to see.
+  const [openAmount, setOpenAmount] = useState(null);
+
+  /**
+   * Props for a figure that may not fit its tile: the shortened text, plus a
+   * tap that opens the exact amount — but ONLY when it was actually shortened,
+   * so a tile reading ₦0 is not pretending to have more to show.
+   */
+  const amountProps = (label, amount) => ({
+    value: formatCurrencyCompact(amount),
+    onPress: isCompactCurrency(amount) ? () => setOpenAmount({ label, amount }) : undefined,
+    pressLabel: isCompactCurrency(amount) ? t('dashboard.amount.press', { label }) : undefined,
+  });
 
   const { data, isPending, isError, error, refetch, isRefetching } = useQuery(dashboardQuery);
 
   // Pulling to refresh on the home screen re-asks what this agent may do, so a
   // permission an administrator just changed takes effect without restarting.
   const onRefresh = useRefreshWithPermissions(refetch);
+
+  // The three cash figures are shown ALWAYS, each as a dash when the server
+  // sends no value — so it is visible whether the backend is returning the
+  // field at all (a dash) versus a real number. `availableCash` (the spendable
+  // limit) and `awaitingRemittance` (cash remitted but not yet approved) are
+  // newer fields this gateway does not return yet; they read as "—" until it
+  // does. `cashInHand`/`availableCash` are also null for an agent with no till
+  // — same dash. A tap on a shortened figure opens its exact value (amountProps
+  // only attaches that when there IS a value to open).
+  const cashTile = (label, amount) => ({
+    label,
+    ...(amount == null ? { value: EMDASH } : amountProps(label, amount)),
+  });
 
   // Branch and business date ride along with the agent code: an agent posting
   // cash needs to know which book day the server has them on.
@@ -137,8 +167,8 @@ export default function HomeScreen() {
                 />
                 <StatCard
                   label={t('dashboard.stats.collections')}
-                  value={formatCurrency(data.collectionsTotal ?? 0)}
                   tone="bg-tile-4"
+                  {...amountProps(t('dashboard.stats.collections'), data.collectionsTotal ?? 0)}
                 />
               </View>
             </View>
@@ -156,38 +186,39 @@ export default function HomeScreen() {
                 })}
               />
 
+              {/* Available cash, the ledger balance, and cash awaiting branch
+                  confirmation — always shown. A field the server does not send
+                  (availableCash / awaitingRemittance are not live yet) reads
+                  "—", so it is clear whether the backend is returning it. */}
               <MetricPanel
                 className="mt-3"
                 items={[
-                  {
-                    label: t('dashboard.today.cashInHand'),
-                    // null means the server has no figure, which is not zero naira.
-                    value: data.cashInHand == null ? EMDASH : formatCurrency(data.cashInHand),
-                  },
-                  {
-                    label: t('dashboard.today.pendingShort'),
-                    value: formatCurrency(data.pendingToday ?? 0),
-                  },
-                  {
-                    label: t('dashboard.today.transactionsShort'),
-                    value: String(data.transactionsToday ?? 0),
-                  },
+                  cashTile(t('dashboard.today.availableCash'), data.availableCash),
+                  cashTile(t('dashboard.today.ledger'), data.cashInHand),
+                  cashTile(t('dashboard.today.awaitingShort'), data.awaitingRemittance),
                 ]}
               />
 
-              {/* The two things an agent does with the cash in hand, right under
-                  the figure they act on. */}
+              {/* What an agent does with the cash in hand, right under the
+                  figure they act on.
+
+                  EOD-DISABLED — End of day sat beside this at half width.
+                  With it gone Remit cash takes the row on its own rather than
+                  leaving a hole, so restoring the pair means uncommenting the
+                  button below AND putting `flex-1` back on this one.
+              <Button
+                className="flex-1"
+                variant="outline"
+                icon="calculator-outline"
+                label={t('dashboard.today.endOfDay')}
+                onPress={() => navigateTo('/eod')}
+              />
+              */}
               <View className="mt-3 flex-row gap-3">
                 <Button
                   className="flex-1"
                   variant="outline"
-                  icon="calculator-outline"
-                  label={t('dashboard.today.endOfDay')}
-                  onPress={() => navigateTo('/eod')}
-                />
-                <Button
-                  className="flex-1"
-                  variant="outline"
+                  size="lg"
                   icon="arrow-up-circle-outline"
                   label={t('dashboard.today.remit')}
                   onPress={() => navigateTo('/remittance')}
@@ -307,6 +338,26 @@ export default function HomeScreen() {
         subtitle={openMovement?.capturedAt ? formatDateTime(openMovement.capturedAt) : undefined}
         rows={openMovement ? movementRows(t, openMovement) : []}
         onClose={() => setOpenMovement(null)}
+      />
+
+      {/* The exact figure behind a shortened one. Precise, to the kobo — the
+          whole point of opening it is that "₦499.90B" is an approximation. */}
+      <DetailsModal
+        visible={openAmount !== null}
+        title={openAmount?.label ?? ''}
+        subtitle={t('dashboard.amount.subtitle')}
+        rows={
+          openAmount
+            ? [
+                {
+                  key: 'exact',
+                  label: t('dashboard.amount.exact'),
+                  value: formatCurrencyPrecise(openAmount.amount),
+                },
+              ]
+            : []
+        }
+        onClose={() => setOpenAmount(null)}
       />
     </View>
   );
