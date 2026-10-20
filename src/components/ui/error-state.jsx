@@ -15,8 +15,12 @@ import { useTheme } from '@/theme/theme-provider';
  * underneath, since it is written for the agent (see `send` in api/client).
  */
 const BY_CODE = {
-  NETWORK: { icon: 'cloud-offline-outline', title: 'common.errors.offlineTitle' },
+  // No response reached us — the server or the agent's connection, we can't tell
+  // which, so the heading blames neither.
+  UNREACHABLE: { icon: 'cloud-offline-outline', title: 'common.errors.unreachableTitle' },
   TIMEOUT: { icon: 'time-outline', title: 'common.errors.timeoutTitle' },
+  // A 5xx — the server's problem, not the agent's.
+  SERVER: { icon: 'server-outline', title: 'common.errors.serverTitle' },
 };
 
 const FALLBACK = { icon: 'alert-circle-outline', title: 'common.errors.title' };

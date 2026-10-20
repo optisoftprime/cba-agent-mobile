@@ -9,13 +9,15 @@
   "goHome": "Go to home screen",
   "navigationError": "Navigation error",
   "errors": {
-    "network": "No internet connection. Check your network and try again.",
+    "unreachable": "Couldn't reach the server. It may be down, or your connection may be off — try again shortly.",
+    "server": "The server ran into a problem. This is on our side, not yours — please try again shortly.",
     "timeout": "The request took too long. Please try again.",
     "generic": "Something went wrong. Please try again.",
     "sessionExpiredTitle": "Session expired",
     "sessionExpired": "Please log in again.",
     "title": "Could not load this",
-    "offlineTitle": "No connection",
+    "unreachableTitle": "Can't reach the server",
+    "serverTitle": "Server problem",
     "timeoutTitle": "Took too long",
     "accessRevokedTitle": "Access revoked"
   },

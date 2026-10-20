@@ -9,13 +9,15 @@
   "goHome": "Aller à l'accueil",
   "navigationError": "Erreur de navigation",
   "errors": {
-    "network": "Pas de connexion internet. Vérifiez votre réseau et réessayez.",
+    "unreachable": "Impossible de joindre le serveur. Il est peut-être hors service, ou votre connexion est coupée — réessayez bientôt.",
+    "server": "Le serveur a rencontré un problème. Cela vient de notre côté, pas du vôtre — veuillez réessayer bientôt.",
     "timeout": "La requête a pris trop de temps. Veuillez réessayer.",
     "generic": "Une erreur est survenue. Veuillez réessayer.",
     "sessionExpiredTitle": "Session expirée",
     "sessionExpired": "Veuillez vous reconnecter.",
     "title": "Chargement impossible",
-    "offlineTitle": "Pas de connexion",
+    "unreachableTitle": "Serveur injoignable",
+    "serverTitle": "Problème serveur",
     "timeoutTitle": "Délai dépassé",
     "accessRevokedTitle": "Accès révoqué"
   },

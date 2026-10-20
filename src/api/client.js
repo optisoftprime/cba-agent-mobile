@@ -394,12 +394,36 @@ export function toApiError(error) {
       return new ApiError(i18n.t('common.errors.timeout'), { code: 'TIMEOUT' });
     }
     if (!error.response) {
-      return new ApiError(i18n.t('common.errors.network'), { code: 'NETWORK' });
+      // No HTTP response reached us. This is NOT proof the agent's internet is
+      // down — the server being unreachable, the gateway dropping the
+      // connection, or an upstream (core banking / an auth service) falling over
+      // all look identical from here. So the message must not assert "no
+      // internet connection": an agent whose signal is fine reads that, blames
+      // their phone, and never learns it was the server. It names both.
+      return new ApiError(i18n.t('common.errors.unreachable'), { code: 'UNREACHABLE' });
     }
+    const status = error.response.status;
     const body = error.response.data;
-    return new ApiError(body?.message || i18n.t('common.errors.generic'), {
+    // Only trust a message from the JSON envelope. A gateway 5xx often answers
+    // with an HTML page, and `body?.message` on that is undefined — we must not
+    // dump markup on screen, so fall back to the "server" wording instead.
+    const serverMessage = body && typeof body === 'object' ? body.message : null;
+
+    // A 5xx is the SERVER failing, never the agent. When it hands back a reason
+    // (finman relays things like "auth service unavailable" or "cannot reach
+    // core banking"), show it verbatim so the agent knows it is not their doing;
+    // when it gives none, say the server had a problem rather than the generic
+    // "Something went wrong", which reads like the agent broke something.
+    if (status >= 500) {
+      return new ApiError(serverMessage || i18n.t('common.errors.server'), {
+        code: body?.errorCode ?? 'SERVER',
+        status,
+      });
+    }
+
+    return new ApiError(serverMessage || i18n.t('common.errors.generic'), {
       code: body?.errorCode ?? null,
-      status: error.response.status,
+      status,
     });
   }
 
