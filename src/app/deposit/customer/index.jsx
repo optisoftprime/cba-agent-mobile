@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { CUSTOMER_FILTERS, customersQuery } from '@/api/customers';
 import { itemsOf } from '@/api/pagination';
 import { Permission } from '@/api/permissions';
+import { CustomerSummary } from '@/components/customers/customer-summary';
 import { AppHeader } from '@/components/layout/app-header';
 import { LockedScreen } from '@/components/layout/locked-screen';
 import { Avatar } from '@/components/ui/avatar';
@@ -44,16 +45,6 @@ export default function DepositCustomerScreen() {
 
   const customers = useMemo(() => itemsOf(data, 'customers'), [data]);
 
-  /** "1 Account 20 loans" — the counts are data, the words are UI labels. */
-  const summaryFor = (customer) => {
-    const accounts = customer.accounts ?? 0;
-    const loans = customer.loans ?? 0;
-    return [
-      `${accounts} ${t(accounts === 1 ? 'customers.account' : 'customers.accounts')}`,
-      `${loans} ${t(loans === 1 ? 'customers.loan' : 'customers.loans')}`,
-    ].join(' ');
-  };
-
   if (!access.allowed) {
     return <LockedScreen showBack title={t('deposit.customer.title')} code={Permission.deposit} />;
   }
@@ -85,7 +76,7 @@ export default function DepositCustomerScreen() {
               leading={<Avatar name={item.name} />}
               title={item.name}
               subtitle={item.customerCode}
-              meta={summaryFor(item)}
+              meta={<CustomerSummary customer={item} />}
               onPress={() =>
                 navigateTo('/deposit/account', {
                   customerCode: item.customerCode,
