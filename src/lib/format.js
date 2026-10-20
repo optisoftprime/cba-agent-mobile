@@ -46,7 +46,34 @@ export function maskAccount(number, visible = 4) {
   return `****${value.slice(-visible)}`;
 }
 
-/** ₦4.5M — compact, for summary tiles where space is tight. */
+/**
+ * Where shortening starts. Below a million the full figure still fits the
+ * tiles, and "₦4.5K" is strictly worse than "₦4,500" — same width, less
+ * precise. A million is where the string starts running past the edge.
+ */
+export const COMPACT_FROM = 1_000_000;
+
+/**
+ * Is this figure big enough that `formatCurrencyCompact` will shorten it?
+ *
+ * Callers use it to decide whether the value needs a way to see the exact
+ * amount: offering "tap for the full figure" on a number that is already
+ * complete is noise.
+ */
+export function isCompactCurrency(amount) {
+  if (isMissing(amount)) return false;
+  const value = Number(amount);
+  return Number.isFinite(value) && Math.abs(value) >= COMPACT_FROM;
+}
+
+/**
+ * ₦4.32M — compact, for tiles a full figure would overflow.
+ *
+ * Only ever an approximation, so anywhere this is shown the exact amount has
+ * to stay reachable (the dashboard makes the figure tappable). Never use it on
+ * a receipt, a confirmation, or anything being posted — that is
+ * `formatCurrencyPrecise`.
+ */
 export function formatCurrencyCompact(amount) {
   if (isMissing(amount)) return NO_FIGURE;
   const value = Number(amount);
@@ -54,15 +81,17 @@ export function formatCurrencyCompact(amount) {
   const size = Math.abs(value);
   // Sign first, as in formatCurrencyPrecise.
   const sign = value < 0 ? '-' : '';
+  if (size >= 1_000_000_000_000) return `${sign}${symbol}${trim(size / 1_000_000_000_000)}T`;
   if (size >= 1_000_000_000) return `${sign}${symbol}${trim(size / 1_000_000_000)}B`;
-  if (size >= 1_000_000) return `${sign}${symbol}${trim(size / 1_000_000)}M`;
-  if (size >= 1_000) return `${sign}${symbol}${trim(size / 1_000)}K`;
+  if (size >= COMPACT_FROM) return `${sign}${symbol}${trim(size / COMPACT_FROM)}M`;
   return formatCurrency(value);
 }
 
 function trim(value) {
-  // 4.5 stays 4.5, 4.0 becomes 4 — matches how the designs read.
-  return value.toFixed(1).replace(/\.0$/, '');
+  // Always two decimals: 2.45M, 4.50M, 4.00M. One decimal would round
+  // ₦2,454,000 to "₦2.5M", and keeping the width identical across tiles stops
+  // the figures jittering as they refresh.
+  return value.toFixed(2);
 }
 
 /**

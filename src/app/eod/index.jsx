@@ -1,87 +1,98 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { EOD_KEY, EodStatus, eodCurrentQuery, eodState, submitEod } from '@/api/eod';
-import { VarianceText, useVarianceLabel } from '@/components/eod/variance-text';
+import { EodStatus, eodCurrentQuery, eodState } from '@/api/eod';
+import { VarianceText } from '@/components/eod/variance-text';
 import { AppHeader } from '@/components/layout/app-header';
 import { KeyboardView } from '@/components/layout/keyboard-view';
 import { AlertBanner } from '@/components/ui/alert-banner';
-import { AmountField } from '@/components/ui/amount-field';
 import { BalancePanel } from '@/components/ui/balance-panel';
 import { Button } from '@/components/ui/button';
-import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { DetailRows } from '@/components/ui/detail-rows';
 import { ErrorState } from '@/components/ui/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatusPill } from '@/components/ui/status-pill';
-import { SuccessModal } from '@/components/ui/success-modal';
 import { formatCurrencyPrecise, formatDate, formatDateTime } from '@/lib/format';
 import { navigateTo } from '@/lib/navigate';
 import { EOD_STATUS_TONE } from '@/lib/status';
-import { toast } from '@/lib/toast';
 import { useRefreshWithPermissions } from '@/providers/permission-provider';
 
+// EOD-COUNT-DISABLED — imports used only by the manual cash count, kept so the
+// block below can be switched back on in one go.
+// import { useMutation, useQueryClient } from '@tanstack/react-query';
+// import { useState } from 'react';
+// import { EOD_KEY, submitEod } from '@/api/eod';
+// import { useVarianceLabel } from '@/components/eod/variance-text';
+// import { AmountField } from '@/components/ui/amount-field';
+// import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+// import { SuccessModal } from '@/components/ui/success-modal';
+// import { toast } from '@/lib/toast';
+
 /**
- * End of day — count the cash you are holding and close the day.
+ * End of day — the agent's cash position for the day.
  *
  * Three states, all driven by `eodState()`:
- *   open      nothing submitted yet → the count form
- *   variance  submitted but did not match → the mismatch, and the form again
- *             so the agent can recount
- *   closed    Balanced → the result, no form; nothing left to do today
+ *   open      nothing submitted yet
+ *   variance  submitted but did not match
+ *   closed    Balanced → nothing left to do today
  *
  * Remitting cash to the branch lives here too, because it changes what the
- * agent is expected to count — remit first, then count.
+ * agent is expected to hold.
+ *
+ * EOD-COUNT-DISABLED — the manual cash count and its submit are commented out
+ * at QA/backend's request; the screen is read-only for now. Everything needed
+ * to restore it is still in this file under that same marker.
  */
 export default function EodScreen() {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
 
   const { data, isPending, isError, error, refetch, isRefetching } = useQuery(eodCurrentQuery);
   const onRefresh = useRefreshWithPermissions(refetch);
 
-  const [counted, setCounted] = useState('');
-  const [countError, setCountError] = useState(undefined);
-  const [confirming, setConfirming] = useState(false);
-  const [result, setResult] = useState(null);
-
   const state = eodState(data);
   const resolved = String(data?.status ?? '').toUpperCase() === EodStatus.resolved;
   const expected = Number(data?.expectedCash ?? 0);
-  // Empty is "not entered yet", which is different from a count of zero.
-  const countedValue = counted.trim() === '' ? null : Number(counted);
-  const preview = countedValue == null ? null : countedValue - expected;
-  const resultRecord = result === 'submitted' ? null : result;
-  const resultVarianceLabel = useVarianceLabel(resultRecord?.variance);
 
-  const { mutate, isPending: submitting } = useMutation({
-    mutationFn: submitEod,
-    onSuccess: (record) => {
-      // A Balanced day lifts the reconciliation hold the dashboard shows.
-      queryClient.invalidateQueries({ queryKey: EOD_KEY });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-      setCounted('');
-      // `?? {}` would be read by eodState() as an un-submitted day and shown as
-      // a variance with ₦0.00 figures — a wrong outcome for a submit that
-      // worked. `submitted` is the "it landed, the server told us nothing"
-      // case; the screen refetches and shows the real position underneath.
-      setResult(record ?? 'submitted');
-    },
-    onError: (submitError) => toast.error(submitError.message),
-  });
-
-  const onSubmit = () => {
-    if (submitting) return;
-    // Zero is a legitimate count; only a blank or unreadable entry is not.
-    if (countedValue == null || !Number.isFinite(countedValue) || countedValue < 0) {
-      setCountError(t('eod.count.required'));
-      return;
-    }
-    setCountError(undefined);
-    setConfirming(true);
-  };
+  // EOD-COUNT-DISABLED — the manual count's state, derived values and submit.
+  // const queryClient = useQueryClient();
+  // const [counted, setCounted] = useState('');
+  // const [countError, setCountError] = useState(undefined);
+  // const [confirming, setConfirming] = useState(false);
+  // const [result, setResult] = useState(null);
+  //
+  // // Empty is "not entered yet", which is different from a count of zero.
+  // const countedValue = counted.trim() === '' ? null : Number(counted);
+  // const preview = countedValue == null ? null : countedValue - expected;
+  // const resultRecord = result === 'submitted' ? null : result;
+  // const resultVarianceLabel = useVarianceLabel(resultRecord?.variance);
+  //
+  // const { mutate, isPending: submitting } = useMutation({
+  //   mutationFn: submitEod,
+  //   onSuccess: (record) => {
+  //     // A Balanced day lifts the reconciliation hold the dashboard shows.
+  //     queryClient.invalidateQueries({ queryKey: EOD_KEY });
+  //     queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+  //     setCounted('');
+  //     // `?? {}` would be read by eodState() as an un-submitted day and shown
+  //     // as a variance with ₦0.00 figures — a wrong outcome for a submit that
+  //     // worked. `submitted` is the "it landed, the server told us nothing"
+  //     // case; the screen refetches and shows the real position underneath.
+  //     setResult(record ?? 'submitted');
+  //   },
+  //   onError: (submitError) => toast.error(submitError.message),
+  // });
+  //
+  // const onSubmit = () => {
+  //   if (submitting) return;
+  //   // Zero is a legitimate count; only a blank or unreadable entry is not.
+  //   if (countedValue == null || !Number.isFinite(countedValue) || countedValue < 0) {
+  //     setCountError(t('eod.count.required'));
+  //     return;
+  //   }
+  //   setCountError(undefined);
+  //   setConfirming(true);
+  // };
 
   const positionRows = data
     ? [
@@ -191,8 +202,8 @@ export default function EodScreen() {
 
               {submissionRows.length ? <DetailRows rows={submissionRows} /> : null}
 
-              {/* The count form — hidden once the day is closed, because there
-                  is nothing left to submit. */}
+              {/* EOD-COUNT-DISABLED — the count form. Hidden once the day was
+                  closed, because there was nothing left to submit.
               {state !== 'closed' ? (
                 <View className="gap-4 rounded-2xl border border-line bg-card p-4">
                   <AmountField
@@ -207,8 +218,8 @@ export default function EodScreen() {
                     editable={!submitting}
                   />
 
-                  {/* Read the difference back BEFORE submitting, so a miscount
-                      is caught while the cash is still on the table. */}
+                  // Read the difference back BEFORE submitting, so a miscount
+                  // is caught while the cash is still on the table.
                   {preview != null && Number.isFinite(preview) ? (
                     <DetailRows
                       rows={[
@@ -229,6 +240,7 @@ export default function EodScreen() {
                   />
                 </View>
               ) : null}
+              */}
 
               <Button
                 variant="outline"
@@ -249,6 +261,7 @@ export default function EodScreen() {
         </ScrollView>
       </KeyboardView>
 
+      {/* EOD-COUNT-DISABLED — the confirm step and the outcome modal.
       <ConfirmDialog
         visible={confirming}
         icon="calculator-outline"
@@ -263,8 +276,8 @@ export default function EodScreen() {
         }}
       />
 
-      {/* Balanced is a finished day (tick). Variance is a submitted count that
-          did not match — the day is NOT closed, so it gets the amber clock. */}
+      // Balanced is a finished day (tick). Variance is a submitted count that
+      // did not match — the day is NOT closed, so it gets the amber clock.
       <SuccessModal
         visible={result !== null}
         tone={eodState(resultRecord) === 'closed' ? 'success' : 'pending'}
@@ -304,6 +317,7 @@ export default function EodScreen() {
         primaryLabel={t('eod.done.ok')}
         onPrimary={() => setResult(null)}
       />
+      */}
     </View>
   );
 }

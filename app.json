@@ -20,6 +20,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.optisoft.cbaagent",
+      "versionCode": 6,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.ACCESS_NETWORK_STATE",

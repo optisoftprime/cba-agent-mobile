@@ -5,7 +5,7 @@ import { fetchAgentProfile, login as loginRequest, logout } from '@/api/agent-au
 import { setSessionExpiredHandler } from '@/api/client';
 import i18n from '@/i18n';
 import { authenticateWithBiometrics } from '@/lib/biometrics';
-import { navigateReplace } from '@/lib/navigate';
+import { navigateReset } from '@/lib/navigate';
 import { applyProfile, clearSession, getUser, saveSession } from '@/lib/session';
 import { toast } from '@/lib/toast';
 
@@ -240,7 +240,10 @@ export function AuthProvider({ children }) {
           : i18n.t('common.errors.sessionExpiredTitle'),
         reason || i18n.t('common.errors.sessionExpired'),
       );
-      navigateReplace('/(auth)/login');
+      // Reset, not replace: a replace only swaps the top screen, leaving the
+      // whole signed-in stack underneath — one hardware back press and the
+      // agent is inside the app again on a session the server has revoked.
+      navigateReset('/(auth)/login');
     });
     return () => setSessionExpiredHandler(null);
   }, [signOut]);

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { DetailRows } from '@/components/ui/detail-rows';
 import { StatusPill } from '@/components/ui/status-pill';
 import { agentView } from '@/lib/agent';
-import { navigateReplace, navigateTo } from '@/lib/navigate';
+import { navigateReset, navigateTo } from '@/lib/navigate';
 import { CUSTOMER_STATUS_TONE } from '@/lib/status';
 import { useAuth } from '@/providers/auth-provider';
 import { useTheme } from '@/theme/theme-provider';
@@ -41,8 +41,9 @@ export default function ProfileScreen() {
     try {
       await signOut();
     } finally {
-      // Leaving is not conditional on anything succeeding.
-      navigateReplace('/(auth)/login');
+      // Leaving is not conditional on anything succeeding. Reset, not replace:
+      // replace leaves the signed-in stack alive under the login screen.
+      navigateReset('/(auth)/login');
     }
   };
 
