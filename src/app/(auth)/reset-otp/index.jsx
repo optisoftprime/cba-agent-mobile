@@ -14,6 +14,7 @@ import { ResendLink } from '@/components/ui/resend-link';
 import { resendSecondsLeft } from '@/lib/activation';
 import { navigateBack, navigateReplace } from '@/lib/navigate';
 import { toast } from '@/lib/toast';
+import { useFocusedRef } from '@/lib/use-focused-ref';
 
 const OTP_LENGTH = 6;
 
@@ -24,6 +25,10 @@ const OTP_LENGTH = 6;
 export default function ResetOtpScreen() {
   const { t } = useTranslation();
   const { email, expiryMinutes } = useLocalSearchParams();
+
+  // Verifying navigates to the new-password step; don't do that if the agent
+  // has left (back to login / forgot password) while the request was in flight.
+  const focused = useFocusedRef();
 
   const address = String(email ?? '');
   const [otp, setOtp] = useState('');
@@ -43,6 +48,7 @@ export default function ResetOtpScreen() {
   const verify = useMutation({
     mutationFn: verifyPasswordResetOtp,
     onSuccess: (data) => {
+      if (!focused.current) return;
       // Replace, not push: a consumed code must not be re-submittable by
       // walking back into this screen.
       navigateReplace('/(auth)/reset-password', { token: data?.token ?? '', email: address });

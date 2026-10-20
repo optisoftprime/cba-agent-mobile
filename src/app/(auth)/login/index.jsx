@@ -13,6 +13,7 @@ import { firstNameOf } from '@/lib/format';
 import { navigateReplace, navigateTo } from '@/lib/navigate';
 import { getUser } from '@/lib/session';
 import { toast } from '@/lib/toast';
+import { useFocusedRef } from '@/lib/use-focused-ref';
 import { useAuth } from '@/providers/auth-provider';
 import { brand } from '@/theme/brand';
 
@@ -21,6 +22,11 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default function LoginScreen() {
   const { t } = useTranslation();
   const { signIn, unlockWithBiometrics } = useAuth();
+
+  // Sign-in is async and this screen stays mounted when another is pushed over
+  // it, so a finished request must not navigate from under a screen the agent
+  // moved to while it was loading. Read live after the await — see useFocusedRef.
+  const focused = useFocusedRef();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -75,6 +81,9 @@ export default function LoginScreen() {
 
   /** Where a signed-in agent goes next is the server's call, not ours. */
   const enterApp = (session) => {
+    // The agent navigated away (e.g. to Activate device) while the request was
+    // in flight — honour where they are now rather than yanking them back.
+    if (!focused.current) return;
     if (session?.deviceActivationRequired) navigateReplace('/(auth)/activate-device');
     else navigateReplace('/(tabs)');
   };
@@ -86,7 +95,8 @@ export default function LoginScreen() {
     try {
       enterApp(await signIn({ email: email.trim(), password }));
     } catch (error) {
-      toast.error(error.message);
+      // Only interrupt the agent with the failure if they are still here to see it.
+      if (focused.current) toast.error(error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -147,10 +157,15 @@ export default function LoginScreen() {
 
       {/* Both ways out of a failed sign-in, on one row: the agent who cannot
           remember their password, and the one on a new handset. */}
+      {/* Disabled while a sign-in is in flight: leaving the screen mid-request
+          and letting the finished login navigate from under the new screen is
+          the race this closes. */}
       <View className="mt-4 flex-row items-center justify-between gap-4">
         <Pressable
           accessibilityRole="link"
           hitSlop={8}
+          disabled={isSubmitting}
+          className={isSubmitting ? 'opacity-40' : undefined}
           onPress={() => navigateTo('/(auth)/forgot-password')}>
           <Text className="text-[15px] font-semibold text-primary">
             {t('auth.login.forgotPassword')}
@@ -161,6 +176,8 @@ export default function LoginScreen() {
           <Pressable
             accessibilityRole="link"
             hitSlop={8}
+            disabled={isSubmitting}
+            className={isSubmitting ? 'opacity-40' : undefined}
             onPress={() => navigateTo('/(auth)/activate-device')}>
             <Text className="text-[15px] font-semibold text-primary">
               {t('auth.login.activateDevice')}
@@ -191,6 +208,7 @@ export default function LoginScreen() {
             size="lg"
             icon="finger-print-outline"
             label={t('auth.login.biometric')}
+            disabled={isSubmitting}
             onPress={onBiometricPress}
           />
         </>

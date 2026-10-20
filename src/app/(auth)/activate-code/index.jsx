@@ -12,6 +12,7 @@ import { getUser } from '@/lib/session';
 import { getDeviceInfo } from '@/lib/device';
 import { navigateReplace } from '@/lib/navigate';
 import { toast } from '@/lib/toast';
+import { useFocusedRef } from '@/lib/use-focused-ref';
 
 /**
  * Step 1 of activation. The agent types the two things their admin issued —
@@ -20,6 +21,10 @@ import { toast } from '@/lib/toast';
  */
 export default function ActivateCodeScreen() {
   const { t } = useTranslation();
+
+  // The request navigates on success; don't do that from under a screen the
+  // agent moved to (e.g. tapping back to login) while it was in flight.
+  const focused = useFocusedRef();
 
   const [agentCode, setAgentCode] = useState('');
   const [code, setCode] = useState('');
@@ -68,8 +73,10 @@ export default function ActivateCodeScreen() {
         agentCode: result?.agentCode ?? trimmedAgentCode,
         sentTo: result?.sentTo,
       });
+      if (!focused.current) return;
       navigateReplace('/(auth)/verify-otp');
     } catch (error) {
+      if (!focused.current) return;
       toast.error(error.message);
       setCode('');
       setSubmitting(false);

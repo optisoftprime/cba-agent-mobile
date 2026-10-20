@@ -18,6 +18,7 @@ import {
 } from '@/lib/activation';
 import { navigateReplace } from '@/lib/navigate';
 import { toast } from '@/lib/toast';
+import { useFocusedRef } from '@/lib/use-focused-ref';
 import { useAuth } from '@/providers/auth-provider';
 import { useTheme } from '@/theme/theme-provider';
 
@@ -36,6 +37,10 @@ export default function VerifyOtpScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const { refreshUser } = useAuth();
+
+  // Verifying navigates on success; don't do that from under a screen the agent
+  // moved to (resend, "use a different code") while the request was in flight.
+  const focused = useFocusedRef();
 
   const [pending, setPending] = useState(null);
   const [otp, setOtp] = useState('');
@@ -77,8 +82,10 @@ export default function VerifyOtpScreen() {
       // completeActivation cleared deviceActivationRequired on disk; pick that
       // up in memory so nothing routes back into activation.
       await refreshUser();
+      if (!focused.current) return;
       navigateReplace('/(auth)/code-verified');
     } catch (error) {
+      if (!focused.current) return;
       toast.error(error.message);
       setOtp('');
       setSubmitting(false);
@@ -86,7 +93,7 @@ export default function VerifyOtpScreen() {
   };
 
   const onResend = async () => {
-    if (secondsLeft > 0 || resending || !pending) return;
+    if (secondsLeft > 0 || resending || submitting || !pending) return;
     setResending(true);
     try {
       const result = await resendActivationOtp({ agentCode: pending.agentCode });
@@ -110,6 +117,7 @@ export default function VerifyOtpScreen() {
   };
 
   const onUseDifferentCode = async () => {
+    if (submitting) return;
     await clearPendingActivation();
     navigateReplace('/(auth)/activate-code');
   };
@@ -163,8 +171,9 @@ export default function VerifyOtpScreen() {
           <Pressable
             accessibilityRole="link"
             hitSlop={8}
+            disabled={submitting}
             onPress={onUseDifferentCode}
-            className="mt-4 self-start">
+            className={`mt-4 self-start ${submitting ? 'opacity-40' : ''}`}>
             <Text className="text-[14px] font-medium text-primary">
               {t('auth.verifyOtp.differentCode')}
             </Text>

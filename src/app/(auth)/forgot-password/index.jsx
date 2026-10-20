@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { ControlledField } from '@/components/ui/controlled-field';
 import { navigateBack, navigateTo } from '@/lib/navigate';
 import { toast } from '@/lib/toast';
+import { useFocusedRef } from '@/lib/use-focused-ref';
 
 // Messages are translation keys — ControlledField translates them.
 const schema = z.object({
@@ -32,6 +33,10 @@ const schema = z.object({
 export default function ForgotPasswordScreen() {
   const { t } = useTranslation();
 
+  // Advances to the OTP screen on success; don't do that if the agent has gone
+  // back to login while the request was in flight.
+  const focused = useFocusedRef();
+
   const { control, handleSubmit } = useForm({
     resolver: zodResolver(schema),
     defaultValues: { email: '' },
@@ -40,6 +45,7 @@ export default function ForgotPasswordScreen() {
   const { mutate, isPending } = useMutation({
     mutationFn: requestPasswordReset,
     onSuccess: (data, variables) => {
+      if (!focused.current) return;
       toast.success(t('auth.forgotPassword.sentTitle'), t('auth.forgotPassword.sent'));
       navigateTo('/(auth)/reset-otp', {
         email: variables.email,
