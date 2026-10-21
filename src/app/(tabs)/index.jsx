@@ -93,6 +93,13 @@ export default function HomeScreen() {
     ...(amount == null ? { value: EMDASH } : amountProps(label, amount)),
   });
 
+  // "Cash in hand" (cashInHand) is the headline figure — the relatable one.
+  // "Available cash" (availableCash, what can actually be remitted now) only
+  // earns a tile when it is LESS than cash in hand, i.e. some cash is awaiting
+  // approval to leave; the rest of the time the two are identical and showing
+  // both just reads as the same number twice.
+  const availableDiffers = data?.availableCash != null && data.availableCash !== data.cashInHand;
+
   // Branch and business date ride along with the agent code: an agent posting
   // cash needs to know which book day the server has them on.
   const headerSubtitle = [
@@ -178,26 +185,43 @@ export default function HomeScreen() {
               <BalancePanel
                 label={t('dashboard.today.collected')}
                 value={formatCurrency(data.collectedToday ?? 0)}
-                footerLeft={t('dashboard.today.pending', {
-                  amount: formatCurrency(data.pendingToday ?? 0),
-                })}
-                footerRight={t('dashboard.today.transactions', {
+                footerLeft={t('dashboard.today.transactions', {
                   count: data.transactionsToday ?? 0,
                 })}
               />
 
-              {/* Available cash, the ledger balance, and cash awaiting branch
-                  confirmation — always shown. A field the server does not send
-                  (availableCash / awaitingRemittance are not live yet) reads
-                  "—", so it is clear whether the backend is returning it. */}
-              <MetricPanel
-                className="mt-3"
-                items={[
-                  cashTile(t('dashboard.today.availableCash'), data.availableCash),
-                  cashTile(t('dashboard.today.ledger'), data.cashInHand),
-                  cashTile(t('dashboard.today.awaitingShort'), data.awaitingRemittance),
-                ]}
-              />
+              {/* Cash in hand plus the two things awaiting back-office approval:
+                  pending deposits (over the daily cap) and remitted cash. When
+                  some cash is awaiting approval to leave, "Available cash" (what
+                  can be remitted now) splits off onto its own row; otherwise it
+                  equals cash in hand and is not shown separately. */}
+              {availableDiffers ? (
+                <>
+                  <MetricPanel
+                    className="mt-3"
+                    items={[
+                      cashTile(t('dashboard.today.cashInHand'), data.cashInHand),
+                      cashTile(t('dashboard.today.availableCash'), data.availableCash),
+                    ]}
+                  />
+                  <MetricPanel
+                    className="mt-3"
+                    items={[
+                      cashTile(t('dashboard.today.pendingDeposits'), data.pendingToday),
+                      cashTile(t('dashboard.today.awaitingShort'), data.awaitingRemittance),
+                    ]}
+                  />
+                </>
+              ) : (
+                <MetricPanel
+                  className="mt-3"
+                  items={[
+                    cashTile(t('dashboard.today.cashInHand'), data.cashInHand),
+                    cashTile(t('dashboard.today.pendingDeposits'), data.pendingToday),
+                    cashTile(t('dashboard.today.awaitingShort'), data.awaitingRemittance),
+                  ]}
+                />
+              )}
 
               {/* What an agent does with the cash in hand, right under the
                   figure they act on.

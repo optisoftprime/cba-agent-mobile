@@ -21,7 +21,11 @@ export function MetricPanel({ items, className = '' }) {
       {items.map((item) => {
         const value = (
           <>
-            <Text className="text-[11px] text-ink-muted" numberOfLines={1}>
+            {/* Wrap to two lines rather than truncate — a long label like
+                "Awaiting approval" must stay whole. Values are bottom-aligned
+                (justify-between on the column) so a one-line and a two-line
+                label still line their figures up. */}
+            <Text className="text-[11px] leading-[14px] text-ink-muted" numberOfLines={2}>
               {item.label}
             </Text>
             <View className="mt-1 flex-row items-center gap-1">
@@ -44,7 +48,7 @@ export function MetricPanel({ items, className = '' }) {
         return item.onPress ? (
           <Pressable
             key={item.label}
-            className="flex-1"
+            className="flex-1 justify-between"
             accessibilityRole="button"
             accessibilityLabel={item.pressLabel ?? item.label}
             hitSlop={6}
@@ -52,7 +56,7 @@ export function MetricPanel({ items, className = '' }) {
             {value}
           </Pressable>
         ) : (
-          <View key={item.label} className="flex-1">
+          <View key={item.label} className="flex-1 justify-between">
             {value}
           </View>
         );
